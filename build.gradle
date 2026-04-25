@@ -1,0 +1,55 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '4.0.6'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.mcp'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(25)
+	}
+}
+
+// 저장소 설정: 마일스톤과 스냅샷을 모두 포함
+repositories {
+	mavenCentral()
+	maven { url 'https://repo.spring.io/milestone' }
+	maven { url 'https://repo.spring.io/snapshot' }
+}
+
+
+ext {
+	springAiVersion = "2.0.0-M4"
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
+	}
+}
+
+dependencies {
+	// Spring Boot 기본
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	implementation 'org.springframework.ai:spring-ai-starter-model-google-genai:2.0.0-M4'
+	implementation 'org.springframework.ai:spring-ai-starter-mcp-client'
+	implementation 'org.springframework.ai:spring-ai-starter-mcp-server-webmvc'
+
+	// 보안 (Experimental)
+	implementation 'org.springaicommunity:mcp-client-security-spring-boot:0.1.6'
+	implementation 'org.springaicommunity:mcp-server-security-spring-boot:0.1.6'
+
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
