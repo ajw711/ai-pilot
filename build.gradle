@@ -33,6 +33,7 @@ dependencyManagement {
 
 dependencies {
 	// Spring Boot 기본
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 
@@ -44,6 +45,7 @@ dependencies {
 	implementation 'org.springaicommunity:mcp-client-security-spring-boot:0.1.6'
 	implementation 'org.springaicommunity:mcp-server-security-spring-boot:0.1.6'
 
+	runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
