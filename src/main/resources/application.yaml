@@ -2,6 +2,10 @@ spring:
   application:
     name: mcp-pilot
 
+  thread:
+    virtual:
+      enabled: true
+
   ai:
     google:
       genai:
