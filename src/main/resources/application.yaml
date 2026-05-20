@@ -11,6 +11,11 @@ spring:
       genai:
         api-key: ${GEMINI_API_KEY}
         model: gemini-1.5-pro
+    mcp:
+      server:
+        type: SYNC
+        annotation-scanner:
+          enabled: true
 
   datasource:
     url: ${DB_URL}

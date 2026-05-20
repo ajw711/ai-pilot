@@ -1,5 +1,9 @@
 package com.mcp.mcp_pilot.tool;
 
+import com.mcp.mcp_pilot.dto.Knowledge.KnowledgeRequest;
+import com.mcp.mcp_pilot.service.KnowledgeToolService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.mcp.annotation.McpTool;
 import org.springframework.stereotype.Component;
 
@@ -20,15 +24,27 @@ import java.util.List;
  * 사용자가 프론트엔드 입력창에 글자를 칠 때마다 (예: 'k'),
  * 프론트엔드가 백엔드 API를 찔러 추천 단어 리스트(예: ["k8s", "kafka"])를 받아가는 '검색어 자동완성 API'.
  */
+@Slf4j
 @Component
+@RequiredArgsConstructor
 public class KnowledgeTool {
+
+    private final KnowledgeToolService toolService;
 
     @McpTool(
             name = "storeKnowledgeData",
-            description = "사용자가 전달한 개발 지식 내용 혹은 개발 내용을 원문과 이를 요약한 마크다운 결과물, 태그를 DB에 저장합니다. [중요 규칙]: sourceUrls 파라미터는 사용자가 채팅창에 '명시적으로 입력한 웹사이트 URL'이 있을 경우에만 추출하여 배열에 넣습니다. 사용자가 URL을 제공하지 않았다면 무조건 빈 배열([])을 전송해야 하며, 절대 임의의 가짜 URL을 생성하거나 추론하지 마십시오."
+            description = """
+                    개발 지식을 저장합니다.
+                    규칙:
+                    - sourceUrls는 사용자가 직접 제공한 URL만 포함
+                    - URL이 없으면 빈 배열([])
+                    - URL 추론 금지
+                    """
     )
-    public String storeKnowledgeData(String rawContent, String summarizedContent, List<String> tags, List<String> sourceUrls) {
+    public String storeKnowledgeData(KnowledgeRequest knowledgeRequest) {
+        log.info("Author requested for article");
         try {
+
             return String.format("성공: 요청하신 기술 지식이 안전하게 DB에 적재되었습니다. (마스터 번호: )");
         } catch (Exception e) {
             return "실패: 저장 중 예외 발생 - " + e.getMessage();
