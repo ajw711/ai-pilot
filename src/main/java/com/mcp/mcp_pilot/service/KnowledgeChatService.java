@@ -1,11 +1,10 @@
 package com.mcp.mcp_pilot.service;
 
-import com.mcp.mcp_pilot.dto.Knowledge.KnowledgeRequest;
 import com.mcp.mcp_pilot.dto.chat.ChatRequest;
 import com.mcp.mcp_pilot.dto.chat.ChatResponse;
-import com.mcp.mcp_pilot.repository.KnowledgeLogRepository;
-import com.mcp.mcp_pilot.repository.KnowledgeSourceRepository;
-import com.mcp.mcp_pilot.repository.KnowledgeTagRepository;
+import com.mcp.mcp_pilot.repository.Knowledge.KnowledgeLogRepository;
+import com.mcp.mcp_pilot.repository.Knowledge.KnowledgeSourceRepository;
+import com.mcp.mcp_pilot.repository.Knowledge.KnowledgeTagRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;

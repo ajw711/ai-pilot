@@ -1,4 +1,4 @@
-package com.mcp.mcp_pilot.repository;
+package com.mcp.mcp_pilot.repository.Knowledge;
 
 import com.mcp.mcp_pilot.entity.KnowledgeTagEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
