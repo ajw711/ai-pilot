@@ -1,4 +1,4 @@
-package com.mcp.mcp_pilot.service;
+package com.mcp.mcp_pilot.knowledge.service;
 
 public abstract class AbstractToolService {
 

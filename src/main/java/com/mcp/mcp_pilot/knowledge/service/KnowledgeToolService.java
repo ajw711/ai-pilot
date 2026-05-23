@@ -1,11 +1,11 @@
-package com.mcp.mcp_pilot.service;
+package com.mcp.mcp_pilot.knowledge.service;
 
 import com.mcp.mcp_pilot.common.ToolExecutor;
 import com.mcp.mcp_pilot.common.dto.ToolResponse;
 import com.mcp.mcp_pilot.dto.Knowledge.KnowledgeRequest;
-import com.mcp.mcp_pilot.repository.Knowledge.KnowledgeLogRepository;
-import com.mcp.mcp_pilot.repository.Knowledge.KnowledgeSourceRepository;
-import com.mcp.mcp_pilot.repository.Knowledge.KnowledgeTagRepository;
+import com.mcp.mcp_pilot.knowledge.repository.Knowledge.KnowledgeLogRepository;
+import com.mcp.mcp_pilot.knowledge.repository.Knowledge.KnowledgeSourceRepository;
+import com.mcp.mcp_pilot.knowledge.repository.Knowledge.KnowledgeTagRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

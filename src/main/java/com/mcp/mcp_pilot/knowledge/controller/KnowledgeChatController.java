@@ -1,8 +1,9 @@
-package com.mcp.mcp_pilot.controller;
+package com.mcp.mcp_pilot.knowledge.controller;
 
-import com.mcp.mcp_pilot.dto.chat.ChatRequest;
+import com.mcp.mcp_pilot.ai.dto.ChatRequest;
 import com.mcp.mcp_pilot.dto.chat.ChatResponse;
-import com.mcp.mcp_pilot.service.KnowledgeChatService;
+import com.mcp.mcp_pilot.knowledge.service.KnowledgeChatService;
+import com.mcp.mcp_pilot.knowledge.service.KnowledgeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,19 +24,39 @@ import org.springframework.web.bind.annotation.RestController;
  * KnowledgeToolService
  *    ↓
  * Repository
+ * --------
+ * Frontend
+ *    ↓
+ * KnowledgeChatController
+ *    ↓
+ * KnowledgeService
+ *    ↓
+ * AIClientFactory
+ *    ↓
+ * GeminiClientStrategy
+ *    ↓
+ * Gemini API
+ *    ↓
+ * Tool Calling
+ *    ↓
+ * KnowledgeTool
+ *    ↓
+ * KnowledgeToolService
+ *    ↓
+ * Repository
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/v{version}/knowledge")
+@RequestMapping("/api/{version}/knowledge")
 @RequiredArgsConstructor
 public class KnowledgeChatController {
 
-    private final KnowledgeChatService knowledgeChatService;
+    private final KnowledgeService knowledgeService;
 
     @PostMapping("/chat")
     public ChatResponse chat(@RequestBody ChatRequest chatRequest) {
-        log.info(" chat request !! ");
-        return knowledgeChatService.chat(chatRequest);
+        log.info(" chat request !!");
+        return knowledgeService.chat(chatRequest);
 
     }
 }

@@ -1,13 +1,12 @@
-package com.mcp.mcp_pilot.tool;
+package com.mcp.mcp_pilot.knowledge.tool;
 
+import com.mcp.mcp_pilot.common.dto.ToolResponse;
 import com.mcp.mcp_pilot.dto.Knowledge.KnowledgeRequest;
-import com.mcp.mcp_pilot.service.KnowledgeToolService;
+import com.mcp.mcp_pilot.knowledge.service.KnowledgeToolService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.mcp.annotation.McpTool;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * MCP (Model Context Protocol) 통신 컴포넌트
@@ -41,14 +40,7 @@ public class KnowledgeTool {
                     - URL 추론 금지
                     """
     )
-    public String storeKnowledgeData(KnowledgeRequest knowledgeRequest) {
-        log.info("Author requested for article");
-        try {
 
-            return String.format("성공: 요청하신 기술 지식이 안전하게 DB에 적재되었습니다. (마스터 번호: )");
-        } catch (Exception e) {
-            return "실패: 저장 중 예외 발생 - " + e.getMessage();
-        }
-    }
+    public ToolResponse<Kn> storeKnowledgeData(KnowledgeRequest request) {}
 
 }

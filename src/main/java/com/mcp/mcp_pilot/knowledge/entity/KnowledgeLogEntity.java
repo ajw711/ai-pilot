@@ -1,4 +1,4 @@
-package com.mcp.mcp_pilot.entity;
+package com.mcp.mcp_pilot.knowledge.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
