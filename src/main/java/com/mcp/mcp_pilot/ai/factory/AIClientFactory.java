@@ -7,6 +7,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+/**
+ * Adapter 선택기
+ * 어떤 Adapter를 사용할지 결
+ */
 @Component
 @RequiredArgsConstructor
 public class AIClientFactory {

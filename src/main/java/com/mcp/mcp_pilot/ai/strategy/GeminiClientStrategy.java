@@ -6,6 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
+/**
+ * Adapter 역할
+ */
 @Slf4j
 @Component("GEMINI")
 @RequiredArgsConstructor

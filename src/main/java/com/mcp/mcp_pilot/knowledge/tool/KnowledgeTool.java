@@ -1,7 +1,7 @@
 package com.mcp.mcp_pilot.knowledge.tool;
 
 import com.mcp.mcp_pilot.common.dto.ToolResponse;
-import com.mcp.mcp_pilot.dto.Knowledge.KnowledgeRequest;
+import com.mcp.mcp_pilot.knowledge.dto.KnowledgeRequest;
 import com.mcp.mcp_pilot.knowledge.service.KnowledgeToolService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +40,6 @@ public class KnowledgeTool {
                     - URL 추론 금지
                     """
     )
-
     public ToolResponse<Kn> storeKnowledgeData(KnowledgeRequest request) {}
 
 }

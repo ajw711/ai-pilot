@@ -1,7 +1,7 @@
 package com.mcp.mcp_pilot.knowledge.controller;
 
 import com.mcp.mcp_pilot.ai.dto.ChatRequest;
-import com.mcp.mcp_pilot.dto.chat.ChatResponse;
+import com.mcp.mcp_pilot.ai.dto.ChatResponse;
 import com.mcp.mcp_pilot.knowledge.service.KnowledgeChatService;
 import com.mcp.mcp_pilot.knowledge.service.KnowledgeService;
 import lombok.RequiredArgsConstructor;

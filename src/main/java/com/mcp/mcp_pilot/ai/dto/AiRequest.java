@@ -1,16 +1,23 @@
 package com.mcp.mcp_pilot.ai.dto;
 
 import com.mcp.mcp_pilot.ai.enums.AIModel;
+import com.mcp.mcp_pilot.common.enums.ToolType;
 
 import java.util.List;
 
+/**
+ * AI orchestration 내부 DTO
+ * @param message
+ * @param aiModel
+ * @param tools
+ */
 public record AiRequest(
         String message,
         AIModel aiModel,
-        List<String> tools
+        List<ToolType> tools
 ) {
 
-    public static AiRequest of(String message, AIModel aiModel, List<String> tools) {
+    public static AiRequest of(String message, AIModel aiModel, List<ToolType> tools) {
         return new AiRequest(message, aiModel, tools);
     }
 }

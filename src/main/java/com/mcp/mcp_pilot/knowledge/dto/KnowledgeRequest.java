@@ -1,4 +1,4 @@
-package com.mcp.mcp_pilot.dto.Knowledge;
+package com.mcp.mcp_pilot.knowledge.dto;
 
 import java.util.List;
 

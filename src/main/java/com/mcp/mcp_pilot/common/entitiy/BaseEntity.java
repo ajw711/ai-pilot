@@ -1,4 +1,4 @@
-package com.mcp.mcp_pilot.knowledge.entity;
+package com.mcp.mcp_pilot.common.entitiy;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

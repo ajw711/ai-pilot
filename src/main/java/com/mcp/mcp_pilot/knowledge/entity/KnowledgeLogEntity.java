@@ -1,5 +1,6 @@
 package com.mcp.mcp_pilot.knowledge.entity;
 
+import com.mcp.mcp_pilot.common.entitiy.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 

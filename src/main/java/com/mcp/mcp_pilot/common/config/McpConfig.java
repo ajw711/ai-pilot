@@ -1,4 +1,4 @@
-package com.mcp.mcp_pilot.config;
+package com.mcp.mcp_pilot.common.config;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
