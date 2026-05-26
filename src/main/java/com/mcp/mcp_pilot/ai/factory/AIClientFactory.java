@@ -17,11 +17,11 @@ public class AIClientFactory {
 
     private final Map<String, AiClientStrategy> strategies;
 
-    public AiClientStrategy get(AIModel aiModel) {
-        AiClientStrategy strategy = strategies.get(aiModel.name());
+    public AiClientStrategy get(AIModel model) {
+        AiClientStrategy strategy = strategies.get(model.name());
 
         if (strategy == null) {
-            return new IllegalArgumentException("지원하지 않은 AI 모델입니다.");
+            throw  new IllegalArgumentException("지원하지 않은 AI 모델입니다.");
         }
 
         return strategy;

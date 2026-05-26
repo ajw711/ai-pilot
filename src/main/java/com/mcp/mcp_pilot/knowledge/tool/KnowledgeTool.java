@@ -22,6 +22,18 @@ import org.springframework.stereotype.Component;
  * * @McpComplete [통신: 프론트엔드 ➔ 백엔드 단발성 API]
  * 사용자가 프론트엔드 입력창에 글자를 칠 때마다 (예: 'k'),
  * 프론트엔드가 백엔드 API를 찔러 추천 단어 리스트(예: ["k8s", "kafka"])를 받아가는 '검색어 자동완성 API'.
+ *
+ * Gemini
+ *  ↓
+ * @McpTool
+ *  ↓
+ * KnowledgeTool
+ *  ↓
+ * KnowledgeToolService.execute()
+ *  ↓
+ * Repository
+ *  ↓
+ * DB
  */
 @Slf4j
 @Component
@@ -40,6 +52,8 @@ public class KnowledgeTool {
                     - URL 추론 금지
                     """
     )
-    public ToolResponse<Kn> storeKnowledgeData(KnowledgeRequest request) {}
+    public ToolResponse<Long> storeKnowledgeData(KnowledgeRequest request) {
+        return toolService.execute(request);
+    }
 
 }

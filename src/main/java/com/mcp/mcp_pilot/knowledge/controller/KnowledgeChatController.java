@@ -2,7 +2,6 @@ package com.mcp.mcp_pilot.knowledge.controller;
 
 import com.mcp.mcp_pilot.ai.dto.ChatRequest;
 import com.mcp.mcp_pilot.ai.dto.ChatResponse;
-import com.mcp.mcp_pilot.knowledge.service.KnowledgeChatService;
 import com.mcp.mcp_pilot.knowledge.service.KnowledgeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +56,5 @@ public class KnowledgeChatController {
     public ChatResponse chat(@RequestBody ChatRequest chatRequest) {
         log.info(" chat request !!");
         return knowledgeService.chat(chatRequest);
-
     }
 }

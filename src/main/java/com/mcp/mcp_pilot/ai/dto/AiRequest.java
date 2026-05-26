@@ -8,16 +8,16 @@ import java.util.List;
 /**
  * AI orchestration 내부 DTO
  * @param message
- * @param aiModel
+ * @param model
  * @param tools
  */
 public record AiRequest(
         String message,
-        AIModel aiModel,
+        AIModel model,
         List<ToolType> tools
 ) {
 
-    public static AiRequest of(String message, AIModel aiModel, List<ToolType> tools) {
-        return new AiRequest(message, aiModel, tools);
+    public static AiRequest of(String message, AIModel model, List<ToolType> tools) {
+        return new AiRequest(message, model, tools);
     }
 }

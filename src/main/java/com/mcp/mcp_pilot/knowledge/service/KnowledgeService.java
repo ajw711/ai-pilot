@@ -2,15 +2,13 @@ package com.mcp.mcp_pilot.knowledge.service;
 
 import com.mcp.mcp_pilot.ai.dto.AiRequest;
 import com.mcp.mcp_pilot.ai.dto.ChatRequest;
+import com.mcp.mcp_pilot.ai.dto.ChatResponse;
 import com.mcp.mcp_pilot.ai.enums.AIModel;
 import com.mcp.mcp_pilot.ai.factory.AIClientFactory;
 import com.mcp.mcp_pilot.ai.strategy.AiClientStrategy;
-import com.mcp.mcp_pilot.ai.dto.ChatResponse;
 import com.mcp.mcp_pilot.common.enums.ToolType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,7 +29,7 @@ public class KnowledgeService {
                 AIModel.GEMINI,
                 List.of(ToolType.STORE_KNOWLEDGE_DATA)
                 );
-        AiClientStrategy strategy = aiClientFactory.get(aiRequest.GEMINI);
+        AiClientStrategy strategy = aiClientFactory.get(aiRequest.model());
 
         String answer = strategy.call(AiRequest.of(
                 chatRequest.message(),
