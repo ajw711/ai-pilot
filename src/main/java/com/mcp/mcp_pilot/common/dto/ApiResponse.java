@@ -1,5 +1,6 @@
 package com.mcp.mcp_pilot.common.dto;
 
+import com.mcp.mcp_pilot.common.exception.ErrorCode;
 import net.minidev.json.annotate.JsonIgnore;
 import org.springframework.http.HttpStatus;
 
@@ -9,16 +10,25 @@ public record ApiResponse<T>(
         @JsonIgnore
         HttpStatus httpStatus,
         boolean success,
-        @Nullable T data,
-        @Nullable ExceptionResponse error
+        T data,
+        ExceptionResponse error
 ) {
 
-    public static <T> ApiResponse<T> success(@Nullable final T data) {
-        return new ApiResponse<>(HttpStatus.OK, true, data, null);
+    public static <T> ApiResponse<T> success(T data) {
+        return new ApiResponse<>(
+                HttpStatus.OK,
+                true,
+                data,
+                null
+        );
     }
 
-    public static <T> ApiResponse<T> fail(HttpStatus status, ExceptionResponse error) {
-        return new ApiResponse<>(status, false, null, error);
+    public static <T> ApiResponse<T> fail(ErrorCode errorCode) {
+        return new ApiResponse<>(
+                errorCode.getStatus(),
+                false,
+                null,
+                ExceptionResponse.of(errorCode)
+        );
     }
-
 }

@@ -9,16 +9,19 @@ import com.mcp.mcp_pilot.knowledge.entity.KnowledgeTagEntity;
 import com.mcp.mcp_pilot.knowledge.repository.Knowledge.KnowledgeLogRepository;
 import com.mcp.mcp_pilot.knowledge.repository.Knowledge.KnowledgeSourceRepository;
 import com.mcp.mcp_pilot.knowledge.repository.Knowledge.KnowledgeTagRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.Arrays;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Validated
 public class KnowledgeToolService implements ToolExecutor<KnowledgeRequest, ToolResponse<Long>> {
 
     private final KnowledgeLogRepository logRepository;
@@ -27,11 +30,8 @@ public class KnowledgeToolService implements ToolExecutor<KnowledgeRequest, Tool
 
     @Override
     @Transactional
-    public ToolResponse<Long> execute(KnowledgeRequest request) {
-        log.info("지식 저장 프로세스 시작: {}", Arrays.toString(request.tags().toArray()));
-
-
-
+    public ToolResponse<Long> execute(@Valid KnowledgeRequest request) {
+        log.info("지식 저장 프로세스 시작: {}", request);
         // 1. 지식 로그 저장
         KnowledgeLogEntity logEntity = KnowledgeLogEntity.createLog(
                 request.rawContent(),
@@ -53,7 +53,7 @@ public class KnowledgeToolService implements ToolExecutor<KnowledgeRequest, Tool
                 tagRepository.save(KnowledgeTagEntity.createTag(knowledgeId, tagName));
             }
         }
-
+        log.info("Knowledge 저장 완료");
         return ToolResponse.success(
                 "지식 저장 완료",
                 knowledgeId

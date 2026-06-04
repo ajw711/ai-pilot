@@ -1,5 +1,6 @@
-package com.mcp.mcp_pilot.knowledge.entity;
+package com.mcp.mcp_pilot.ai.vector.entity;
 
+import com.mcp.mcp_pilot.ai.constant.VectorTargetType;
 import com.mcp.mcp_pilot.common.entitiy.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -22,20 +23,24 @@ public class VectorStoreEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "knowledge_log_id", nullable = false, unique = true)
-    private Long knowledgeLogId;
+    @Enumerated(EnumType.STRING)
+    private VectorTargetType targetType; // 예: "KNOWLEDGE", "K8S_LOG"
+
+    @Column(nullable = false)
+    private Long targetId; // 도메인 pk
 
     @Lob
     @Column(name = "embedding_vector", columnDefinition = "varbinary(max)", nullable = false)
     private float[] embeddingVector; // 768차원 벡터 좌표 배열
 
-    private VectorStoreEntity(Long knowledgeLogId, float[] embeddingVector) {
-        this.knowledgeLogId = knowledgeLogId;
+    private VectorStoreEntity(VectorTargetType targetType, Long targetId, float[] embeddingVector) {
+        this.targetType = targetType;
+        this.targetId = targetId;
         this.embeddingVector = embeddingVector;
     }
 
-    public static VectorStoreEntity createVectorStore(Long knowledgeLogId, float[] embeddingVector) {
-        return new VectorStoreEntity(knowledgeLogId, embeddingVector);
+    public static VectorStoreEntity createVectorStore(VectorTargetType targetType, Long targetId, float[] embeddingVector) {
+        return new VectorStoreEntity(targetType, targetId, embeddingVector);
     }
 
 }
