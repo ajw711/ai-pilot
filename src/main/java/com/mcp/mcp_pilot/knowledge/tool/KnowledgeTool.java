@@ -1,8 +1,11 @@
 package com.mcp.mcp_pilot.knowledge.tool;
 
+import com.mcp.mcp_pilot.ai.constant.VectorTargetType;
+import com.mcp.mcp_pilot.ai.vector.service.VectorMemoryService;
 import com.mcp.mcp_pilot.common.dto.ToolResponse;
 import com.mcp.mcp_pilot.knowledge.dto.KnowledgeRequest;
-import com.mcp.mcp_pilot.knowledge.service.KnowledgeToolService;
+import com.mcp.mcp_pilot.knowledge.service.KnowledgeCommandService;
+import com.mcp.mcp_pilot.knowledge.service.KnowledgeSearchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.mcp.annotation.McpTool;
@@ -40,7 +43,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class KnowledgeTool {
 
-    private final KnowledgeToolService toolService;
+    private final KnowledgeCommandService knowledgeCommandService;
+    private final KnowledgeSearchService knowledgeSearchService;
+
+    private final VectorMemoryService vectorMemoryService;
 
     @McpTool(
             name = "storeKnowledgeData",
@@ -53,7 +59,49 @@ public class KnowledgeTool {
                     """
     )
     public ToolResponse<Long> storeKnowledgeData(KnowledgeRequest request) {
-        return toolService.execute(request);
+        // DB트랜잭션 (Long, Source, Tag 저장) - 커넥션 점유 후 바로 반납
+        ToolResponse<Long> response = knowledgeCommandService.execute(request);
+
+        // 응답 상태 체크
+        if (response.isSuccess()) {
+           Long knowledgeId = response.data();
+
+            // 별도 스레드(가상 스레드)에서 작업(벡터화) 수행
+            // 메인 트랜잭션에서 이미 끝났으므로 API 지연이 성능에 영향을 주지 않음?
+            Thread.ofVirtual().start(() -> {
+                try {
+                    log.info("[Distributed-Task] 벡터화 시작. ID: {}", knowledgeId);
+
+                    vectorMemoryService.saveEmbedding(
+                            VectorTargetType.KNOWLEDGE,
+                            knowledgeId,
+                            summarizeAndMerge(request)
+                    );
+                } catch (Exception e) {
+                    log.error("[Distributed-Task] 벡터화 실패. ID: {}: {}", knowledgeId,
+                            e.getMessage());
+                }
+            });
+        }
+        return response;
+    }
+
+    @McpTool(
+            name = "searchKnowledge",
+            description = "내 개인 위키에서 지식을 검색합니다. 제목 키워드나 의미 기반 질문으로 찾을 수 있습니다."
+    )
+    public ToolResponse<String> searchKnowledge(String query) {
+        String result = knowledgeSearchService.searchWiki(query);
+        return ToolResponse.success("검색 결과입니다.", result);
+    }
+
+    private String summarizeAndMerge(KnowledgeRequest request) {
+        return String.format(
+                "제목: %s\n태그: %s\n요약: %s",
+                request.title(),
+                String.join(", ", request.tags()),
+                request.summarizedContent()
+        );
     }
 
 }

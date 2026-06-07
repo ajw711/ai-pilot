@@ -16,13 +16,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.Arrays;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @Validated
-public class KnowledgeToolService implements ToolExecutor<KnowledgeRequest, ToolResponse<Long>> {
+public class KnowledgeCommandService implements ToolExecutor<KnowledgeRequest, ToolResponse<Long>> {
 
     private final KnowledgeLogRepository logRepository;
     private final KnowledgeSourceRepository sourceRepository;
@@ -34,6 +32,7 @@ public class KnowledgeToolService implements ToolExecutor<KnowledgeRequest, Tool
         log.info("지식 저장 프로세스 시작: {}", request);
         // 1. 지식 로그 저장
         KnowledgeLogEntity logEntity = KnowledgeLogEntity.createLog(
+                request.title(),
                 request.rawContent(),
                 request.summarizedContent(), // Notion PageId 향후
                 null);
@@ -59,4 +58,5 @@ public class KnowledgeToolService implements ToolExecutor<KnowledgeRequest, Tool
                 knowledgeId
         );
     }
+
 }

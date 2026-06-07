@@ -15,6 +15,10 @@ public record ToolResponse<T>(
         String message,
         T data
 ) {
+    // 성공 여부를 확인하기 위한 메서드
+    public boolean isSuccess() {
+        return this.status != null && ToolStatus.SUCCESS.name().equals(this.status.name());
+    }
 
     public static <T> ToolResponse<T> of(ToolStatus status,String message, T data) {
         return new ToolResponse<>(status, message, data);

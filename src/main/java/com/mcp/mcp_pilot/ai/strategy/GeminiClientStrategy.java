@@ -20,9 +20,13 @@ public class GeminiClientStrategy implements AiClientStrategy {
     public String call(AiRequest request) {
         log.info("Gemini client request: {}", request);
 
+        String[] toolNames = request.tools().stream()
+                .map(toolType -> toolType.getToolName())
+                .toArray(String[]::new);
+
         return chatClient.prompt()
                 .user(request.message())
-                .tools(request.tools().toArray(new String[0]))
+                .tools(toolNames)
                 .call()
                 .content();
     }

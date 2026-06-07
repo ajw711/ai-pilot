@@ -20,6 +20,9 @@ public class KnowledgeService {
 
     private final AIClientFactory aiClientFactory;
 
+    /**
+     * 메인 챗 에이전트 사령탑(AI 채팅)
+     */
     public ChatResponse chat(ChatRequest chatRequest) {
 
         log.info("Knowledge chat request!!");
@@ -27,15 +30,14 @@ public class KnowledgeService {
         AiRequest aiRequest = AiRequest.of(
                 chatRequest.message(),
                 AIModel.GEMINI,
-                List.of(ToolType.STORE_KNOWLEDGE_DATA)
-                );
+                List.of(
+                        ToolType.STORE_KNOWLEDGE_DATA,
+                        ToolType.SEARCH_KNOWLEDGE
+                )
+        );
         AiClientStrategy strategy = aiClientFactory.get(aiRequest.model());
 
-        String answer = strategy.call(AiRequest.of(
-                chatRequest.message(),
-                AIModel.GEMINI,
-                List.of()
-        ));
+        String answer = strategy.call(aiRequest);
         return ChatResponse.of(answer);
     }
 }

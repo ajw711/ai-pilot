@@ -20,6 +20,9 @@ public class KnowledgeLogEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private String title;
+
     @Column(columnDefinition = "NVARCHAR(MAX)", nullable = false)
     private String rawContent; // 사용자가 입력한 날 것 데이터
 
@@ -28,13 +31,14 @@ public class KnowledgeLogEntity extends BaseEntity {
 
     private String notionPageId; // 노션에 성공적으로 적재 한 페이지 ID
 
-    private KnowledgeLogEntity(String rawContent, String summarizedContent, String notionPageId) {
+    private KnowledgeLogEntity(String title, String rawContent, String summarizedContent, String notionPageId) {
+        this.title = title;
         this.rawContent = rawContent;
         this.summarizedContent = summarizedContent;
         this.notionPageId = notionPageId;
     }
 
-    public static KnowledgeLogEntity createLog(String rawContent, String summarizedContent, String notionPageId) {
-        return new KnowledgeLogEntity (rawContent, summarizedContent, notionPageId);
+    public static KnowledgeLogEntity createLog(String title, String rawContent, String summarizedContent, String notionPageId) {
+        return new KnowledgeLogEntity (title, rawContent, summarizedContent, notionPageId);
     }
 }
