@@ -58,5 +58,4 @@ public class KnowledgeCommandService implements ToolExecutor<KnowledgeRequest, T
                 knowledgeId
         );
     }
-
 }

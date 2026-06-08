@@ -28,8 +28,7 @@ public class LocalVectorSearchAdapter implements VectorSearchPort {
     @Override
     public List<Long> search(VectorTargetType targetType, String query, int topK,  SimilarityMetric metric) {
         // 검색어 임베딩 생성
-        float[] queryVector =
-                embeddingModel.embed(query);
+        float[] queryVector = embeddingModel.embed(query);
 
         // Vector similarity search algorithms (Cosine Similarity, Euclidean Distance (L2), Dot Product (Inner Product))
         // 현재 설정된 Metric에 맞는 알고리즘 선택

@@ -10,7 +10,15 @@ spring:
     google:
       genai:
         api-key: ${GEMINI_API_KEY}
-        model: gemini-1.5-pro
+        chat:
+          options:
+            model: gemini-2.5-pro
+            thinkingBudget: 1000
+        embedding:
+          api-key: ${GEMINI_API_KEY}
+          text:
+            options:
+              model: text-embedding-004
     mcp:
       server:
         type: SYNC
