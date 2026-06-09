@@ -12,7 +12,7 @@ spring:
         api-key: ${GEMINI_API_KEY}
         chat:
           options:
-            model: gemini-2.5-pro
+            model: gemini-2.5-flash
             thinkingBudget: 1000
         embedding:
           api-key: ${GEMINI_API_KEY}
@@ -50,3 +50,10 @@ management:
       show-details: always
       probes:
         enabled: true # Liveness/Readiness 전용 경로 활성화
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs

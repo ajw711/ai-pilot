@@ -9,6 +9,7 @@ import com.mcp.mcp_pilot.knowledge.service.KnowledgeSearchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.mcp.annotation.McpTool;
+import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Component;
 
 /**
@@ -48,15 +49,9 @@ public class KnowledgeTool {
 
     private final VectorMemoryService vectorMemoryService;
 
-    @McpTool(
+    @Tool(
             name = "storeKnowledgeData",
-            description = """
-                    개발 지식을 저장합니다.
-                    규칙:
-                    - sourceUrls는 사용자가 직접 제공한 URL만 포함
-                    - URL이 없으면 빈 배열([])
-                    - URL 추론 금지
-                    """
+            description = "개발 지식을 저장합니다. 규칙: sourceUrls는 사용자가 직접 제공한 URL만 포함, URL이 없으면 빈 배열([]), URL 추론 금지"
     )
     public ToolResponse<Long> storeKnowledgeData(KnowledgeRequest request) {
         // DB트랜잭션 (Long, Source, Tag 저장) - 커넥션 점유 후 바로 반납
@@ -86,7 +81,7 @@ public class KnowledgeTool {
         return response;
     }
 
-    @McpTool(
+    @Tool(
             name = "searchKnowledge",
             description = "내 개인 위키에서 지식을 검색합니다. 제목 키워드나 의미 기반 질문으로 찾을 수 있습니다."
     )
