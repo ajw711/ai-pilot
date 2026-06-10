@@ -18,7 +18,7 @@ spring:
           api-key: ${GEMINI_API_KEY}
           text:
             options:
-              model: text-embedding-004
+              model: gemini-embedding-001
     mcp:
       server:
         type: SYNC
@@ -57,3 +57,7 @@ springdoc:
     operations-sorter: alpha
   api-docs:
     path: /v3/api-docs
+
+logging:
+  level:
+    org.springframework.ai: DEBUG
