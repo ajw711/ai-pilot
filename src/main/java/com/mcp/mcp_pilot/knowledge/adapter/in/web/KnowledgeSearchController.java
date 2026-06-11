@@ -1,7 +1,7 @@
-package com.mcp.mcp_pilot.knowledge.controller;
+package com.mcp.mcp_pilot.knowledge.adapter.in.web;
 
-import com.mcp.mcp_pilot.knowledge.dto.SearchResponse;
-import com.mcp.mcp_pilot.knowledge.service.KnowledgeSearchService;
+import com.mcp.mcp_pilot.knowledge.adapter.in.web.dto.SearchResponse;
+import com.mcp.mcp_pilot.knowledge.port.in.SearchKnowledgeUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -12,11 +12,12 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class KnowledgeSearchController {
 
-    private final KnowledgeSearchService knowledgeSearchService;
+    private final SearchKnowledgeUseCase searchKnowledgeUseCase;
 
     @GetMapping("/search")
     public SearchResponse search(@RequestParam String query) {
-        String result = knowledgeSearchService.searchWiki(query);
+        log.info("Knowledge search request (Web Adapter): {}", query);
+        String result = searchKnowledgeUseCase.searchWiki(query);
         return SearchResponse.of(result);
     }
 }

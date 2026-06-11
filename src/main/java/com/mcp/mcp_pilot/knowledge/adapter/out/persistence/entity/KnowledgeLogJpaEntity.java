@@ -1,4 +1,4 @@
-package com.mcp.mcp_pilot.knowledge.entity;
+package com.mcp.mcp_pilot.knowledge.adapter.out.persistence.entity;
 
 import com.mcp.mcp_pilot.common.entitiy.BaseEntity;
 import jakarta.persistence.*;
@@ -6,19 +6,20 @@ import lombok.*;
 
 
 /**
- *  지식 원문 및 요약
- *  지식 마스터
+ *  지식 원문 및 요약 (JPA Entity)
  */
 @Table(name = "knowledge_log")
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class KnowledgeLogEntity extends BaseEntity {
+public class KnowledgeLogJpaEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
 
     @Column(nullable = false)
     private String title;
@@ -31,14 +32,14 @@ public class KnowledgeLogEntity extends BaseEntity {
 
     private String notionPageId; // 노션에 성공적으로 적재 한 페이지 ID
 
-    private KnowledgeLogEntity(String title, String rawContent, String summarizedContent, String notionPageId) {
+    private KnowledgeLogJpaEntity(String title, String rawContent, String summarizedContent, String notionPageId) {
         this.title = title;
         this.rawContent = rawContent;
         this.summarizedContent = summarizedContent;
         this.notionPageId = notionPageId;
     }
 
-    public static KnowledgeLogEntity createLog(String title, String rawContent, String summarizedContent, String notionPageId) {
-        return new KnowledgeLogEntity (title, rawContent, summarizedContent, notionPageId);
+    public static KnowledgeLogJpaEntity createLog(String title, String rawContent, String summarizedContent, String notionPageId) {
+        return new KnowledgeLogJpaEntity (title, rawContent, summarizedContent, notionPageId);
     }
 }

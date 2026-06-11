@@ -7,6 +7,8 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
  *  텍스트를 의미 벡터(embedding vector)로 변환
@@ -29,8 +31,8 @@ public class VectorStoreEntity extends BaseEntity {
     @Column(nullable = false)
     private Long targetId; // 도메인 pk
 
-    @Lob
     @Column(name = "embedding_vector", columnDefinition = "varbinary(max)", nullable = false)
+    @JdbcTypeCode(SqlTypes.VARBINARY)
     private float[] embeddingVector; // 768차원 벡터 좌표 배열
 
     private VectorStoreEntity(VectorTargetType targetType, Long targetId, float[] embeddingVector) {

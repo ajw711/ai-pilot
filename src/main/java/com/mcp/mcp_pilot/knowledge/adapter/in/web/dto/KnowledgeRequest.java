@@ -1,12 +1,10 @@
-package com.mcp.mcp_pilot.knowledge.dto;
+package com.mcp.mcp_pilot.knowledge.adapter.in.web.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
 import java.util.List;
 
 public record KnowledgeRequest(
-
         @NotBlank(message = "제목(title)은 필수입니다.")
         String title,
 

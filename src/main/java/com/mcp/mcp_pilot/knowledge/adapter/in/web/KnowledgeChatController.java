@@ -1,8 +1,8 @@
-package com.mcp.mcp_pilot.knowledge.controller;
+package com.mcp.mcp_pilot.knowledge.adapter.in.web;
 
 import com.mcp.mcp_pilot.ai.dto.ChatRequest;
 import com.mcp.mcp_pilot.ai.dto.ChatResponse;
-import com.mcp.mcp_pilot.knowledge.service.KnowledgeService;
+import com.mcp.mcp_pilot.knowledge.port.in.KnowledgeChatUseCase;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,40 +11,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
-/**
- * Controller
- *    ↓
- * ChatService
- *    ↓
- * Gemini
- *    ↓
- * @McpTool
- *    ↓
- * KnowledgeToolService
- *    ↓
- * Repository
- * --------
- * Frontend
- *    ↓
- * KnowledgeChatController
- *    ↓
- * KnowledgeService
- *    ↓
- * AIClientFactory
- *    ↓
- * GeminiClientStrategy
- *    ↓
- * Gemini API
- *    ↓
- * Tool Calling
- *    ↓
- * KnowledgeTool
- *    ↓
- * KnowledgeToolService
- *    ↓
- * Repository
- */
 @Tag(name = "AI Chat", description = "에이전트 대화")
 @Slf4j
 @RestController
@@ -52,11 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class KnowledgeChatController {
 
-    private final KnowledgeService knowledgeService;
+    private final KnowledgeChatUseCase knowledgeChatUseCase;
 
     @PostMapping("/chat")
     public ChatResponse chat(@RequestBody ChatRequest chatRequest) {
-        log.info(" chat request !!");
-        return knowledgeService.chat(chatRequest);
+        log.info("Knowledge chat request (Web Adapter)");
+        return knowledgeChatUseCase.chat(chatRequest);
     }
 }
