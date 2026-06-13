@@ -2,6 +2,9 @@ package com.mcp.mcp_pilot.knowledge.adapter.out.persistence.repository;
 
 import com.mcp.mcp_pilot.knowledge.adapter.out.persistence.entity.KnowledgeLogJpaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,4 +18,15 @@ public interface KnowledgeLogRepository extends JpaRepository<KnowledgeLogJpaEnt
 
     // 제목 키워드 검색 (LIKE %query%)
     List<KnowledgeLogJpaEntity> findByTitleContaining(String keyword);
+
+    @Modifying
+    @Query("""
+        update KnowledgeLogJpaEntity k
+            set k.summarizedContent = :summary
+        where k.id = :knowledgeId
+    """)
+    void updateSummary(
+            @Param("knowledgeId") Long knowledgeId,
+            @Param("summary") String summary
+    );
 }

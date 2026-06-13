@@ -14,12 +14,16 @@ public class KnowledgeLog {
     private final Long id;
     private final String title;
     private final String rawContent;
-    private final String summarizedContent;
+    private String summarizedContent;
     private final String notionPageId;
     private final LocalDateTime createDate;
     private final LocalDateTime updateDate;
 
     public static KnowledgeLog create(String title, String rawContent, String summarizedContent, String notionPageId) {
         return new KnowledgeLog(null, title, rawContent, summarizedContent, notionPageId, null, null);
+    }
+
+    public void updateSummary(String summarizedContent) {
+        this.summarizedContent = summarizedContent;
     }
 }

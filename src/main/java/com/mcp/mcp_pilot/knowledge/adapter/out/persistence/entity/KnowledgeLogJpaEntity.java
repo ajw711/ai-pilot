@@ -39,7 +39,7 @@ public class KnowledgeLogJpaEntity extends BaseEntity {
         this.notionPageId = notionPageId;
     }
 
-    public static KnowledgeLogJpaEntity createLog(String title, String rawContent, String summarizedContent, String notionPageId) {
+    public static KnowledgeLogJpaEntity create(String title, String rawContent, String summarizedContent, String notionPageId) {
         return new KnowledgeLogJpaEntity (title, rawContent, summarizedContent, notionPageId);
     }
 }

@@ -30,7 +30,7 @@ public class KnowledgeTagJpaEntity extends BaseEntity {
         this.tagName = tagName.trim().toLowerCase();
     }
 
-    public static KnowledgeTagJpaEntity createTag(Long knowledgeLogId, String tagName) {
+    public static KnowledgeTagJpaEntity create(Long knowledgeLogId, String tagName) {
         return new KnowledgeTagJpaEntity(knowledgeLogId, tagName);
     }
 }

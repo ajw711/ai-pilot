@@ -1,6 +1,7 @@
 package com.mcp.mcp_pilot.knowledge.adapter.in.web.mapper;
 
 import com.mcp.mcp_pilot.knowledge.adapter.in.web.dto.KnowledgeRequest;
+import com.mcp.mcp_pilot.knowledge.adapter.in.web.dto.SaveKnowledgeResponse;
 import com.mcp.mcp_pilot.knowledge.port.in.dto.SaveKnowledgeCommand;
 
 /**
@@ -16,5 +17,9 @@ public class KnowledgeWebMapper {
                 request.tags(),
                 request.sourceUrls()
         );
+    }
+
+    public static SaveKnowledgeResponse toResponse(Long knowledgeId) {
+        return new SaveKnowledgeResponse(knowledgeId);
     }
 }

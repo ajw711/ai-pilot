@@ -30,7 +30,7 @@ public class KnowledgeSourceJpaEntity extends BaseEntity {
         this.sourceUrl = sourceUrl;
     }
 
-    public static KnowledgeSourceJpaEntity createSource(Long knowledgeLogId, String sourceUrl) {
+    public static KnowledgeSourceJpaEntity create(Long knowledgeLogId, String sourceUrl) {
         return new KnowledgeSourceJpaEntity(knowledgeLogId, sourceUrl);
     }
 }

@@ -11,7 +11,7 @@ import java.util.List;
 public record SaveKnowledgeCommand(
         @NotBlank String title,
         @NotBlank String rawContent,
-        @NotBlank String summarizedContent,
+        String summarizedContent,
         @NotNull List<String> tags,
         @NotNull List<String> sourceUrls
 ) {

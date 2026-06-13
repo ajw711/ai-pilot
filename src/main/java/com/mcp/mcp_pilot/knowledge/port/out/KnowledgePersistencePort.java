@@ -11,6 +11,7 @@ public interface KnowledgePersistencePort {
     KnowledgeLog save(KnowledgeLog knowledgeLog);
     void saveSources(List<KnowledgeSource> sources);
     void saveTags(List<KnowledgeTag> tags);
+    void updateSummary(Long knowledgeId, String summary);
     
     Optional<KnowledgeLog> findById(Long id);
     Optional<KnowledgeLog> findByTitle(String title);

@@ -6,16 +6,23 @@ import com.mcp.mcp_pilot.knowledge.adapter.out.persistence.entity.KnowledgeTagJp
 import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeLog;
 import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeSource;
 import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeTag;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * Persistence Mapper: Domain Entity <-> JPA Entity
+ * 헥사고날 아키텍처 원칙에 따라 Adapter 레이어에서 경계 간 변환을 담당함.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class KnowledgePersistenceMapper {
 
+    // --- KnowledgeLog ---
+
     public static KnowledgeLog toDomain(KnowledgeLogJpaEntity entity) {
+        if (entity == null) return null;
         return new KnowledgeLog(
                 entity.getId(),
                 entity.getTitle(),
@@ -28,20 +35,29 @@ public class KnowledgePersistenceMapper {
     }
 
     public static KnowledgeLogJpaEntity toEntity(KnowledgeLog domain) {
-        KnowledgeLogJpaEntity entity = KnowledgeLogJpaEntity.createLog(
+        if (domain == null) return null;
+        KnowledgeLogJpaEntity entity = KnowledgeLogJpaEntity.create(
                 domain.getTitle(),
                 domain.getRawContent(),
                 domain.getSummarizedContent(),
                 domain.getNotionPageId()
         );
-        // ID가 있는 경우 (업데이트 시) 세팅
         if (domain.getId() != null) {
             entity.setId(domain.getId());
         }
         return entity;
     }
 
+    public static List<KnowledgeLog> toDomainList(List<KnowledgeLogJpaEntity> entities) {
+        return entities.stream()
+                .map(KnowledgePersistenceMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    // --- KnowledgeSource ---
+
     public static KnowledgeSource toDomain(KnowledgeSourceJpaEntity entity) {
+        if (entity == null) return null;
         return new KnowledgeSource(
                 entity.getId(),
                 entity.getKnowledgeLogId(),
@@ -50,7 +66,8 @@ public class KnowledgePersistenceMapper {
     }
 
     public static KnowledgeSourceJpaEntity toEntity(KnowledgeSource domain) {
-        KnowledgeSourceJpaEntity entity = KnowledgeSourceJpaEntity.createSource(
+        if (domain == null) return null;
+        KnowledgeSourceJpaEntity entity = KnowledgeSourceJpaEntity.create(
                 domain.getKnowledgeLogId(),
                 domain.getSourceUrl()
         );
@@ -60,7 +77,16 @@ public class KnowledgePersistenceMapper {
         return entity;
     }
 
+    public static List<KnowledgeSource> toSourceDomainList(List<KnowledgeSourceJpaEntity> entities) {
+        return entities.stream()
+                .map(KnowledgePersistenceMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    // --- KnowledgeTag ---
+
     public static KnowledgeTag toDomain(KnowledgeTagJpaEntity entity) {
+        if (entity == null) return null;
         return new KnowledgeTag(
                 entity.getId(),
                 entity.getKnowledgeLogId(),
@@ -69,7 +95,8 @@ public class KnowledgePersistenceMapper {
     }
 
     public static KnowledgeTagJpaEntity toEntity(KnowledgeTag domain) {
-        KnowledgeTagJpaEntity entity = KnowledgeTagJpaEntity.createTag(
+        if (domain == null) return null;
+        KnowledgeTagJpaEntity entity = KnowledgeTagJpaEntity.create(
                 domain.getKnowledgeLogId(),
                 domain.getTagName()
         );
@@ -77,5 +104,11 @@ public class KnowledgePersistenceMapper {
             entity.setId(domain.getId());
         }
         return entity;
+    }
+
+    public static List<KnowledgeTag> toTagDomainList(List<KnowledgeTagJpaEntity> entities) {
+        return entities.stream()
+                .map(KnowledgePersistenceMapper::toDomain)
+                .collect(Collectors.toList());
     }
 }

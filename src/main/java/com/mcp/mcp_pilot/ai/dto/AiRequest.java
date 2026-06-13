@@ -19,5 +19,6 @@ public record AiRequest(
 
     public static AiRequest of(String message, AIModel model, List<ToolType> tools) {
         return new AiRequest(message, model, tools);
+        
     }
 }

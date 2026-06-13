@@ -11,6 +11,7 @@ import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeTag;
 import com.mcp.mcp_pilot.knowledge.port.out.KnowledgePersistencePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -46,6 +47,12 @@ public class KnowledgePersistenceAdapter implements KnowledgePersistencePort {
     }
 
     @Override
+    @Transactional
+    public void updateSummary(Long knowledgeId, String summary) {
+        logRepository.updateSummary(knowledgeId, summary);
+    }
+
+    @Override
     public Optional<KnowledgeLog> findById(Long id) {
         return logRepository.findById(id).map(KnowledgePersistenceMapper::toDomain);
     }
@@ -57,8 +64,6 @@ public class KnowledgePersistenceAdapter implements KnowledgePersistencePort {
 
     @Override
     public List<KnowledgeLog> findByTitleContaining(String keyword) {
-        return logRepository.findByTitleContaining(keyword).stream()
-                .map(KnowledgePersistenceMapper::toDomain)
-                .collect(Collectors.toList());
+        return KnowledgePersistenceMapper.toDomainList(logRepository.findByTitleContaining(keyword));
     }
 }
