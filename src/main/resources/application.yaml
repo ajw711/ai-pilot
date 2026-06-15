@@ -37,6 +37,13 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.SQLServerDialect
+    show-sql: true
+
+notion:
+  api:
+    token: ${NOTION_TOKEN}
+    database-id: ${NOTION_DATABASE_ID}
+    version:
 
 management:
   server:

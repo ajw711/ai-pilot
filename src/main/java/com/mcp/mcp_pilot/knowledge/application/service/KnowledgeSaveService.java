@@ -6,6 +6,7 @@ import com.mcp.mcp_pilot.ai.factory.AIClientFactory;
 import com.mcp.mcp_pilot.ai.strategy.AiClientStrategy;
 import com.mcp.mcp_pilot.knowledge.application.event.KnowledgeProcessedEvent;
 import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeLog;
+import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeSource;
 import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeTag;
 import com.mcp.mcp_pilot.knowledge.port.in.SaveKnowledgeUseCase;
 import com.mcp.mcp_pilot.knowledge.port.in.dto.SaveKnowledgeCommand;
@@ -15,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +34,7 @@ public class KnowledgeSaveService implements SaveKnowledgeUseCase {
     private final AIClientFactory aiClientFactory;
     private final ApplicationEventPublisher eventPublisher;
     private final ExecutorService wikiExecutor;
+    private final TransactionTemplate transactionTemplate;
     private final Semaphore apiThrottle = new Semaphore(2);
     private static final String WIKI_PROMPT = """
             다음 내용을 개발자 위키 문서 형식으로 정리해줘.
@@ -52,16 +55,22 @@ public class KnowledgeSaveService implements SaveKnowledgeUseCase {
     @Transactional
     public KnowledgeLog saveKnowledge(SaveKnowledgeCommand command) {
         log.info("지식 저장 프로세스 시작 (Application Service): {}", command.title());
-        KnowledgeLog knowledgeLog = persistencePort.save(
+        KnowledgeLog savedLog = persistencePort.save(
                 KnowledgeLog.create(
                         command.title(),
                         command.rawContent(),
-                        null,
+                        command.summarizedContent(),
                         null
                 )
         );
-        KnowledgeLog savedLog = persistencePort.save(knowledgeLog);
         Long knowledgeId = savedLog.getId();
+
+        if (command.sourceUrls() != null && !command.sourceUrls().isEmpty()) {
+            List<KnowledgeSource> sources = command.sourceUrls().stream()
+                    .map( url -> KnowledgeSource.create(knowledgeId, url))
+                    .toList();
+            persistencePort.saveSources(sources);
+        }
 
         // 요약본이 없다면 비동기 가공 프로세스 가동
         if (command.summarizedContent() == null || command.summarizedContent().isBlank()) {
@@ -91,7 +100,7 @@ public class KnowledgeSaveService implements SaveKnowledgeUseCase {
             String summarized = strategy.call(aiRequest);
 
             // 3. 가공된 결과 업데이트
-            updateAndPublish(knowledgeId, summarized);
+            updateAndPublishTransactional(knowledgeId, summarized);
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt(); // 인터럽트 상태 복구
@@ -114,26 +123,30 @@ public class KnowledgeSaveService implements SaveKnowledgeUseCase {
     }
 
     // DB 업데이트와 이벤트를 묶는 트랜잭션 메서드
-    @Transactional
-    protected void updateAndPublish(Long knowledgeId, String summarized) {
-        // 1. 요약본 업데이트
-        persistencePort.updateSummary(knowledgeId, summarized);
+    protected void updateAndPublishTransactional(Long knowledgeId, String summarized) {
 
-        // 2. 태그 추출 및 저장 (향후 TagListener로 분리 가능)
-        List<String> extractedTags = extractTags(summarized);
-        if (!extractedTags.isEmpty()) {
-            List<KnowledgeTag> tagList = extractedTags.stream()
-                    .map(tagName -> KnowledgeTag.create(knowledgeId, tagName))
-                    .toList();
-            persistencePort.saveTags(tagList);
-            log.info("[SaveService] Wiki 태그 자동 추출 및 저장 완료 ({}개) - ID: {}",
-                    extractedTags.size(), knowledgeId);
-        }
-        log.info("[SaveService] Wiki 성공적으로 요약본 업데이트 완료 (ID: {})", knowledgeId);
+        transactionTemplate.executeWithoutResult(status -> {
+            // 1. 요약본 업데이트
+            persistencePort.updateSummary(knowledgeId, summarized);
 
-        // 이벤트 발행
-        eventPublisher.publishEvent(new KnowledgeProcessedEvent(knowledgeId));
-        log.info("[SaveService] 가공 완료 이벤트 발행됨 (ID: {})", knowledgeId);
+            // 2. 태그 추출 및 저장 (향후 TagListener로 분리 가능)
+            List<String> extractedTags = extractTags(summarized);
+            if (!extractedTags.isEmpty()) {
+                List<KnowledgeTag> tagList = extractedTags.stream()
+                        .map(tagName -> KnowledgeTag.create(knowledgeId, tagName))
+                        .toList();
+                persistencePort.saveTags(tagList);
+                log.info("[SaveService] Wiki 태그 자동 추출 및 저장 완료 ({}개) - ID: {}",
+                        extractedTags.size(), knowledgeId);
+            }
+
+
+            log.info("[SaveService] Wiki 요약본 업데이트 완료 (ID: {})", knowledgeId);
+
+            // 이벤트 발행
+            eventPublisher.publishEvent(new KnowledgeProcessedEvent(knowledgeId));
+            log.info("[SaveService] 가공 완료 이벤트 발행됨 (ID: {})", knowledgeId);
+        });
     }
 
     private String addLineNumbers(String rawContent) {

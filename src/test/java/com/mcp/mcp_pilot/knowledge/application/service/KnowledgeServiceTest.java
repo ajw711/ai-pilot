@@ -2,28 +2,30 @@ package com.mcp.mcp_pilot.knowledge.application.service;
 
 import com.mcp.mcp_pilot.ai.factory.AIClientFactory;
 import com.mcp.mcp_pilot.ai.strategy.AiClientStrategy;
-import com.mcp.mcp_pilot.ai.vector.port.VectorSearchPort;
+import com.mcp.mcp_pilot.knowledge.application.event.KnowledgeProcessedEvent;
 import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeLog;
 import com.mcp.mcp_pilot.knowledge.port.in.dto.SaveKnowledgeCommand;
 import com.mcp.mcp_pilot.knowledge.port.out.KnowledgePersistencePort;
-import com.mcp.mcp_pilot.knowledge.port.out.KnowledgeSearchPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 
 // 단위 테스트에 공통적으로 사용할 확장 기능을 선언해주는 역할
@@ -31,19 +33,26 @@ import static org.mockito.ArgumentMatchers.eq;
 class KnowledgeServiceTest {
 
     @Mock private KnowledgePersistencePort persistencePort;
-    @Mock private KnowledgeSearchPort searchPort;
-    @Mock private VectorSearchPort vectorSearchPort;
+    @Mock private ApplicationEventPublisher eventPublisher;
     @Mock private AIClientFactory aiClientFactory;
     @Mock private AiClientStrategy aiClientStrategy;
+    @Mock private TransactionTemplate transactionTemplate;
 
-    private KnowledgeService knowledgeService;
+    private KnowledgeSaveService knowledgeSaveService;
 
     @BeforeEach
     void setUp() {
+        doAnswer(invocation -> {
+            Consumer<TransactionStatus> callback = invocation.getArgument(0);
+            callback.accept(null);
+            return null;
+        }).when(transactionTemplate)
+                .executeWithoutResult(any());
+
         ExecutorService executor =
                 Executors.newSingleThreadExecutor();
-        knowledgeService = new KnowledgeService(
-                persistencePort, searchPort, vectorSearchPort, aiClientFactory, executor
+        knowledgeSaveService = new KnowledgeSaveService(
+                persistencePort, aiClientFactory, eventPublisher, executor, transactionTemplate
         );
 
     }
@@ -75,7 +84,7 @@ class KnowledgeServiceTest {
 
         // When
         KnowledgeLog result =
-                knowledgeService.saveKnowledge(command);
+                knowledgeSaveService.saveKnowledge(command);
 
         // Then
         // 사용자에게 대기 없이 ID가 바로 반환되는가?
@@ -90,6 +99,9 @@ class KnowledgeServiceTest {
         // 가공된 결과로 DB 업데이트가 호출되었는가?
         // KnowledgeService의 updateSummary 메서드가 잘 호출되었는지 확인
         verify(persistencePort, timeout(2000).times(1)).updateSummary(eq(1L), eq("AI 요약 결과"));
+
+        // 이벤트 발행 여부
+        verify(eventPublisher, timeout(2000).times(1)).publishEvent(new KnowledgeProcessedEvent(1L));
     }
 
 }

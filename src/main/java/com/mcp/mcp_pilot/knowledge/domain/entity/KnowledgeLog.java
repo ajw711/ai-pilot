@@ -22,8 +22,4 @@ public class KnowledgeLog {
     public static KnowledgeLog create(String title, String rawContent, String summarizedContent, String notionPageId) {
         return new KnowledgeLog(null, title, rawContent, summarizedContent, notionPageId, null, null);
     }
-
-    public void updateSummary(String summarizedContent) {
-        this.summarizedContent = summarizedContent;
-    }
 }

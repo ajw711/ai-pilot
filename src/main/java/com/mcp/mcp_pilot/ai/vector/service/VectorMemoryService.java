@@ -9,7 +9,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
+
 
 @Slf4j
 @Service
@@ -25,16 +28,11 @@ public class VectorMemoryService {
      * 외부 API 호출(Network I/O)과 DB 저장(DB I/O)을 분리하여
      *  트랜잭션 점유 시간을 최소화
      */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveEmbedding(VectorTargetType targetType, Long targetId, String content) {
         // 외부 API 호출 (Network I/O)는 트랜잭션 외부에서 진행하여 DB 커넥션 점유 시간을 최소화
         float[] vector = generateVector(targetType, targetId, content);
-
-        // TransactionTemplate 사용 이유:
-        // 1. 서비스 내부 호출 시 @Transactional이 작동하지 않는 AOP 프록시 한계
-        // 2. 서비스 레이어 분리 없이 명확한 트랜잭션 경계 설정
-        transactionTemplate.executeWithoutResult(status -> {
-            saveVectorToDatabase(targetType, targetId, vector);
-        });
+        saveVectorToDatabase(targetType, targetId, vector);
     }
 
     /**
@@ -55,9 +53,15 @@ public class VectorMemoryService {
      */
     private void saveVectorToDatabase(VectorTargetType targetType, Long targetId, float[] vector) {
         try {
-            VectorStoreEntity entity = VectorStoreEntity.createVectorStore(targetType, targetId, vector);
+            VectorStoreEntity entity =
+                    VectorStoreEntity.createVectorStore(
+                            targetType,
+                            targetId,
+                            vector
+                    );
             vectorStoreRepository.save(entity);
-            log.info("[Vector] 임베딩 저장 완료");
+
+            log.info("after flush");
         } catch (Exception e) {
             log.error("[Vector] 벡터 저장 실패: {}", e.getMessage());
             throw new AiException(ErrorCode.AI_VECTOR_STORAGE_FAILURE, e);
