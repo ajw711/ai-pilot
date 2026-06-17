@@ -43,7 +43,7 @@ notion:
   api:
     token: ${NOTION_TOKEN}
     database-id: ${NOTION_DATABASE_ID}
-    version:
+    version: 2026-03-11
 
 management:
   server:
