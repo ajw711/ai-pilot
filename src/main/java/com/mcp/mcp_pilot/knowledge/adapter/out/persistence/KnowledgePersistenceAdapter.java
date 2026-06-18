@@ -51,6 +51,20 @@ public class KnowledgePersistenceAdapter implements KnowledgePersistencePort {
     public void updateSummary(Long knowledgeId, String summary) {
         logRepository.updateSummary(knowledgeId, summary);
     }
+@Override
+@Transactional
+public void updatePublicationResult(Long knowledgeId, String notionPageId, String notionPageUrl) {
+    KnowledgeLogJpaEntity entity = logRepository.findById(knowledgeId)
+            .orElseThrow(() -> new RuntimeException("지식 로그를 찾을 수 없습니다: " + knowledgeId));
+    entity.updatePublicationResult(notionPageId, notionPageUrl);
+}
+
+@Override
+public boolean isPublished(Long knowledgeId) {
+    return logRepository.findById(knowledgeId)
+            .map(entity -> entity.getNotionPageId() != null)
+            .orElse(false);
+}
 
     @Override
     public Optional<KnowledgeLog> findById(Long id) {

@@ -28,7 +28,6 @@ public class KnowledgePersistenceMapper {
                 entity.getTitle(),
                 entity.getRawContent(),
                 entity.getSummarizedContent(),
-                entity.getNotionPageId(),
                 entity.getCreateDate(),
                 entity.getUpdateDate()
         );
@@ -36,11 +35,13 @@ public class KnowledgePersistenceMapper {
 
     public static KnowledgeLogJpaEntity toEntity(KnowledgeLog domain) {
         if (domain == null) return null;
+        // notionPageId, notionPageUrl은 도메인에 없으므로 null로 생성 (추후 업데이트됨)
         KnowledgeLogJpaEntity entity = KnowledgeLogJpaEntity.create(
                 domain.getTitle(),
                 domain.getRawContent(),
                 domain.getSummarizedContent(),
-                domain.getNotionPageId()
+                null,
+                null
         );
         if (domain.getId() != null) {
             entity.setId(domain.getId());

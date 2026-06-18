@@ -12,6 +12,7 @@ public record SaveKnowledgeCommand(
         @NotBlank String title,
         @NotBlank String rawContent,
         String summarizedContent,
+        List<String> tags,
         List<String> sourceUrls
 ) {
 }

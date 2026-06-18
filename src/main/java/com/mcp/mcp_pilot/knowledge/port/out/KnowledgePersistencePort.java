@@ -12,6 +12,8 @@ public interface KnowledgePersistencePort {
     void saveSources(List<KnowledgeSource> sources);
     void saveTags(List<KnowledgeTag> tags);
     void updateSummary(Long knowledgeId, String summary);
+    void updatePublicationResult(Long knowledgeId, String notionPageId, String notionPageUrl);
+    boolean isPublished(Long knowledgeId);
     
     Optional<KnowledgeLog> findById(Long id);
     Optional<KnowledgeLog> findByTitle(String title);

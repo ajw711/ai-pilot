@@ -17,7 +17,7 @@ public class GlobalExceptionHandler {
 
     /**
      * Bean Validation (@Valid, @Validated) 실패 처리
-     * MCP Tool 호출 시 데이터가 누락되면 AI에게 에러 메시지를 전달합니다.
+     * MCP Tool 호출 시 데이터가 누락되면 AI에게 에러 메시지를 전달.
      */
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<?> handleValidationException(ConstraintViolationException e) {

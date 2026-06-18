@@ -11,6 +11,9 @@ import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeTag;
 import com.mcp.mcp_pilot.knowledge.port.in.SaveKnowledgeUseCase;
 import com.mcp.mcp_pilot.knowledge.port.in.dto.SaveKnowledgeCommand;
 import com.mcp.mcp_pilot.knowledge.port.out.KnowledgePersistencePort;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.prometheus.metrics.core.metrics.Gauge;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -36,6 +39,7 @@ public class KnowledgeSaveService implements SaveKnowledgeUseCase {
     private final ExecutorService wikiExecutor;
     private final TransactionTemplate transactionTemplate;
     private final Semaphore apiThrottle = new Semaphore(2);
+    private final MeterRegistry meterRegistry;
     private static final String WIKI_PROMPT = """
             다음 내용을 개발자 위키 문서 형식으로 정리해줘.
 
@@ -51,16 +55,26 @@ public class KnowledgeSaveService implements SaveKnowledgeUseCase {
             원문:
             """;
 
+    @PostConstruct
+    public void registerMetrics(){
+        // AI 호출 가용 허가증 수
+        meterRegistry.gauge("ai_throttle_available_permits", apiThrottle, Semaphore::availablePermits);
+        // AI 호출 대기열 길이
+        meterRegistry.gauge("ai_throttle_queue_length", apiThrottle, Semaphore::getQueueLength);
+        log.info("[SaveService] AI Throttle 메트릭 등록 완료");
+    }
+
     @Override
     @Transactional
     public KnowledgeLog saveKnowledge(SaveKnowledgeCommand command) {
+        // 파이프라인 시작 카운트
+        meterRegistry.counter("knowledge_save_total").increment();
         log.info("지식 저장 프로세스 시작 (Application Service): {}", command.title());
         KnowledgeLog savedLog = persistencePort.save(
                 KnowledgeLog.create(
                         command.title(),
                         command.rawContent(),
-                        command.summarizedContent(),
-                        null
+                        command.summarizedContent()
                 )
         );
         Long knowledgeId = savedLog.getId();
@@ -144,7 +158,7 @@ public class KnowledgeSaveService implements SaveKnowledgeUseCase {
             log.info("[SaveService] Wiki 요약본 업데이트 완료 (ID: {})", knowledgeId);
 
             // 이벤트 발행
-            eventPublisher.publishEvent(new KnowledgeProcessedEvent(knowledgeId));
+            eventPublisher.publishEvent(KnowledgeProcessedEvent.of(knowledgeId));
             log.info("[SaveService] 가공 완료 이벤트 발행됨 (ID: {})", knowledgeId);
         });
     }

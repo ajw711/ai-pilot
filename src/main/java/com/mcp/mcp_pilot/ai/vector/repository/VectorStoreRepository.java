@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface VectorStoreRepository extends JpaRepository<VectorStoreEntity, Long> {
     List<VectorStoreEntity> findByTargetType(VectorTargetType targetType);
+    boolean existsByTargetTypeAndTargetId(VectorTargetType targetType, Long targetId);
 }

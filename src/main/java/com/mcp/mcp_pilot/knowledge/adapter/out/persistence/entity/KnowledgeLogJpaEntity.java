@@ -20,7 +20,6 @@ public class KnowledgeLogJpaEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     @Column(nullable = false)
     private String title;
 
@@ -32,14 +31,22 @@ public class KnowledgeLogJpaEntity extends BaseEntity {
 
     private String notionPageId; // 노션에 성공적으로 적재 한 페이지 ID
 
-    private KnowledgeLogJpaEntity(String title, String rawContent, String summarizedContent, String notionPageId) {
+    private String notionPageUrl; // 노션 페이지 URL
+
+    private KnowledgeLogJpaEntity(String title, String rawContent, String summarizedContent, String notionPageId, String notionPageUrl) {
         this.title = title;
         this.rawContent = rawContent;
         this.summarizedContent = summarizedContent;
         this.notionPageId = notionPageId;
+        this.notionPageUrl = notionPageUrl;
     }
 
-    public static KnowledgeLogJpaEntity create(String title, String rawContent, String summarizedContent, String notionPageId) {
-        return new KnowledgeLogJpaEntity (title, rawContent, summarizedContent, notionPageId);
+    public static KnowledgeLogJpaEntity create(String title, String rawContent, String summarizedContent, String notionPageId, String notionPageUrl) {
+        return new KnowledgeLogJpaEntity (title, rawContent, summarizedContent, notionPageId, notionPageUrl);
+    }
+
+    public void updatePublicationResult(String notionPageId, String notionPageUrl) {
+        this.notionPageId = notionPageId;
+        this.notionPageUrl = notionPageUrl;
     }
 }

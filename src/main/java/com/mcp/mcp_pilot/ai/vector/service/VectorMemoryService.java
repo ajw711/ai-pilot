@@ -32,7 +32,13 @@ public class VectorMemoryService {
     public void saveEmbedding(VectorTargetType targetType, Long targetId, String content) {
         // 외부 API 호출 (Network I/O)는 트랜잭션 외부에서 진행하여 DB 커넥션 점유 시간을 최소화
         float[] vector = generateVector(targetType, targetId, content);
-        saveVectorToDatabase(targetType, targetId, vector);
+        if (!exists(targetType, targetId)) {
+            saveVectorToDatabase(targetType, targetId, vector);
+        }
+    }
+
+    public boolean exists(VectorTargetType targetType, Long targetId) {
+        return vectorStoreRepository.existsByTargetTypeAndTargetId(targetType, targetId);
     }
 
     /**
