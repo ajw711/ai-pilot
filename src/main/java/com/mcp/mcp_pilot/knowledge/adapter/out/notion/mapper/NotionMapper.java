@@ -14,12 +14,11 @@ import java.util.regex.Pattern;
 @Component
 public class NotionMapper {
 
-    public NotionPageRequest toRequest(KnowledgeLog log, String databaseId) {
-        // Properties (데이터베이스 컬럼 매핑)
-        // 노션 DB 컬럼명에 따라 "Name" 또는 "Title" 등으로 조정 필요
+    public NotionPageRequest toRequest(KnowledgeLog log, String pageId) {
+        // Properties (페이지 제목 매핑)
         Map<String, Object> properties = Map.of(
-                "Name", Map.of(
-                        "title", List.of(createTextInput(log.getTitle()))
+                "title", Map.of(
+                        "title", createRichTextList(log.getTitle())
                 )
         );
 
@@ -27,7 +26,7 @@ public class NotionMapper {
         List<Map<String, Object>> children = parseContentToBlocks(log.getSummarizedContent());
 
         return new NotionPageRequest(
-                new Parent(databaseId),
+                new Parent(pageId),
                 properties,
                 children
         );
@@ -77,19 +76,13 @@ public class NotionMapper {
             else if (trimmedLine.startsWith("- ") || trimmedLine.startsWith("* ")) {
                 blocks.add(createListItemBlock(trimmedLine.substring(2)));
             }
-            // 빈 줄 처리
-            else if (trimmedLine.isEmpty()) {
-                // 노션에서 빈 줄은 생략하거나 빈 단락으로 추가 가능
-            }
             // 일반 텍스트 처리
-            else {
+            else if (!trimmedLine.isEmpty()) {
                 blocks.add(createParagraphBlock(line));
             }
         }
 
-        // 마지막에 태그나 출처 정보를 위한 구분선 추가 가능
         blocks.add(Map.of("object", "block", "type", "divider", "divider", Map.of()));
-
         return blocks;
     }
 
@@ -98,7 +91,7 @@ public class NotionMapper {
         return Map.of(
                 "object", "block",
                 "type", type,
-                type, Map.of("rich_text", List.of(createTextInput(text)))
+                type, Map.of("rich_text", createRichTextList(text))
         );
     }
 
@@ -106,7 +99,7 @@ public class NotionMapper {
         return Map.of(
                 "object", "block",
                 "type", "paragraph",
-                "paragraph", Map.of("rich_text", List.of(createTextInput(text)))
+                "paragraph", Map.of("rich_text", createRichTextList(text))
         );
     }
 
@@ -114,12 +107,11 @@ public class NotionMapper {
         return Map.of(
                 "object", "block",
                 "type", "bulleted_list_item",
-                "bulleted_list_item", Map.of("rich_text", List.of(createTextInput(text)))
+                "bulleted_list_item", Map.of("rich_text", createRichTextList(text))
         );
     }
 
     private Map<String, Object> createCodeBlock(String code, String language) {
-        // 노션 API에서 지원하는 언어 이름으로 매핑
         if (language.equals("js")) language = "javascript";
         if (language.equals("yml")) language = "yaml";
         
@@ -127,16 +119,64 @@ public class NotionMapper {
                 "object", "block",
                 "type", "code",
                 "code", Map.of(
-                        "rich_text", List.of(createTextInput(code)),
+                        "rich_text", List.of(createPlainRichTextItem(code)),
                         "language", language
                 )
         );
     }
 
-    private Map<String, Object> createTextInput(String text) {
+    private List<Map<String, Object>> createRichTextList(String text) {
+        List<Map<String, Object>> richTextList = new ArrayList<>();
+        if (text == null || text.isBlank()) return richTextList;
+
+        // **bold** 및 [L1] 인용 처리 정규식
+        // 1번 그룹: 굵은 글씨 (**text**)
+        // 2번 그룹: 인용 표시 ([L1])
+        Pattern pattern = Pattern.compile("\\*\\*(.*?)\\*\\*|\\[(L\\d+)\\]");
+        Matcher matcher = pattern.matcher(text);
+
+        int lastEnd = 0;
+        while (matcher.find()) {
+            // 일치하는 부분 이전의 일반 텍스트
+            if (matcher.start() > lastEnd) {
+                richTextList.add(createPlainRichTextItem(text.substring(lastEnd, matcher.start())));
+            }
+
+            if (matcher.group(1) != null) {
+                // **굵은 글씨** 처리
+                richTextList.add(createStyledRichTextItem(matcher.group(1), true, false, "default"));
+            } else if (matcher.group(2) != null) {
+                // [L1] 인용 표시 처리 (회색, 이탤릭으로 차별화)
+                richTextList.add(createStyledRichTextItem("[" + matcher.group(2) + "]", false, true, "gray"));
+            }
+            
+            lastEnd = matcher.end();
+        }
+
+        if (lastEnd < text.length()) {
+            richTextList.add(createPlainRichTextItem(text.substring(lastEnd)));
+        }
+
+        return richTextList;
+    }
+
+    private Map<String, Object> createPlainRichTextItem(String content) {
+        return createStyledRichTextItem(content, false, false, "default");
+    }
+
+    private Map<String, Object> createStyledRichTextItem(String content, boolean bold, boolean italic, String color) {
         return Map.of(
                 "type", "text",
-                "text", Map.of("content", text != null ? text : "")
+                "text", Map.of("content", content != null ? content : ""),
+                "annotations", Map.of(
+                        "bold", bold,
+                        "italic", italic,
+                        "strikethrough", false,
+                        "underline", false,
+                        "code", false,
+                        "color", color
+                )
         );
     }
+}
 }

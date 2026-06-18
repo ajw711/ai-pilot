@@ -67,7 +67,7 @@ public class VectorMemoryService {
                     );
             vectorStoreRepository.save(entity);
 
-            log.info("after flush");
+            log.info("벡터 저장 성공: {}", entity.getId());
         } catch (Exception e) {
             log.error("[Vector] 벡터 저장 실패: {}", e.getMessage());
             throw new AiException(ErrorCode.AI_VECTOR_STORAGE_FAILURE, e);
