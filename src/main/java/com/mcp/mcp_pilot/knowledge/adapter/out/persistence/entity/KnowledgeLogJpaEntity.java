@@ -1,6 +1,7 @@
 package com.mcp.mcp_pilot.knowledge.adapter.out.persistence.entity;
 
 import com.mcp.mcp_pilot.common.entitiy.BaseEntity;
+import com.mcp.mcp_pilot.knowledge.domain.vo.KnowledgeStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,26 +24,40 @@ public class KnowledgeLogJpaEntity extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
-    @Column(columnDefinition = "NVARCHAR(MAX)", nullable = false)
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String rawContent; // 사용자가 입력한 날 것 데이터
 
-    @Column(columnDefinition = "NVARCHAR(MAX)", nullable = false)
-    private String summarizedContent; // Gemini가 요약한 데이터
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String formattedContent; // Gemini가 요약한 데이터
 
     private String notionPageId; // 노션에 성공적으로 적재 한 페이지 ID
 
     private String notionPageUrl; // 노션 페이지 URL
 
-    private KnowledgeLogJpaEntity(String title, String rawContent, String summarizedContent, String notionPageId, String notionPageUrl) {
+    private Integer confidenceScore;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String verificationReport;
+
+    @Enumerated(EnumType.STRING)
+    private KnowledgeStatus status;
+
+    private Integer verificationVersion;
+
+    private KnowledgeLogJpaEntity(String title, String rawContent, String formattedContent, String notionPageId, String notionPageUrl, Integer confidenceScore, String verificationReport, KnowledgeStatus status, Integer verificationVersion) {
         this.title = title;
         this.rawContent = rawContent;
-        this.summarizedContent = summarizedContent;
+        this.formattedContent = formattedContent;
         this.notionPageId = notionPageId;
         this.notionPageUrl = notionPageUrl;
+        this.confidenceScore = confidenceScore;
+        this.verificationReport = verificationReport;
+        this.status = status;
+        this.verificationVersion = verificationVersion;
     }
 
-    public static KnowledgeLogJpaEntity create(String title, String rawContent, String summarizedContent, String notionPageId, String notionPageUrl) {
-        return new KnowledgeLogJpaEntity (title, rawContent, summarizedContent, notionPageId, notionPageUrl);
+    public static KnowledgeLogJpaEntity create(String title, String rawContent, String formattedContent, String notionPageId, String notionPageUrl, Integer confidenceScore, String verificationReport, KnowledgeStatus status, Integer verificationVersion) {
+        return new KnowledgeLogJpaEntity (title, rawContent, formattedContent, notionPageId, notionPageUrl, confidenceScore, verificationReport, status, verificationVersion);
     }
 
     public void updatePublicationResult(String notionPageId, String notionPageUrl) {

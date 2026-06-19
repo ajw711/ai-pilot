@@ -1,6 +1,7 @@
 package com.mcp.mcp_pilot.knowledge.adapter.out.persistence.repository;
 
 import com.mcp.mcp_pilot.knowledge.adapter.out.persistence.entity.KnowledgeLogJpaEntity;
+import com.mcp.mcp_pilot.knowledge.domain.vo.KnowledgeStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -22,11 +23,40 @@ public interface KnowledgeLogRepository extends JpaRepository<KnowledgeLogJpaEnt
     @Modifying
     @Query("""
         update KnowledgeLogJpaEntity k
-            set k.summarizedContent = :summary
+            set k.formattedContent = :summary
         where k.id = :knowledgeId
     """)
     void updateSummary(
             @Param("knowledgeId") Long knowledgeId,
             @Param("summary") String summary
+    );
+
+    @Modifying
+    @Query("""
+        update KnowledgeLogJpaEntity k
+            set k.status = :status
+        where k.id = :knowledgeId
+    """)
+    void updateStatus(
+            @Param("knowledgeId") Long knowledgeId,
+            @Param("status") KnowledgeStatus status
+    );
+
+    @Modifying
+    @Query("""
+        update KnowledgeLogJpaEntity k
+            set k.formattedContent = :summary,
+                k.confidenceScore = :confidenceScore,
+                k.verificationReport = :verificationReport,
+                k.status = :status,
+                k.verificationVersion = COALESCE(k.verificationVersion, 0) + 1
+        where k.id = :knowledgeId
+    """)
+    void updateVerificationAndSummary(
+            @Param("knowledgeId") Long knowledgeId,
+            @Param("summary") String summary,
+            @Param("confidenceScore") Integer confidenceScore,
+            @Param("verificationReport") String reportJson,
+            @Param("status") KnowledgeStatus status
     );
 }

@@ -2,10 +2,12 @@ package com.mcp.mcp_pilot.knowledge.application.service;
 
 import com.mcp.mcp_pilot.knowledge.application.event.KnowledgeProcessedEvent;
 import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeLog;
+import com.mcp.mcp_pilot.knowledge.domain.vo.KnowledgeStatus;
 import com.mcp.mcp_pilot.knowledge.exception.KnowledgeNotFoundException;
 import com.mcp.mcp_pilot.knowledge.exception.KnowledgePublishException;
 import com.mcp.mcp_pilot.knowledge.port.in.NotionUseCase;
 import com.mcp.mcp_pilot.knowledge.port.out.KnowledgePersistencePort;
+import com.mcp.mcp_pilot.knowledge.port.out.KnowledgeVectorPort;
 import com.mcp.mcp_pilot.knowledge.port.out.NotionPublishPort;
 import com.mcp.mcp_pilot.knowledge.port.out.dto.NotionPublishResult;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -23,6 +25,7 @@ import java.time.Instant;
 public class KnowledgePublishService implements NotionUseCase {
 
     private final KnowledgePersistencePort persistencePort;
+    private final KnowledgeVectorPort knowledgeVectorPort;
     private final NotionPublishPort notionPublishPort;
     private final MeterRegistry meterRegistry;
 
@@ -36,7 +39,6 @@ public class KnowledgePublishService implements NotionUseCase {
         Duration lag = Duration.between(event.publishedAt(), Instant.now());
         meterRegistry.timer("knowledge_event_lag_seconds", "consumer", "notion").record(lag);
 
-
         // 멱등성 체크
         if (persistencePort.isPublished(event.knowledgeId())) {
             log.info("[NotionService] 이미 발행된 지식입니다. 건너뜁니다. - ID: {}", event.knowledgeId());
@@ -44,6 +46,7 @@ public class KnowledgePublishService implements NotionUseCase {
         }
 
         log.info("[NotionService] 노션 발행 유스케이스 실행 - ID: {} ", event.knowledgeId());
+        persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.PUBLISHING);
         
         Timer.Sample sample = Timer.start(meterRegistry);
         String status = "success";
@@ -59,11 +62,21 @@ public class KnowledgePublishService implements NotionUseCase {
             
             // 결과 영속화
             persistencePort.updatePublicationResult(event.knowledgeId(), result.pageId(), result.pageUrl());
+
+            boolean vectorDone = knowledgeVectorPort.isVectorStored(event.knowledgeId());
+            if (vectorDone) {
+                persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.PUBLISHED);
+                log.info("[NotionService] Notion & Vector 적재 완료 -> PUBLISHED 전환 (ID: {})", event.knowledgeId());
+            } else {
+                persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.PUBLISHING);
+                log.info("[NotionService] Notion 적재 완료 (Vector 대기) -> PUBLISHING 상태 유지 (ID: {})", event.knowledgeId());
+            }
             
         } catch (Throwable e) {
             status = "fail";
             errorType = classifyError(e);
             log.error("[NotionService] 노션 발행 실패 (ID: {}): {}", event.knowledgeId(), e.getMessage());
+            persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.FAILED);
             throw new KnowledgePublishException(e);
         } finally {
             // <domain>_<subsystem>_<metric>_<unit> 메트릭 패턴 적용

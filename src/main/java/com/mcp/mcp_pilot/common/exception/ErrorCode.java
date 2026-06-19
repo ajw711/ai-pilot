@@ -27,8 +27,8 @@ public enum ErrorCode {
 
     // Knowledge 관련
     KNOWLEDGE_NOT_FOUND(HttpStatus.NOT_FOUND, "K001", "지식 데이터를 찾을 수 없습니다."),
-    KNOWLEDGE_PUBLISH_FAILURE(HttpStatus.INTERNAL_SERVER_ERROR,"K002","지식 발행에 실패했습니다.");
-
+    KNOWLEDGE_PUBLISH_FAILURE(HttpStatus.INTERNAL_SERVER_ERROR,"K002","지식 발행에 실패했습니다."),
+    INVALID_KNOWLEDGE_STATUS(HttpStatus.BAD_REQUEST, "K003", "승인할 수 없는 상태의 지식 데이터입니다.");
 
     private final HttpStatus status; // HTTP 상태 코드
     private final String code; // 에러 코드

@@ -1,5 +1,7 @@
 package com.mcp.mcp_pilot.knowledge.adapter.out.persistence;
 
+import com.mcp.mcp_pilot.ai.constant.VectorTargetType;
+import com.mcp.mcp_pilot.ai.vector.repository.VectorStoreRepository;
 import com.mcp.mcp_pilot.knowledge.adapter.out.persistence.entity.KnowledgeLogJpaEntity;
 import com.mcp.mcp_pilot.knowledge.adapter.out.persistence.mapper.KnowledgePersistenceMapper;
 import com.mcp.mcp_pilot.knowledge.adapter.out.persistence.repository.KnowledgeLogRepository;
@@ -8,10 +10,15 @@ import com.mcp.mcp_pilot.knowledge.adapter.out.persistence.repository.KnowledgeT
 import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeLog;
 import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeSource;
 import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeTag;
+import com.mcp.mcp_pilot.knowledge.domain.vo.KnowledgeStatus;
+import com.mcp.mcp_pilot.knowledge.domain.vo.VerificationResponse;
+import com.mcp.mcp_pilot.knowledge.exception.KnowledgeNotFoundException;
 import com.mcp.mcp_pilot.knowledge.port.out.KnowledgePersistencePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +31,7 @@ public class KnowledgePersistenceAdapter implements KnowledgePersistencePort {
     private final KnowledgeLogRepository logRepository;
     private final KnowledgeSourceRepository sourceRepository;
     private final KnowledgeTagRepository tagRepository;
+    private final JsonMapper jsonMapper;
 
     @Override
     public KnowledgeLog save(KnowledgeLog knowledgeLog) {
@@ -51,20 +59,46 @@ public class KnowledgePersistenceAdapter implements KnowledgePersistencePort {
     public void updateSummary(Long knowledgeId, String summary) {
         logRepository.updateSummary(knowledgeId, summary);
     }
-@Override
-@Transactional
-public void updatePublicationResult(Long knowledgeId, String notionPageId, String notionPageUrl) {
-    KnowledgeLogJpaEntity entity = logRepository.findById(knowledgeId)
-            .orElseThrow(() -> new RuntimeException("지식 로그를 찾을 수 없습니다: " + knowledgeId));
-    entity.updatePublicationResult(notionPageId, notionPageUrl);
-}
 
-@Override
-public boolean isPublished(Long knowledgeId) {
-    return logRepository.findById(knowledgeId)
-            .map(entity -> entity.getNotionPageId() != null)
-            .orElse(false);
-}
+    @Override
+    @Transactional
+    public void updateStatus(Long knowledgeId, KnowledgeStatus status) {
+        logRepository.updateStatus(knowledgeId, status);
+    }
+
+    @Override
+    @Transactional
+    public void updateVerificationAndSummary(
+            Long knowledgeId,
+            String summary,
+            Integer confidenceScore,
+            VerificationResponse verificationReport,
+            KnowledgeStatus status) {
+        String reportJson = null;
+        if (verificationReport != null) {
+           try {
+               reportJson = jsonMapper.writeValueAsString(verificationReport);
+           } catch (JacksonException e) {
+               throw new RuntimeException("검수 리포트 데이터 DB 전송 직렬화 실패", e);
+           }
+        }
+        logRepository.updateVerificationAndSummary(knowledgeId, summary, confidenceScore, reportJson, status);
+    }
+
+    @Override
+    @Transactional
+    public void updatePublicationResult(Long knowledgeId, String notionPageId, String notionPageUrl) {
+        KnowledgeLogJpaEntity entity = logRepository.findById(knowledgeId)
+                .orElseThrow(() -> new KnowledgeNotFoundException(knowledgeId));
+        entity.updatePublicationResult(notionPageId, notionPageUrl);
+    }
+
+    @Override
+    public boolean isPublished(Long knowledgeId) {
+        return logRepository.findById(knowledgeId)
+                .map(entity -> entity.getNotionPageId() != null)
+                .orElse(false);
+    }
 
     @Override
     public Optional<KnowledgeLog> findById(Long id) {
@@ -80,4 +114,5 @@ public boolean isPublished(Long knowledgeId) {
     public List<KnowledgeLog> findByTitleContaining(String keyword) {
         return KnowledgePersistenceMapper.toDomainList(logRepository.findByTitleContaining(keyword));
     }
+
 }

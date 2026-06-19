@@ -1,5 +1,7 @@
 package com.mcp.mcp_pilot.knowledge.domain.entity;
 
+import com.mcp.mcp_pilot.knowledge.domain.vo.KnowledgeStatus;
+import com.mcp.mcp_pilot.knowledge.exception.InvalidKnowledgeStatusException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import java.time.LocalDateTime;
@@ -14,11 +16,26 @@ public class KnowledgeLog {
     private final Long id;
     private final String title;
     private final String rawContent;
-    private String summarizedContent;
+    private String formattedContent;
     private final LocalDateTime createDate;
     private final LocalDateTime updateDate;
+    private Integer confidenceScore;
+    private String verificationReport;
+    private KnowledgeStatus status;
+    private Integer verificationVersion;
 
-    public static KnowledgeLog create(String title, String rawContent, String summarizedContent) {
-        return new KnowledgeLog(null, title, rawContent, summarizedContent, null, null);
+    public static KnowledgeLog create(String title, String rawContent, String formattedContent) {
+        return new KnowledgeLog(null, title, rawContent, formattedContent, null, null, null, null, KnowledgeStatus.DRAFT, 0);
+    }
+
+    public void approve(String finalFormattedContent) {
+        if (this.status != KnowledgeStatus.REVIEW_READY) {
+            throw new InvalidKnowledgeStatusException();
+        }
+
+        if (finalFormattedContent != null && !finalFormattedContent.isBlank()) {
+            this.formattedContent = finalFormattedContent;
+        }
+        this.status = KnowledgeStatus.APPROVED;
     }
 }

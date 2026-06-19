@@ -1,16 +1,18 @@
 package com.mcp.mcp_pilot.knowledge.adapter.in.web;
 
+import com.mcp.mcp_pilot.knowledge.adapter.in.web.dto.ApproveRequest;
 import com.mcp.mcp_pilot.knowledge.adapter.in.web.dto.KnowledgeRequest;
 import com.mcp.mcp_pilot.knowledge.adapter.in.web.dto.SaveKnowledgeResponse;
 import com.mcp.mcp_pilot.knowledge.adapter.in.web.dto.SearchResponse;
 import com.mcp.mcp_pilot.knowledge.adapter.in.web.mapper.KnowledgeWebMapper;
 import com.mcp.mcp_pilot.knowledge.port.in.SaveKnowledgeUseCase;
 import com.mcp.mcp_pilot.knowledge.port.in.SearchKnowledgeUseCase;
+import com.mcp.mcp_pilot.knowledge.port.in.dto.ApproveKnowledgeCommand;
 import com.mcp.mcp_pilot.knowledge.port.in.dto.SaveKnowledgeCommand;
+import com.mcp.mcp_pilot.knowledge.port.out.ApproveKnowledgeUseCase;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -21,6 +23,7 @@ public class KnowledgeWikiController {
 
     private final SearchKnowledgeUseCase searchKnowledgeUseCase;
     private final SaveKnowledgeUseCase saveKnowledgeUseCase;
+    private final ApproveKnowledgeUseCase approveKnowledgeUseCase;
 
     @GetMapping("/search")
     public SearchResponse search(@RequestParam String query) {
@@ -39,5 +42,17 @@ public class KnowledgeWikiController {
                         .saveKnowledge(command)
                         .getId();
         return KnowledgeWebMapper.toResponse(knowledgeId);
+    }
+
+    /**
+     * 지식 수동 검수 후 최종 승인(APPROVED) 및 발행(Notion, Vector) 트리거 API
+     */
+    @PatchMapping("/approve")
+    public void approve(
+            @RequestBody(required = false) ApproveRequest request
+    ) {
+        log.info("지식 수동 승인 요청 수신 (Web Adapter) - ID: {}", request.knowledgeId());
+        ApproveKnowledgeCommand command = KnowledgeWebMapper.toCommand(request);
+        approveKnowledgeUseCase.approve(command);
     }
 }

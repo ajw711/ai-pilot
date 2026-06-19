@@ -3,6 +3,8 @@ package com.mcp.mcp_pilot.knowledge.application.service;
 import com.mcp.mcp_pilot.ai.constant.VectorTargetType;
 import com.mcp.mcp_pilot.ai.vector.service.VectorMemoryService;
 import com.mcp.mcp_pilot.knowledge.application.event.KnowledgeProcessedEvent;
+import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeLog;
+import com.mcp.mcp_pilot.knowledge.domain.vo.KnowledgeStatus;
 import com.mcp.mcp_pilot.knowledge.exception.KnowledgeNotFoundException;
 import com.mcp.mcp_pilot.knowledge.port.in.VectorUseCase;
 import com.mcp.mcp_pilot.knowledge.port.out.KnowledgePersistencePort;
@@ -30,7 +32,6 @@ public class KnowledgeVectorService implements VectorUseCase {
         Duration lag = Duration.between(event.publishedAt(), Instant.now());
         meterRegistry.timer("knowledge_event_lag_seconds", "consumer", "vector").record(Duration.between(event.publishedAt(), Instant.now()));
 
-
         Timer.Sample sample = Timer.start(meterRegistry);
         String status = "success";
 
@@ -41,20 +42,39 @@ public class KnowledgeVectorService implements VectorUseCase {
         }
 
         log.info("[VectorService] 지식 벡터화 시작 - ID: {}", event.knowledgeId());
+        persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.PUBLISHING);
 
         try {
             persistencePort.findById(event.knowledgeId()).ifPresentOrElse(knowledge -> {
+
+                float[] vector = vectorMemoryService.generateVectorOnly(
+                        VectorTargetType.KNOWLEDGE,
+                        knowledge.getId(),
+                        knowledge.getFormattedContent()
+                );
+
                 vectorMemoryService.saveEmbedding(
                         VectorTargetType.KNOWLEDGE,
                         knowledge.getId(),
-                        knowledge.getSummarizedContent()
+                        vector
                 );
+
+                boolean vectorDone = persistencePort.isPublished(event.knowledgeId());
+                if (vectorDone) {
+                    persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.PUBLISHED);
+                    log.info("[VectorService] Notion & Vector 모두 적재 완료 -> PUBLISHED 상태로 전환 (ID: {})", event.knowledgeId());
+                } else {
+                    persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.PUBLISHING);
+                    log.info("[VectorService] Vector 적재 완료 (Notion 대기) -> PUBLISHING 상태 유지 (ID: {})", event.knowledgeId());
+                }
+
             }, () -> {
                 throw new KnowledgeNotFoundException(event.knowledgeId());
             });
         } catch (Exception e) {
             status = "fail";
             log.error("[VectorService] 벡터화 실패 (ID: {}): {}", event.knowledgeId(), e.getMessage());
+            persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.FAILED);
             throw e;
         } finally {
             meterRegistry.counter("vector_embedding_requests_total", "status", status).increment();

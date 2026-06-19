@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 /**
  * Persistence Mapper: Domain Entity <-> JPA Entity
- * 헥사고날 아키텍처 원칙에 따라 Adapter 레이어에서 경계 간 변환을 담당함.
+ * Adapter 레이어에서 경계 간 변환을 담당함.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class KnowledgePersistenceMapper {
@@ -27,9 +27,13 @@ public class KnowledgePersistenceMapper {
                 entity.getId(),
                 entity.getTitle(),
                 entity.getRawContent(),
-                entity.getSummarizedContent(),
+                entity.getFormattedContent(),
                 entity.getCreateDate(),
-                entity.getUpdateDate()
+                entity.getUpdateDate(),
+                entity.getConfidenceScore(),
+                entity.getVerificationReport(),
+                entity.getStatus(),
+                entity.getVerificationVersion()
         );
     }
 
@@ -39,9 +43,13 @@ public class KnowledgePersistenceMapper {
         KnowledgeLogJpaEntity entity = KnowledgeLogJpaEntity.create(
                 domain.getTitle(),
                 domain.getRawContent(),
-                domain.getSummarizedContent(),
+                domain.getFormattedContent(),
                 null,
-                null
+                null,
+                domain.getConfidenceScore(),
+                domain.getVerificationReport(),
+                domain.getStatus(),
+                domain.getVerificationVersion()
         );
         if (domain.getId() != null) {
             entity.setId(domain.getId());

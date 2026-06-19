@@ -20,7 +20,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class VectorMemoryService {
 
     private final EmbeddingModel embeddingModel;
-    private final TransactionTemplate transactionTemplate;
     private final VectorStoreRepository vectorStoreRepository;
 
     /**
@@ -29,16 +28,20 @@ public class VectorMemoryService {
      *  트랜잭션 점유 시간을 최소화
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void saveEmbedding(VectorTargetType targetType, Long targetId, String content) {
+    public void saveEmbedding(VectorTargetType targetType, Long targetId, float[] vector) {
         // 외부 API 호출 (Network I/O)는 트랜잭션 외부에서 진행하여 DB 커넥션 점유 시간을 최소화
-        float[] vector = generateVector(targetType, targetId, content);
         if (!exists(targetType, targetId)) {
             saveVectorToDatabase(targetType, targetId, vector);
         }
     }
 
+
     public boolean exists(VectorTargetType targetType, Long targetId) {
         return vectorStoreRepository.existsByTargetTypeAndTargetId(targetType, targetId);
+    }
+
+    public float[] generateVectorOnly(VectorTargetType targetType, Long targetId, String content){
+        return generateVector(targetType, targetId, content);
     }
 
     /**

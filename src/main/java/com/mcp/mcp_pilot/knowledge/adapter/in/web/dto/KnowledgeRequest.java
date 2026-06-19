@@ -11,7 +11,7 @@
                 @NotBlank(message = "원문 내용(rawContent)은 필수입니다.")
                 String rawContent,
 
-                String summarizedContent,
+                String formattedContent,
 
                 @NotNull(message = "태그 리스트는 필수입니다. (빈 배열 가능)")
                 List<String> tags,

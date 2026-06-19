@@ -23,7 +23,7 @@ public class NotionMapper {
         );
 
         // 본문(Children) 생성 - Markdown-ish 요약본을 블록으로 변환
-        List<Map<String, Object>> children = parseContentToBlocks(log.getSummarizedContent());
+        List<Map<String, Object>> children = parseContentToBlocks(log.getFormattedContent());
 
         return new NotionPageRequest(
                 new Parent(pageId),
@@ -179,4 +179,4 @@ public class NotionMapper {
         );
     }
 }
-}
+
