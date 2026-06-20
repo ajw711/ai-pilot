@@ -1,12 +1,8 @@
 package com.mcp.mcp_pilot.knowledge.application.service;
 
 import com.mcp.mcp_pilot.knowledge.application.TagExtractor;
-import com.mcp.mcp_pilot.knowledge.application.VerificationScorer;
-import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeLog;
-import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeSource;
-import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeTag;
-import com.mcp.mcp_pilot.knowledge.domain.vo.KnowledgeStatus;
-import com.mcp.mcp_pilot.knowledge.domain.vo.VerificationResponse;
+import com.mcp.mcp_pilot.knowledge.domain.vo.VerificationReport;
+import com.mcp.mcp_pilot.knowledge.domain.policy.DecisionPolicy;
 import com.mcp.mcp_pilot.knowledge.port.in.SaveKnowledgeUseCase;
 import com.mcp.mcp_pilot.knowledge.port.in.dto.SaveKnowledgeCommand;
 import com.mcp.mcp_pilot.knowledge.port.out.KnowledgeAiPort;
@@ -28,7 +24,6 @@ public class KnowledgeSaveService implements SaveKnowledgeUseCase {
 
     private final KnowledgePersistencePort persistencePort;
     private final KnowledgeAiPort knowledgeAiPort;
-    private final VerificationScorer verificationScorer;
     private final TagExtractor tagExtractor;
     private final ExecutorService wikiExecutor;
     private final TransactionTemplate transactionTemplate;
@@ -81,18 +76,19 @@ public class KnowledgeSaveService implements SaveKnowledgeUseCase {
             persistencePort.updateStatus(knowledgeId, KnowledgeStatus.VERIFYING);
 
             // 1. AI Verifier 포트 호출 (외부 기술 격리)
-            VerificationResponse verifyResponse = knowledgeAiPort.verify(rawContent);
+            VerificationReport verifyReport = knowledgeAiPort.verify(rawContent);
 
-            // 2. 신뢰도 점수 계산
-            int score = verificationScorer.calculate(verifyResponse);
+            // 2. 의사결정 정책에 따른 점수 및 상태 결정
+            int score = DecisionPolicy.calculateScore(verifyReport);
+            KnowledgeStatus nextStatus = DecisionPolicy.decide(verifyReport);
 
             persistencePort.updateStatus(knowledgeId, KnowledgeStatus.FORMATTING);
 
             // 3. AI Formatter 포트 호출
             String formattedContent = knowledgeAiPort.format(rawContent);
 
-            // 4. 가공 완료 후 수동 승인 대기 상태(REVIEW_READY)로 전환하여 유저 검토 유도
-            completeProcessing(knowledgeId, formattedContent, score, verifyResponse);
+            // 4. 가공 완료 후 의사결정 상태로 전환하여 유저 검토 유도
+            completeProcessing(knowledgeId, formattedContent, score, verifyReport, nextStatus);
 
         } catch (Exception e) {
             log.error("Wiki 비동기 AI 가공 프로세스 실패 (ID: {})", knowledgeId, e);
@@ -104,10 +100,11 @@ public class KnowledgeSaveService implements SaveKnowledgeUseCase {
             Long knowledgeId,
             String formatted,
             int score,
-            VerificationResponse verifyResponse) {
+            VerificationReport verifyReport,
+            KnowledgeStatus nextStatus) {
         transactionTemplate.executeWithoutResult(s -> {
             // 1. 결과 일괄 업데이트
-            persistencePort.updateVerificationAndSummary(knowledgeId, formatted, score, verifyResponse, KnowledgeStatus.REVIEW_READY);
+            persistencePort.updateVerificationAndSummary(knowledgeId, formatted, score, verifyReport, nextStatus);
 
             // 2. 태그 추출 및 저장
             List<String> extractedTags = tagExtractor.extractTags(formatted);
@@ -119,7 +116,7 @@ public class KnowledgeSaveService implements SaveKnowledgeUseCase {
                 log.info("[SaveService] 태그 자동 추출 및 저장 완료 ({}개) - ID: {}",
                         extractedTags.size(), knowledgeId);
             }
-            log.info("[SaveService] 지식 가공 데이터 업데이트 완료 (ID: {}, Score: {}, Status: {})", knowledgeId, score, KnowledgeStatus.REVIEW_READY);
+            log.info("[SaveService] 지식 가공 데이터 업데이트 완료 (ID: {}, Score: {}, Status: {})", knowledgeId, score, nextStatus);
 
         });
     }

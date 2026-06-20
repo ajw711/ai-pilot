@@ -5,6 +5,7 @@ import com.mcp.mcp_pilot.knowledge.adapter.in.web.dto.KnowledgeRequest;
 import com.mcp.mcp_pilot.knowledge.adapter.in.web.dto.SaveKnowledgeResponse;
 import com.mcp.mcp_pilot.knowledge.adapter.in.web.dto.SearchResponse;
 import com.mcp.mcp_pilot.knowledge.adapter.in.web.mapper.KnowledgeWebMapper;
+import com.mcp.mcp_pilot.knowledge.port.in.DeleteKnowledgeUseCase;
 import com.mcp.mcp_pilot.knowledge.port.in.SaveKnowledgeUseCase;
 import com.mcp.mcp_pilot.knowledge.port.in.SearchKnowledgeUseCase;
 import com.mcp.mcp_pilot.knowledge.port.in.dto.ApproveKnowledgeCommand;
@@ -24,6 +25,7 @@ public class KnowledgeWikiController {
     private final SearchKnowledgeUseCase searchKnowledgeUseCase;
     private final SaveKnowledgeUseCase saveKnowledgeUseCase;
     private final ApproveKnowledgeUseCase approveKnowledgeUseCase;
+    private final DeleteKnowledgeUseCase deleteKnowledgeUseCase;
 
     @GetMapping("/search")
     public SearchResponse search(@RequestParam String query) {
@@ -54,5 +56,11 @@ public class KnowledgeWikiController {
         log.info("지식 수동 승인 요청 수신 (Web Adapter) - ID: {}", request.knowledgeId());
         ApproveKnowledgeCommand command = KnowledgeWebMapper.toCommand(request);
         approveKnowledgeUseCase.approve(command);
+    }
+
+    @DeleteMapping("/{knowledgeId}")
+    public void delete(@PathVariable Long knowledgeId) {
+        log.info("지식 삭제 요청 수신 (Web Adapter) - ID: {}", knowledgeId);
+        deleteKnowledgeUseCase.delete(knowledgeId);
     }
 }

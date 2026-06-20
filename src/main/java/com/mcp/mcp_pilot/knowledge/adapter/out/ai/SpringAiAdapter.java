@@ -1,7 +1,6 @@
 package com.mcp.mcp_pilot.knowledge.adapter.out.ai;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.mcp.mcp_pilot.knowledge.domain.vo.VerificationResponse;
+import com.mcp.mcp_pilot.knowledge.domain.vo.VerificationReport;
 import com.mcp.mcp_pilot.knowledge.port.out.KnowledgeAiPort;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.annotation.PostConstruct;
@@ -27,26 +26,32 @@ public class SpringAiAdapter implements KnowledgeAiPort {
     private final Semaphore apiThrottle = new Semaphore(2);
 
     private static final String VERIFY_PROMPT = """
-            당신은 소프트웨어 엔지니어링 지식을 검수하는 전문 편집자입니다.
-            제공된 개발자 원문을 분석하여 다음 3가지 항목을 작성해 주세요.
+            당신은 소프트웨어 엔지니어링 및 컴퓨터 과학 기술 문서를 검수하는 전문 에디터(Knowledge Guardian)입니다.
+            사용자가 여러 자료를 공부하여 정리해 둔 지식 원문을 기술적으로 꼼꼼히 대조하고 검토해 주세요.
             
-            1. 사실 관계 오류 (factIssues): 원문의 내용 중 기술적으로 명백히 잘못된 사실이 있다면 원문 내용(originalText), 이유(reason), 심각도(severity: HIGH/MEDIUM/LOW)를 명시해 주세요.
-            2. 애매한 표현 (ambiguities): 설명이 불충분하거나 모호하여 오해를 일으킬 수 있는 문장(text)과 개선 제안(suggestion)을 적어주세요.
-            3. 근거 부족 (unsupportedClaims): 명확한 기술적 근거 없이 단정적으로 선언된 문장(text)과 그 이유(reason)를 적어주세요.
+            발견된 이슈는 다음 세 가지 심각도(severity) 레벨로 분류하여 issues 배열 형식(JSON)으로 응답해 주세요.
+            
+            1. CRITICAL: 기술적 스펙, 공식 사양, 상속 및 포함 관계(예: 상위/하위 개념의 혼동), 핵심 개념 정의를 명백히 잘못 설명하여 나중에 면접이나 실무에서 사용하면 치명적인 결함이 되는 사실적 오류
+            2. WARNING: 특정 옵션이나 환경에 따라 다름에도 무조건 단정적으로 작성하여 오해의 소지가 있거나, 예외 조건 누락, 문맥상 헷갈리기 쉬운 서술
+            3. SUGGESTION: 본문의 문장은 문제없으나, 관련해서 추가적으로 공부하면 좋은 연관 핵심 키워드, 디자인 패턴, 혹은 심화 설명 제안 (이 항목은 감점이나 오류 대상이 아닌 정보 보완성 추천입니다)
+            
+            중요 지침:
+            - 사내 기술 블로그나 엔지니어링 위키 성격의 문서이므로, "가장 널리 쓰인다", "거의 항상 사용한다" 등의 실무적 대중성 표현은 트집 잡지(지적하지) 마십시오.
+            - 외부 지식을 임의로 본문에 길게 추가하거나 자의적으로 해석하여 수정본을 창작하지 말고, 오직 원문에 존재하는 팩트의 오류 검수와 제안에만 집중하십시오.
             
             반드시 제시된 형식(JSON)에 맞춰 응답해 주세요. 외부 지식을 억지로 추가하여 문장을 새로 작성하지 마십시오.
             """;
 
     private static final String FORMAT_PROMPT = """
             당신은 개발자 기술 문서 전문 포맷터입니다.
-            제공된 개발자 원문의 핵심 뜻과 주관적 뉘앙스(예: '~라고 이해했다', '~인 것 같다' 등 저자의 생각)를 '절대' 수정하거나 삭제하지 말고 그대로 보존하십시오.
-            문장을 교과서적으로 다시 쓰거나 재작성하지 마십시오.
-            오직 다음 가이드라인에 따라 마크다운 가독성 포맷팅만 수행하십시오.
+            제공된 원문의 텍스트 내용(설명글, 예제 코드 내의 주석 및 주관적 생각 등)을 단 한 문장이나 단어조차도 임의로 생략, 요약, 수정 또는 삭제하지 말고 100% 그대로 보존하십시오.
+            이 작업은 요약 작업이 아닙니다. 원문 글을 글자 그대로 보존하면서, 오직 가독성을 위해 마크다운 포맷(##, ###, ```java, * 불릿 등)과 적절한 줄바꿈만 추가하는 작업입니다.
             
             가이드라인:
-            - 제목과 소제목(##, ###)을 사용하여 문서를 읽기 쉽게 문단으로 구획하십시오.
-            - 코드 예제는 원문 그대로 완벽히 보존하고, 가급적 포맷을 정돈하여 표시하십시오.
-            - 불필요한 반복이 있는 단락은 제거하되, 문장의 원래 의도는 해치지 마십시오.
+            - 제목과 소제목(##, ###)을 추가하여 문단을 가독성 있게 구획하십시오.
+              * 중요: 모든 제목(예: ##, ###)은 반드시 독립된 행(Line)에 작성되어야 하며, 제목 뒤에는 반드시 줄바꿈 문자(\\n)를 넣어 본문 내용이 제목과 같은 줄에 연속되어 위치하지 않도록 완전히 격리하십시오.
+            - 예제 코드는 주석을 포함하여 원문 그대로 완전히 보존하고, 가급적 포맷을 정돈하여 표시하십시오.
+            - 원문의 모든 설명글과 문단은 절대 생략하거나 생축하지 말고 원본 문장을 100% 다 기입해 주십시오.
             - 문서 마지막에 원문의 키워드를 나타내는 태그를 3개 이상 '#' 기호와 함께 추가하십시오.
             """;
 
@@ -59,15 +64,15 @@ public class SpringAiAdapter implements KnowledgeAiPort {
 
 
     @Override
-    public VerificationResponse verify(String rawContent) {
+    public VerificationReport verify(String rawContent) {
         return executeWithThrottle(() -> {
             log.info("[SpringAiAdapter] AI 검수 요청");
             String userPrompt = "원문:\n" + rawContent;
             return chatClient.prompt()
-                    .system(FORMAT_PROMPT)
+                    .system(VERIFY_PROMPT)
                     .user(userPrompt)
                     .call()
-                    .entity(VerificationResponse.class);
+                    .entity(VerificationReport.class);
         });
     }
 

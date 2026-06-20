@@ -11,7 +11,7 @@ import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeLog;
 import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeSource;
 import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeTag;
 import com.mcp.mcp_pilot.knowledge.domain.vo.KnowledgeStatus;
-import com.mcp.mcp_pilot.knowledge.domain.vo.VerificationResponse;
+import com.mcp.mcp_pilot.knowledge.domain.vo.VerificationReport;
 import com.mcp.mcp_pilot.knowledge.exception.KnowledgeNotFoundException;
 import com.mcp.mcp_pilot.knowledge.port.out.KnowledgePersistencePort;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.json.JsonMapper;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -38,6 +39,14 @@ public class KnowledgePersistenceAdapter implements KnowledgePersistencePort {
         KnowledgeLogJpaEntity entity = KnowledgePersistenceMapper.toEntity(knowledgeLog);
         KnowledgeLogJpaEntity savedEntity = logRepository.save(entity);
         return KnowledgePersistenceMapper.toDomain(savedEntity);
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long knowledgeId) {
+        KnowledgeLogJpaEntity entity = logRepository.findById(knowledgeId)
+                .orElseThrow(() -> new KnowledgeNotFoundException(knowledgeId));
+        entity.delete(LocalDateTime.now()); // Soft Delete 반영
     }
 
     @Override
@@ -71,8 +80,8 @@ public class KnowledgePersistenceAdapter implements KnowledgePersistencePort {
     public void updateVerificationAndSummary(
             Long knowledgeId,
             String summary,
-            Integer confidenceScore,
-            VerificationResponse verificationReport,
+            Integer verificationScore,
+            VerificationReport verificationReport,
             KnowledgeStatus status) {
         String reportJson = null;
         if (verificationReport != null) {
@@ -82,7 +91,7 @@ public class KnowledgePersistenceAdapter implements KnowledgePersistencePort {
                throw new RuntimeException("검수 리포트 데이터 DB 전송 직렬화 실패", e);
            }
         }
-        logRepository.updateVerificationAndSummary(knowledgeId, summary, confidenceScore, reportJson, status);
+        logRepository.updateVerificationAndSummary(knowledgeId, summary, verificationScore, reportJson, status);
     }
 
     @Override

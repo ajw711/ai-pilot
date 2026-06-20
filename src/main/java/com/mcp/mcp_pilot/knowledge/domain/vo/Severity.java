@@ -1,10 +1,10 @@
 package com.mcp.mcp_pilot.knowledge.domain.vo;
 
 /**
- * 사실 관계 오류의 중요도를 정의한 Enum
+ * 지식 검증 발견 사항의 심각도를 정의한 Enum
  */
 public enum Severity {
-    HIGH,
-    MEDIUM,
-    LOW
+    CRITICAL,
+    WARNING,
+    SUGGESTION
 }

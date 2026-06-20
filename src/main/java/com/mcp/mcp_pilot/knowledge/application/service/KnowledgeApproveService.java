@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -20,6 +21,7 @@ public class KnowledgeApproveService implements ApproveKnowledgeUseCase {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
+    @Transactional
     public void approve(ApproveKnowledgeCommand command) {
         Long knowledgeId = command.knowledgeId();
         log.info("[ApproveService] 지식 승인 프로세스 시작 - ID: {}", command.knowledgeId());

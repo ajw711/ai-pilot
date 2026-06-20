@@ -3,6 +3,7 @@ package com.mcp.mcp_pilot.knowledge.domain.entity;
 import com.mcp.mcp_pilot.knowledge.domain.vo.KnowledgeStatus;
 import com.mcp.mcp_pilot.knowledge.exception.InvalidKnowledgeStatusException;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import java.time.LocalDateTime;
 
@@ -19,13 +20,22 @@ public class KnowledgeLog {
     private String formattedContent;
     private final LocalDateTime createDate;
     private final LocalDateTime updateDate;
-    private Integer confidenceScore;
+    private Integer verificationScore;
     private String verificationReport;
     private KnowledgeStatus status;
     private Integer verificationVersion;
+    private LocalDateTime deleteAt;
 
     public static KnowledgeLog create(String title, String rawContent, String formattedContent) {
-        return new KnowledgeLog(null, title, rawContent, formattedContent, null, null, null, null, KnowledgeStatus.DRAFT, 0);
+        return new KnowledgeLog(null, title, rawContent, formattedContent, null, null, null, null, KnowledgeStatus.DRAFT, 0, null);
+    }
+
+    public void updateVerificationResult(String formattedContent, int score, String reportJson, KnowledgeStatus status) {
+        this.formattedContent = formattedContent;
+        this.verificationScore = score;
+        this.verificationReport = reportJson;
+        this.status = status;
+        this.verificationVersion = (this.verificationVersion == null ? 0 : this.verificationVersion) + 1;
     }
 
     public void approve(String finalFormattedContent) {
@@ -37,5 +47,13 @@ public class KnowledgeLog {
             this.formattedContent = finalFormattedContent;
         }
         this.status = KnowledgeStatus.APPROVED;
+    }
+
+    public void delete(LocalDateTime deleteAt) {
+        this.deleteAt = deleteAt;
+    }
+
+    public boolean isDeleted() {
+        return this.deleteAt != null;
     }
 }

@@ -4,11 +4,15 @@ import com.mcp.mcp_pilot.common.entitiy.BaseEntity;
 import com.mcp.mcp_pilot.knowledge.domain.vo.KnowledgeStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
+
+import java.time.LocalDateTime;
 
 
 /**
  *  지식 원문 및 요약 (JPA Entity)
  */
+@SQLRestriction("deleted_at IS NULL")
 @Table(name = "knowledge_log")
 @Entity
 @Getter
@@ -21,7 +25,7 @@ public class KnowledgeLogJpaEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
     private String title;
 
     @Column(columnDefinition = "NVARCHAR(MAX)")
@@ -34,7 +38,7 @@ public class KnowledgeLogJpaEntity extends BaseEntity {
 
     private String notionPageUrl; // 노션 페이지 URL
 
-    private Integer confidenceScore;
+    private Integer verificationScore;
 
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String verificationReport;
@@ -44,24 +48,58 @@ public class KnowledgeLogJpaEntity extends BaseEntity {
 
     private Integer verificationVersion;
 
-    private KnowledgeLogJpaEntity(String title, String rawContent, String formattedContent, String notionPageId, String notionPageUrl, Integer confidenceScore, String verificationReport, KnowledgeStatus status, Integer verificationVersion) {
+    private LocalDateTime deletedAt;
+
+    private KnowledgeLogJpaEntity(String title,
+                                  String rawContent,
+                                  String formattedContent,
+                                  String notionPageId,
+                                  String notionPageUrl,
+                                  Integer verificationScore,
+                                  String verificationReport,
+                                  KnowledgeStatus status,
+                                  Integer verificationVersion,
+                                  LocalDateTime deletedAt) {
         this.title = title;
         this.rawContent = rawContent;
         this.formattedContent = formattedContent;
         this.notionPageId = notionPageId;
         this.notionPageUrl = notionPageUrl;
-        this.confidenceScore = confidenceScore;
+        this.verificationScore = verificationScore;
         this.verificationReport = verificationReport;
         this.status = status;
         this.verificationVersion = verificationVersion;
+        this.deletedAt = deletedAt;
     }
 
-    public static KnowledgeLogJpaEntity create(String title, String rawContent, String formattedContent, String notionPageId, String notionPageUrl, Integer confidenceScore, String verificationReport, KnowledgeStatus status, Integer verificationVersion) {
-        return new KnowledgeLogJpaEntity (title, rawContent, formattedContent, notionPageId, notionPageUrl, confidenceScore, verificationReport, status, verificationVersion);
+    public static KnowledgeLogJpaEntity create(String title,
+                                               String rawContent,
+                                               String formattedContent,
+                                               String notionPageId,
+                                               String notionPageUrl,
+                                               Integer verificationScore,
+                                               String verificationReport,
+                                               KnowledgeStatus status,
+                                               Integer verificationVersion,
+                                               LocalDateTime deletedAt) {
+        return new KnowledgeLogJpaEntity (title,
+                rawContent,
+                formattedContent,
+                notionPageId,
+                notionPageUrl,
+                verificationScore,
+                verificationReport,
+                status,
+                verificationVersion,
+                deletedAt);
     }
 
     public void updatePublicationResult(String notionPageId, String notionPageUrl) {
         this.notionPageId = notionPageId;
         this.notionPageUrl = notionPageUrl;
+    }
+
+    public void delete(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
     }
 }

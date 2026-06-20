@@ -46,7 +46,7 @@ public interface KnowledgeLogRepository extends JpaRepository<KnowledgeLogJpaEnt
     @Query("""
         update KnowledgeLogJpaEntity k
             set k.formattedContent = :summary,
-                k.confidenceScore = :confidenceScore,
+                k.verificationScore = :verificationScore,
                 k.verificationReport = :verificationReport,
                 k.status = :status,
                 k.verificationVersion = COALESCE(k.verificationVersion, 0) + 1
@@ -55,7 +55,7 @@ public interface KnowledgeLogRepository extends JpaRepository<KnowledgeLogJpaEnt
     void updateVerificationAndSummary(
             @Param("knowledgeId") Long knowledgeId,
             @Param("summary") String summary,
-            @Param("confidenceScore") Integer confidenceScore,
+            @Param("verificationScore") Integer verificationScore,
             @Param("verificationReport") String reportJson,
             @Param("status") KnowledgeStatus status
     );

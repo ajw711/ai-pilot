@@ -30,10 +30,11 @@ public class KnowledgePersistenceMapper {
                 entity.getFormattedContent(),
                 entity.getCreateDate(),
                 entity.getUpdateDate(),
-                entity.getConfidenceScore(),
+                entity.getVerificationScore(),
                 entity.getVerificationReport(),
                 entity.getStatus(),
-                entity.getVerificationVersion()
+                entity.getVerificationVersion(),
+                entity.getDeletedAt()
         );
     }
 
@@ -46,10 +47,11 @@ public class KnowledgePersistenceMapper {
                 domain.getFormattedContent(),
                 null,
                 null,
-                domain.getConfidenceScore(),
+                domain.getVerificationScore(),
                 domain.getVerificationReport(),
                 domain.getStatus(),
-                domain.getVerificationVersion()
+                domain.getVerificationVersion(),
+                domain.getDeleteAt()
         );
         if (domain.getId() != null) {
             entity.setId(domain.getId());
