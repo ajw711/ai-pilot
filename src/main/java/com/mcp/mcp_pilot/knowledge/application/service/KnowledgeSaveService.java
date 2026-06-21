@@ -1,6 +1,10 @@
 package com.mcp.mcp_pilot.knowledge.application.service;
 
 import com.mcp.mcp_pilot.knowledge.application.TagExtractor;
+import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeLog;
+import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeSource;
+import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeTag;
+import com.mcp.mcp_pilot.knowledge.domain.vo.KnowledgeStatus;
 import com.mcp.mcp_pilot.knowledge.domain.vo.VerificationReport;
 import com.mcp.mcp_pilot.knowledge.domain.policy.DecisionPolicy;
 import com.mcp.mcp_pilot.knowledge.port.in.SaveKnowledgeUseCase;
