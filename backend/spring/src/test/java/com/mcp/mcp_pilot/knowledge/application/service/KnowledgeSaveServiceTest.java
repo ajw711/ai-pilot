@@ -1,10 +1,6 @@
 package com.mcp.mcp_pilot.knowledge.application.service;
 
-import com.mcp.mcp_pilot.ai.enums.AIModel;
-import com.mcp.mcp_pilot.ai.factory.AIClientFactory;
-import com.mcp.mcp_pilot.ai.strategy.AiClientStrategy;
 import com.mcp.mcp_pilot.knowledge.application.TagExtractor;
-import com.mcp.mcp_pilot.knowledge.application.event.KnowledgeProcessedEvent;
 import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeLog;
 import com.mcp.mcp_pilot.knowledge.domain.policy.DecisionPolicy;
 import com.mcp.mcp_pilot.knowledge.domain.vo.Issue;
@@ -23,10 +19,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
