@@ -110,7 +110,7 @@ public class KnowledgeSaveServiceTest {
         // Then
         verify(persistencePort).updateStatus(id, KnowledgeStatus.VERIFYING);
         verify(knowledgeAiPort).verify(rawContent);
-        verify(persistencePort).updateStatus(id, KnowledgeStatus.PUBLISHED);
+        verify(persistencePort).updateStatus(id, KnowledgeStatus.FORMATTING);
         verify(knowledgeAiPort).format(rawContent);
         verify(persistencePort).updateVerificationAndSummary(
                 eq(id),
@@ -126,7 +126,5 @@ public class KnowledgeSaveServiceTest {
                                 tags.stream().anyMatch(t -> t.getTagName().equalsIgnoreCase("Spring"))
                 )
         );
-
-
     }
 }
