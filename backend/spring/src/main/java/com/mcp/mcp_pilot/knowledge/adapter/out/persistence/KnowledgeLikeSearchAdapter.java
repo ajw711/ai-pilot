@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -20,9 +21,30 @@ public class KnowledgeLikeSearchAdapter implements KnowledgeSearchPort {
 
     @Override
     public List<KnowledgeLog> search(String query) {
-        log.info("[Persistence-Adapter] LIKE 검색 수행: {}", query);
+        log.info("[SearchAdapter] LIKE 검색 수행: {}", query);
         return logRepository.findByTitleContaining(query).stream()
                 .map(KnowledgePersistenceMapper::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<KnowledgeLog> findAll() {
+        log.info("[SearchAdapter] 전체 목록 조회");
+        return KnowledgePersistenceMapper.toDomainList(logRepository.findAll());
+    }
+
+    @Override
+    public Optional<KnowledgeLog> findById(Long id) {
+        return logRepository.findById(id).map(KnowledgePersistenceMapper::toDomain);
+    }
+
+    @Override
+    public Optional<KnowledgeLog> findByTitle(String title) {
+        return logRepository.findByTitle(title).map(KnowledgePersistenceMapper::toDomain);
+    }
+
+    @Override
+    public List<KnowledgeLog> findByTitleContaining(String keyword) {
+        return KnowledgePersistenceMapper.toDomainList(logRepository.findByTitleContaining(keyword));
     }
 }

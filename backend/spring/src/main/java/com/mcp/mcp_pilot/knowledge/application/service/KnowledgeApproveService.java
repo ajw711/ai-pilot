@@ -6,6 +6,7 @@ import com.mcp.mcp_pilot.knowledge.exception.KnowledgeNotFoundException;
 import com.mcp.mcp_pilot.knowledge.port.in.dto.ApproveKnowledgeCommand;
 import com.mcp.mcp_pilot.knowledge.port.out.ApproveKnowledgeUseCase;
 import com.mcp.mcp_pilot.knowledge.port.out.KnowledgePersistencePort;
+import com.mcp.mcp_pilot.knowledge.port.out.KnowledgeSearchPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class KnowledgeApproveService implements ApproveKnowledgeUseCase {
 
     private final KnowledgePersistencePort persistencePort;
+    private final KnowledgeSearchPort searchPort;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
@@ -26,7 +28,7 @@ public class KnowledgeApproveService implements ApproveKnowledgeUseCase {
         Long knowledgeId = command.knowledgeId();
         log.info("[ApproveService] 지식 승인 프로세스 시작 - ID: {}", command.knowledgeId());
 
-        KnowledgeLog knowledge = persistencePort.findById(command.knowledgeId())
+        KnowledgeLog knowledge = searchPort.findById(command.knowledgeId())
                 .orElseThrow(() -> new KnowledgeNotFoundException(command.knowledgeId()));
 
         knowledge.approve(command.finalFormattedContent());

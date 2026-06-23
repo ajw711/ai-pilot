@@ -7,6 +7,7 @@ import com.mcp.mcp_pilot.knowledge.exception.KnowledgeNotFoundException;
 import com.mcp.mcp_pilot.knowledge.exception.KnowledgePublishException;
 import com.mcp.mcp_pilot.knowledge.port.in.NotionUseCase;
 import com.mcp.mcp_pilot.knowledge.port.out.KnowledgePersistencePort;
+import com.mcp.mcp_pilot.knowledge.port.out.KnowledgeSearchPort;
 import com.mcp.mcp_pilot.knowledge.port.out.KnowledgeVectorPort;
 import com.mcp.mcp_pilot.knowledge.port.out.NotionPublishPort;
 import com.mcp.mcp_pilot.knowledge.port.out.dto.NotionPublishResult;
@@ -25,6 +26,7 @@ import java.time.Instant;
 public class KnowledgePublishService implements NotionUseCase {
 
     private final KnowledgePersistencePort persistencePort;
+    private final KnowledgeSearchPort searchPort;
     private final KnowledgeVectorPort knowledgeVectorPort;
     private final NotionPublishPort notionPublishPort;
     private final MeterRegistry meterRegistry;
@@ -53,7 +55,7 @@ public class KnowledgePublishService implements NotionUseCase {
         String errorType = "none";
         
         try {
-            KnowledgeLog knowledgeLog = persistencePort.findById(event.knowledgeId())
+            KnowledgeLog knowledgeLog = searchPort.findById(event.knowledgeId())
                     .orElseThrow(() -> new KnowledgeNotFoundException(event.knowledgeId()));
             
             // 외부 API 호출 (Adapter 호출 - 내부에서 @Retryable 작동)

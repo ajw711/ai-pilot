@@ -64,19 +64,16 @@ public class KnowledgePersistenceAdapter implements KnowledgePersistencePort {
     }
 
     @Override
-    @Transactional
     public void updateSummary(Long knowledgeId, String summary) {
         logRepository.updateSummary(knowledgeId, summary);
     }
 
     @Override
-    @Transactional
     public void updateStatus(Long knowledgeId, KnowledgeStatus status) {
         logRepository.updateStatus(knowledgeId, status);
     }
 
     @Override
-    @Transactional
     public void updateVerificationAndSummary(
             Long knowledgeId,
             String summary,
@@ -95,7 +92,6 @@ public class KnowledgePersistenceAdapter implements KnowledgePersistencePort {
     }
 
     @Override
-    @Transactional
     public void updatePublicationResult(Long knowledgeId, String notionPageId, String notionPageUrl) {
         KnowledgeLogJpaEntity entity = logRepository.findById(knowledgeId)
                 .orElseThrow(() -> new KnowledgeNotFoundException(knowledgeId));
@@ -107,21 +103,6 @@ public class KnowledgePersistenceAdapter implements KnowledgePersistencePort {
         return logRepository.findById(knowledgeId)
                 .map(entity -> entity.getNotionPageId() != null)
                 .orElse(false);
-    }
-
-    @Override
-    public Optional<KnowledgeLog> findById(Long id) {
-        return logRepository.findById(id).map(KnowledgePersistenceMapper::toDomain);
-    }
-
-    @Override
-    public Optional<KnowledgeLog> findByTitle(String title) {
-        return logRepository.findByTitle(title).map(KnowledgePersistenceMapper::toDomain);
-    }
-
-    @Override
-    public List<KnowledgeLog> findByTitleContaining(String keyword) {
-        return KnowledgePersistenceMapper.toDomainList(logRepository.findByTitleContaining(keyword));
     }
 
 }

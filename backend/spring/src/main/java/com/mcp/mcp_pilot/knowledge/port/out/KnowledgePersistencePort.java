@@ -22,8 +22,6 @@ public interface KnowledgePersistencePort {
     boolean isPublished(Long knowledgeId);
 
     void delete(Long knowledgeId);
-    
-    Optional<KnowledgeLog> findById(Long id);
-    Optional<KnowledgeLog> findByTitle(String title);
-    List<KnowledgeLog> findByTitleContaining(String keyword);
+
+
 }

@@ -1,20 +1,20 @@
 package com.mcp.mcp_pilot.knowledge.adapter.in.web;
 
-import com.mcp.mcp_pilot.knowledge.adapter.in.web.dto.ApproveRequest;
-import com.mcp.mcp_pilot.knowledge.adapter.in.web.dto.KnowledgeRequest;
-import com.mcp.mcp_pilot.knowledge.adapter.in.web.dto.SaveKnowledgeResponse;
-import com.mcp.mcp_pilot.knowledge.adapter.in.web.dto.SearchResponse;
+import com.mcp.mcp_pilot.knowledge.adapter.in.web.dto.*;
 import com.mcp.mcp_pilot.knowledge.adapter.in.web.mapper.KnowledgeWebMapper;
 import com.mcp.mcp_pilot.knowledge.port.in.DeleteKnowledgeUseCase;
 import com.mcp.mcp_pilot.knowledge.port.in.SaveKnowledgeUseCase;
 import com.mcp.mcp_pilot.knowledge.port.in.SearchKnowledgeUseCase;
 import com.mcp.mcp_pilot.knowledge.port.in.dto.ApproveKnowledgeCommand;
+import com.mcp.mcp_pilot.knowledge.port.in.dto.KnowledgeSummary;
 import com.mcp.mcp_pilot.knowledge.port.in.dto.SaveKnowledgeCommand;
 import com.mcp.mcp_pilot.knowledge.port.out.ApproveKnowledgeUseCase;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -26,6 +26,12 @@ public class KnowledgeWikiController {
     private final SaveKnowledgeUseCase saveKnowledgeUseCase;
     private final ApproveKnowledgeUseCase approveKnowledgeUseCase;
     private final DeleteKnowledgeUseCase deleteKnowledgeUseCase;
+
+    @GetMapping("/list")
+    public List<KnowledgeSummary> listAll() {
+        log.info("Knowledge listAll (Web Adapter)");
+        return searchKnowledgeUseCase.findAll();
+    }
 
     @GetMapping("/search")
     public SearchResponse search(@RequestParam String query) {
