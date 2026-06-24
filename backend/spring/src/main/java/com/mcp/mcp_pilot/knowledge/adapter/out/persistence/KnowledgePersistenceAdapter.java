@@ -14,6 +14,7 @@ import com.mcp.mcp_pilot.knowledge.exception.KnowledgeNotFoundException;
 import com.mcp.mcp_pilot.knowledge.port.out.KnowledgePersistencePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -57,11 +58,13 @@ public class KnowledgePersistenceAdapter implements KnowledgePersistencePort {
     }
 
     @Override
+    @Transactional
     public void updateStatus(Long knowledgeId, KnowledgeStatus status) {
         logRepository.updateStatus(knowledgeId, status);
     }
 
     @Override
+    @Transactional
     public void updateVerificationAndSummary(
             Long knowledgeId,
             String summary,
@@ -80,6 +83,7 @@ public class KnowledgePersistenceAdapter implements KnowledgePersistencePort {
     }
 
     @Override
+    @Transactional
     public void updatePublicationResult(Long knowledgeId, String notionPageId, String notionPageUrl) {
         KnowledgeLogJpaEntity entity = logRepository.findById(knowledgeId)
                 .orElseThrow(() -> new KnowledgeNotFoundException(knowledgeId));
