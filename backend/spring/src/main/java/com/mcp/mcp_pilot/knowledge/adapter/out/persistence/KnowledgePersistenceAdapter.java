@@ -1,7 +1,5 @@
 package com.mcp.mcp_pilot.knowledge.adapter.out.persistence;
 
-import com.mcp.mcp_pilot.ai.constant.VectorTargetType;
-import com.mcp.mcp_pilot.ai.vector.repository.VectorStoreRepository;
 import com.mcp.mcp_pilot.knowledge.adapter.out.persistence.entity.KnowledgeLogJpaEntity;
 import com.mcp.mcp_pilot.knowledge.adapter.out.persistence.mapper.KnowledgePersistenceMapper;
 import com.mcp.mcp_pilot.knowledge.adapter.out.persistence.repository.KnowledgeLogRepository;
@@ -16,11 +14,9 @@ import com.mcp.mcp_pilot.knowledge.exception.KnowledgeNotFoundException;
 import com.mcp.mcp_pilot.knowledge.port.out.KnowledgePersistencePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.json.JsonMapper;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -42,11 +38,8 @@ public class KnowledgePersistenceAdapter implements KnowledgePersistencePort {
     }
 
     @Override
-    @Transactional
-    public void delete(Long knowledgeId) {
-        KnowledgeLogJpaEntity entity = logRepository.findById(knowledgeId)
-                .orElseThrow(() -> new KnowledgeNotFoundException(knowledgeId));
-        entity.delete(LocalDateTime.now()); // Soft Delete 반영
+    public Optional<KnowledgeLog> findById(Long id) {
+        return logRepository.findById(id).map(KnowledgePersistenceMapper::toDomain);
     }
 
     @Override
@@ -61,11 +54,6 @@ public class KnowledgePersistenceAdapter implements KnowledgePersistencePort {
         tagRepository.saveAll(tags.stream()
                 .map(KnowledgePersistenceMapper::toEntity)
                 .collect(Collectors.toList()));
-    }
-
-    @Override
-    public void updateSummary(Long knowledgeId, String summary) {
-        logRepository.updateSummary(knowledgeId, summary);
     }
 
     @Override

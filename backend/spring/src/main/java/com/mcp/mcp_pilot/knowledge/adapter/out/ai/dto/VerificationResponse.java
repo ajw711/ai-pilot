@@ -1,4 +1,8 @@
-package com.mcp.mcp_pilot.knowledge.domain.vo;
+package com.mcp.mcp_pilot.knowledge.adapter.out.ai.dto;
+
+import com.mcp.mcp_pilot.knowledge.domain.vo.AmbiguousExpression;
+import com.mcp.mcp_pilot.knowledge.domain.vo.FactIssue;
+import com.mcp.mcp_pilot.knowledge.domain.vo.UnsupportedClaim;
 
 import java.util.List;
 

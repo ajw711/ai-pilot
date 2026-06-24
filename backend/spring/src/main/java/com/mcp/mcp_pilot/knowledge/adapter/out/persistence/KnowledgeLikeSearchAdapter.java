@@ -34,8 +34,8 @@ public class KnowledgeLikeSearchAdapter implements KnowledgeSearchPort {
     }
 
     @Override
-    public Optional<KnowledgeLog> findById(Long id) {
-        return logRepository.findById(id).map(KnowledgePersistenceMapper::toDomain);
+    public Optional<KnowledgeLog> findSummaryById(Long knowledgeId) {
+        return logRepository.findById(knowledgeId).map(KnowledgePersistenceMapper::toDomain);
     }
 
     @Override

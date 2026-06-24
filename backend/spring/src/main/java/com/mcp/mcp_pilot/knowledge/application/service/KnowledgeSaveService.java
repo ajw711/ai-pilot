@@ -9,6 +9,7 @@ import com.mcp.mcp_pilot.knowledge.domain.vo.VerificationReport;
 import com.mcp.mcp_pilot.knowledge.domain.policy.DecisionPolicy;
 import com.mcp.mcp_pilot.knowledge.port.in.SaveKnowledgeUseCase;
 import com.mcp.mcp_pilot.knowledge.port.in.dto.SaveKnowledgeCommand;
+import com.mcp.mcp_pilot.knowledge.port.in.dto.SaveKnowledgeResult;
 import com.mcp.mcp_pilot.knowledge.port.out.KnowledgeAiPort;
 import com.mcp.mcp_pilot.knowledge.port.out.KnowledgePersistencePort;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -36,7 +37,7 @@ public class KnowledgeSaveService implements SaveKnowledgeUseCase {
 
     @Override
     @Transactional
-    public KnowledgeLog saveKnowledge(SaveKnowledgeCommand command) {
+    public SaveKnowledgeResult saveKnowledge(SaveKnowledgeCommand command) {
         // 파이프라인 시작 카운트
         meterRegistry.counter("knowledge_save_total").increment();
         log.info("지식 저장 프로세스 시작 (Application Service): {}", command.title());
@@ -71,7 +72,8 @@ public class KnowledgeSaveService implements SaveKnowledgeUseCase {
             wikiExecutor.submit(() -> processWikiAsync(knowledgeId, command.rawContent()));
         }
         log.info("[SaveService] 지식 1차 저장 완료 ID: {}", knowledgeId);
-        return savedLog;
+
+        return SaveKnowledgeResult.of(savedLog.getId(), savedLog.getStatus());
     }
 
     private void processWikiAsync(long knowledgeId, String rawContent) {
@@ -96,7 +98,7 @@ public class KnowledgeSaveService implements SaveKnowledgeUseCase {
 
         } catch (Exception e) {
             log.error("Wiki 비동기 AI 가공 프로세스 실패 (ID: {})", knowledgeId, e);
-            persistencePort.updateStatus(knowledgeId, KnowledgeStatus.FAILED);
+            persistencePort.updateStatus(knowledgeId, KnowledgeStatus.FAILED_AT_VERIFYING);
         }
     }
 

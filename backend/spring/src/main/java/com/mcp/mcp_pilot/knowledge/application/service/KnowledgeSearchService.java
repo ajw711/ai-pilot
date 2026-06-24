@@ -6,7 +6,6 @@ import com.mcp.mcp_pilot.ai.vector.port.VectorSearchPort;
 import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeLog;
 import com.mcp.mcp_pilot.knowledge.port.in.SearchKnowledgeUseCase;
 import com.mcp.mcp_pilot.knowledge.port.in.dto.KnowledgeSummary;
-import com.mcp.mcp_pilot.knowledge.port.out.KnowledgePersistencePort;
 import com.mcp.mcp_pilot.knowledge.port.out.KnowledgeSearchPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +20,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class KnowledgeSearchService implements SearchKnowledgeUseCase {
 
-    private final KnowledgePersistencePort knowledgePersistencePort;
     private final KnowledgeSearchPort  knowledgeSearchPort;
     private final VectorSearchPort vectorSearchPort;
 
@@ -45,12 +43,11 @@ public class KnowledgeSearchService implements SearchKnowledgeUseCase {
         List<Long> similarIds = vectorSearchPort.search(VectorTargetType.KNOWLEDGE, query, 3, SimilarityMetric.COSINE);
         if (!similarIds.isEmpty()) {
             List<KnowledgeLog> vectorResults = similarIds.stream()
-                    .map(knowledgeSearchPort::findById)
+                    .map(knowledgeSearchPort::findSummaryById)
                     .flatMap(Optional::stream)
                     .toList();
             return formatListResponse("유사 지식 검색 결과", vectorResults);
         }
-
         return "관련된 위키 내용을 찾을 수 없습니다.";
     }
 

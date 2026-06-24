@@ -7,7 +7,7 @@ import java.util.Optional;
 public interface KnowledgeSearchPort {
     List<KnowledgeLog> search(String query);
     List<KnowledgeLog> findAll();
-    Optional<KnowledgeLog> findById(Long id);
+    Optional<KnowledgeLog> findSummaryById(Long knowledgeId);
     Optional<KnowledgeLog> findByTitle(String title);
     List<KnowledgeLog> findByTitleContaining(String keyword);
 }

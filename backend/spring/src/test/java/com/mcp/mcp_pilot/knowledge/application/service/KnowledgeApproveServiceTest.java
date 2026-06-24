@@ -6,7 +6,6 @@ import com.mcp.mcp_pilot.knowledge.domain.vo.KnowledgeStatus;
 import com.mcp.mcp_pilot.knowledge.exception.InvalidKnowledgeStatusException;
 import com.mcp.mcp_pilot.knowledge.exception.KnowledgeNotFoundException;
 import com.mcp.mcp_pilot.knowledge.port.in.dto.ApproveKnowledgeCommand;
-import com.mcp.mcp_pilot.knowledge.port.out.ApproveKnowledgeUseCase;
 import com.mcp.mcp_pilot.knowledge.port.out.KnowledgePersistencePort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -53,7 +52,7 @@ public class KnowledgeApproveServiceTest {
         knowledgeApproveService.approve(command);
 
         // Then
-        assertEquals(KnowledgeStatus.APPROVED, target.getStatus());
+        assertEquals(KnowledgeStatus.REVIEW_APPROVED, target.getStatus());
         assertEquals("최종 포맷된 내용", target.getFormattedContent());
 
         verify(persistencePort).findById(id);

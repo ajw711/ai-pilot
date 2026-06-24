@@ -46,14 +46,10 @@ public class KnowledgeLog {
         if (finalFormattedContent != null && !finalFormattedContent.isBlank()) {
             this.formattedContent = finalFormattedContent;
         }
-        this.status = KnowledgeStatus.APPROVED;
+        this.status = KnowledgeStatus.REVIEW_APPROVED;
     }
 
     public void delete(LocalDateTime deleteAt) {
         this.deleteAt = deleteAt;
-    }
-
-    public boolean isDeleted() {
-        return this.deleteAt != null;
     }
 }

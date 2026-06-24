@@ -9,7 +9,6 @@ import javax.annotation.Nullable;
 public record ApiResponse<T>(
         @JsonIgnore
         HttpStatus httpStatus,
-        boolean success,
         T data,
         ExceptionResponse error
 ) {
@@ -17,7 +16,6 @@ public record ApiResponse<T>(
     public static <T> ApiResponse<T> success(T data) {
         return new ApiResponse<>(
                 HttpStatus.OK,
-                true,
                 data,
                 null
         );
@@ -26,7 +24,6 @@ public record ApiResponse<T>(
     public static <T> ApiResponse<T> fail(ErrorCode errorCode) {
         return new ApiResponse<>(
                 errorCode.getStatus(),
-                false,
                 null,
                 ExceptionResponse.of(errorCode)
         );

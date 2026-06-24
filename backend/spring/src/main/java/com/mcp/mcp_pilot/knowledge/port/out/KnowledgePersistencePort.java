@@ -11,17 +11,12 @@ import java.util.Optional;
 
 public interface KnowledgePersistencePort {
     KnowledgeLog save(KnowledgeLog knowledgeLog);
-
+    Optional<KnowledgeLog> findById(Long id);
     void saveSources(List<KnowledgeSource> sources);
     void saveTags(List<KnowledgeTag> tags);
-    void updateSummary(Long knowledgeId, String summary);
     void updateStatus(Long knowledgeId, KnowledgeStatus status);
 
     void updateVerificationAndSummary(Long knowledgeId, String summary, Integer verificationScore, VerificationReport verificationReport, KnowledgeStatus status);
     void updatePublicationResult(Long knowledgeId, String notionPageId, String notionPageUrl);
     boolean isPublished(Long knowledgeId);
-
-    void delete(Long knowledgeId);
-
-
 }

@@ -1,6 +1,6 @@
 package com.mcp.mcp_pilot.knowledge.application;
 
-import com.mcp.mcp_pilot.knowledge.domain.vo.VerificationResponse;
+import com.mcp.mcp_pilot.knowledge.adapter.out.ai.dto.VerificationResponse;
 import org.springframework.stereotype.Component;
 
 @Component

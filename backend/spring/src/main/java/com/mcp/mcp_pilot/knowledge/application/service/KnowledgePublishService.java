@@ -26,7 +26,6 @@ import java.time.Instant;
 public class KnowledgePublishService implements NotionUseCase {
 
     private final KnowledgePersistencePort persistencePort;
-    private final KnowledgeSearchPort searchPort;
     private final KnowledgeVectorPort knowledgeVectorPort;
     private final NotionPublishPort notionPublishPort;
     private final MeterRegistry meterRegistry;
@@ -48,14 +47,14 @@ public class KnowledgePublishService implements NotionUseCase {
         }
 
         log.info("[NotionService] 노션 발행 유스케이스 실행 - ID: {} ", event.knowledgeId());
-        persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.PUBLISHING);
+        persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.NOTION_PUBLISHING);
         
         Timer.Sample sample = Timer.start(meterRegistry);
         String status = "success";
         String errorType = "none";
         
         try {
-            KnowledgeLog knowledgeLog = searchPort.findById(event.knowledgeId())
+            KnowledgeLog knowledgeLog = persistencePort.findById(event.knowledgeId())
                     .orElseThrow(() -> new KnowledgeNotFoundException(event.knowledgeId()));
             
             // 외부 API 호출 (Adapter 호출 - 내부에서 @Retryable 작동)
@@ -70,7 +69,7 @@ public class KnowledgePublishService implements NotionUseCase {
                 persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.PUBLISHED);
                 log.info("[NotionService] Notion & Vector 적재 완료 -> PUBLISHED 전환 (ID: {})", event.knowledgeId());
             } else {
-                persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.PUBLISHING);
+                persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.FAILED_AT_VECTOR_INDEX);
                 log.info("[NotionService] Notion 적재 완료 (Vector 대기) -> PUBLISHING 상태 유지 (ID: {})", event.knowledgeId());
             }
             
@@ -78,7 +77,7 @@ public class KnowledgePublishService implements NotionUseCase {
             status = "fail";
             errorType = classifyError(e);
             log.error("[NotionService] 노션 발행 실패 (ID: {}): {}", event.knowledgeId(), e.getMessage());
-            persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.FAILED);
+            persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.FAILED_AT_NOTION_PUBLISH);
             throw new KnowledgePublishException(e);
         } finally {
             // <domain>_<subsystem>_<metric>_<unit> 메트릭 패턴 적용

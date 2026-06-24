@@ -42,7 +42,7 @@ public class KnowledgeVectorService implements VectorUseCase {
         }
 
         log.info("[VectorService] 지식 벡터화 시작 - ID: {}", event.knowledgeId());
-        persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.PUBLISHING);
+        persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.VECTOR_INDEXING);
 
         try {
             persistencePort.findById(event.knowledgeId()).ifPresentOrElse(knowledge -> {
@@ -64,8 +64,8 @@ public class KnowledgeVectorService implements VectorUseCase {
                     persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.PUBLISHED);
                     log.info("[VectorService] Notion & Vector 모두 적재 완료 -> PUBLISHED 상태로 전환 (ID: {})", event.knowledgeId());
                 } else {
-                    persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.PUBLISHING);
-                    log.info("[VectorService] Vector 적재 완료 (Notion 대기) -> PUBLISHING 상태 유지 (ID: {})", event.knowledgeId());
+                    persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.VECTOR_INDEXING);
+                    log.info("[VectorService] Vector 적재 완료 (Notion 대기) -> VECTOR_INDEXING 상태 유지 (ID: {})", event.knowledgeId());
                 }
 
             }, () -> {
@@ -74,7 +74,7 @@ public class KnowledgeVectorService implements VectorUseCase {
         } catch (Exception e) {
             status = "fail";
             log.error("[VectorService] 벡터화 실패 (ID: {}): {}", event.knowledgeId(), e.getMessage());
-            persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.FAILED);
+            persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.FAILED_AT_VECTOR_INDEX);
             throw e;
         } finally {
             meterRegistry.counter("vector_embedding_requests_total", "status", status).increment();

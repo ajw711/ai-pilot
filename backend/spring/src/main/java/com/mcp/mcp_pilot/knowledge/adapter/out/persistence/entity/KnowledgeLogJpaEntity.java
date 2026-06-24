@@ -98,8 +98,4 @@ public class KnowledgeLogJpaEntity extends BaseEntity {
         this.notionPageId = notionPageId;
         this.notionPageUrl = notionPageUrl;
     }
-
-    public void delete(LocalDateTime deletedAt) {
-        this.deletedAt = deletedAt;
-    }
 }
