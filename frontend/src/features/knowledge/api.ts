@@ -1,7 +1,7 @@
 import { api } from "../../lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { KnowledgeStatus } from "../../types/knowledge";
-
+import type { ApiResponse } from "../../types/api";
 export interface KnowledgeSummaryDto {
   id: number;
   title: string;
@@ -17,13 +17,18 @@ export interface SaveKnowledgeRequestDto {
   sourceUrls: string[]; // Spring Boot @NotNull 대응
 }
 
+export interface ListKnowledgeResponse {
+  summaryList: KnowledgeSummaryDto[];
+}
+
 //React Query 전용 커스텀 훅 정의
 export const useKnowledgeList = () => {
   return useQuery<KnowledgeSummaryDto[]>({
     queryKey: ["knowledgeList"],
     queryFn: async () => {
-      const { data } = await api.get<KnowledgeSummaryDto[]>("/knowledge/list");
-      return data;
+      const { data: apiResponse } =
+        await api.get<ApiResponse<ListKnowledgeResponse>>("/knowledge/list");
+      return apiResponse.data?.summaryList || [];
     },
   });
 };
