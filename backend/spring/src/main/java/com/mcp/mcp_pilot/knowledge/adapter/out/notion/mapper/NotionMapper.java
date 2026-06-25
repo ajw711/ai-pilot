@@ -42,7 +42,7 @@ public class NotionMapper {
         return "plain text";
     }
 
-    public NotionPageRequest toRequest(KnowledgeLog log, String pageId) {
+    public NotionPageRequest toRequest(KnowledgeLog log, String databaseId) {
         // Properties (페이지 제목 매핑)
         Map<String, Object> properties = Map.of(
                 "title", Map.of(
@@ -54,16 +54,18 @@ public class NotionMapper {
         List<Map<String, Object>> children = parseContentToBlocks(log.getFormattedContent());
 
         return new NotionPageRequest(
-                new Parent(pageId),
+                new Parent(databaseId),
                 properties,
                 children
         );
     }
 
     private List<Map<String, Object>> parseContentToBlocks(String content) {
-        List<Map<String, Object>> blocks = new ArrayList<>();
+        List<NotionBlock> rootBlocks = new ArrayList<>();
+        List<NotionBlock> parentStack = new ArrayList<>();
+
         if (content == null || content.isBlank()) {
-            return blocks;
+            return List.of();
         }
 
         String[] lines = content.split("\\r?\\n");
@@ -73,8 +75,8 @@ public class NotionMapper {
 
         for (String line : lines) {
             // Notion API block count limit protection (max 100 blocks, cap at 97 to leave room)
-            if (blocks.size() >= 97) {
-                blocks.add(createParagraphBlock("... (Notion API 블록 개수 제한으로 인해 본문이 생략되었습니다. 전체 내용은 데이터베이스를 확인해 주세요.)"));
+            if (rootBlocks.size() >= 97) {
+                rootBlocks.add(new NotionBlock("paragraph", Map.of("rich_text", createRichTextList("... (Notion API 블록 개수 제한으로 인해 본문이 생략되었습니다. 전체 내용은 데이터베이스를 확인해 주세요.)")), 0));
                 break;
             }
 
@@ -83,7 +85,7 @@ public class NotionMapper {
             // 코드 블록 처리
             if (trimmedLine.startsWith("```")) {
                 if (inCodeBlock) {
-                    blocks.add(createCodeBlock(codeBuffer.toString(), codeLanguage));
+                    rootBlocks.add(createCodeNotionBlock(codeBuffer.toString(), codeLanguage));
                     codeBuffer.setLength(0);
                     inCodeBlock = false;
                 } else {
@@ -91,6 +93,7 @@ public class NotionMapper {
                     // 언어명 뒤의 공백 제거 및 trim 수행
                     codeLanguage = trimmedLine.length() > 3 ? trimmedLine.substring(3).trim().toLowerCase() : "java";
                 }
+                parentStack.clear();
                 continue;
             }
 
@@ -99,59 +102,94 @@ public class NotionMapper {
                 continue;
             }
 
+            // 이미지 처리
+            if (trimmedLine.startsWith("![") && trimmedLine.endsWith(")")) {
+                int altCloseIdx = trimmedLine.indexOf("](");
+                if (altCloseIdx > 2) {
+                    String imageUrl = trimmedLine.substring(altCloseIdx + 2, trimmedLine.length() - 1);
+                    Map<String, Object> imageDetails = Map.of(
+                            "type", "external",
+                            "external", Map.of("url", imageUrl)
+                    );
+                    rootBlocks.add(new NotionBlock("image", imageDetails, 0));
+                    parentStack.clear();
+                    continue;
+                }
+            }
+
             // 헤더 처리
             if (trimmedLine.startsWith("### ")) {
-                blocks.add(createHeadingBlock(3, trimmedLine.substring(4)));
+                rootBlocks.add(new NotionBlock("heading_3", Map.of("rich_text", createRichTextList(trimmedLine.substring(4))), 0));
+                parentStack.clear();
             } else if (trimmedLine.startsWith("## ")) {
-                blocks.add(createHeadingBlock(2, trimmedLine.substring(3)));
+                rootBlocks.add(new NotionBlock("heading_2", Map.of("rich_text", createRichTextList(trimmedLine.substring(3))), 0));
+                parentStack.clear();
             } else if (trimmedLine.startsWith("# ")) {
-                blocks.add(createHeadingBlock(1, trimmedLine.substring(2)));
+                rootBlocks.add(new NotionBlock("heading_1", Map.of("rich_text", createRichTextList(trimmedLine.substring(2))), 0));
+                parentStack.clear();
             } 
             // 리스트 처리
             else if (trimmedLine.startsWith("- ") || trimmedLine.startsWith("* ")) {
-                blocks.add(createListItemBlock(trimmedLine.substring(2)));
+                int leadingSpaces = countLeadingSpaces(line);
+                String itemText = trimmedLine.substring(2);
+                NotionBlock newBlock = new NotionBlock("bulleted_list_item", Map.of("rich_text", createRichTextList(itemText)), leadingSpaces);
+
+                NotionBlock parent = null;
+                while (!parentStack.isEmpty()) {
+                    NotionBlock top = parentStack.get(parentStack.size() - 1);
+                    if (top.indentLevel < leadingSpaces) {
+                        parent = top;
+                        break;
+                    } else {
+                        parentStack.remove(parentStack.size() - 1);
+                    }
+                }
+
+                if (parent != null) {
+                    parent.children.add(newBlock);
+                } else {
+                    rootBlocks.add(newBlock);
+                }
+                parentStack.add(newBlock);
             }
             // 일반 텍스트 처리
             else if (!trimmedLine.isEmpty()) {
-                blocks.add(createParagraphBlock(line));
+                rootBlocks.add(new NotionBlock("paragraph", Map.of("rich_text", createRichTextList(line)), 0));
+                parentStack.clear();
             }
         }
 
         // if code block was not closed by LLM, close it automatically to prevent missing content
-        if (inCodeBlock && codeBuffer.length() > 0 && blocks.size() < 98) {
-            blocks.add(createCodeBlock(codeBuffer.toString(), codeLanguage));
+        if (inCodeBlock && codeBuffer.length() > 0 && rootBlocks.size() < 98) {
+            rootBlocks.add(createCodeNotionBlock(codeBuffer.toString(), codeLanguage));
         }
 
-        blocks.add(Map.of("object", "block", "type", "divider", "divider", Map.of()));
-        return blocks;
+        rootBlocks.add(new NotionBlock("divider", Map.of(), 0));
+
+        // Convert to nested list of maps
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (NotionBlock root : rootBlocks) {
+            result.add(root.toMap());
+        }
+        return result;
     }
 
-    private Map<String, Object> createHeadingBlock(int level, String text) {
-        String type = "heading_" + level;
-        return Map.of(
-                "object", "block",
-                "type", type,
-                type, Map.of("rich_text", createRichTextList(text))
-        );
+    private int countLeadingSpaces(String line) {
+        int count = 0;
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+            if (c == ' ') {
+                count++;
+            } else if (c == '\t') {
+                count += 4;
+            } else {
+                break;
+            }
+        }
+        return count;
     }
 
-    private Map<String, Object> createParagraphBlock(String text) {
-        return Map.of(
-                "object", "block",
-                "type", "paragraph",
-                "paragraph", Map.of("rich_text", createRichTextList(text))
-        );
-    }
-
-    private Map<String, Object> createListItemBlock(String text) {
-        return Map.of(
-                "object", "block",
-                "type", "bulleted_list_item",
-                "bulleted_list_item", Map.of("rich_text", createRichTextList(text))
-        );
-    }
-
-    private Map<String, Object> createCodeBlock(String code, String language) {
+    private NotionBlock createCodeNotionBlock(String code, String language) {
         String sanitizedLanguage = sanitizeLanguage(language);
         List<Map<String, Object>> richTextList = new ArrayList<>();
         
@@ -165,14 +203,10 @@ public class NotionMapper {
             }
         }
         
-        return Map.of(
-                "object", "block",
-                "type", "code",
-                "code", Map.of(
-                        "rich_text", richTextList,
-                        "language", sanitizedLanguage
-                )
-        );
+        return new NotionBlock("code", Map.of(
+                "rich_text", richTextList,
+                "language", sanitizedLanguage
+        ), 0);
     }
 
     private List<Map<String, Object>> createRichTextList(String text) {
@@ -238,6 +272,40 @@ public class NotionMapper {
                         "color", color
                 )
         );
+    }
+
+    private static class NotionBlock {
+        private final String type;
+        private final Map<String, Object> details;
+        private final List<NotionBlock> children = new ArrayList<>();
+        private final int indentLevel;
+
+        public NotionBlock(String type, Map<String, Object> details, int indentLevel) {
+            this.type = type;
+            this.details = details;
+            this.indentLevel = indentLevel;
+        }
+
+        public Map<String, Object> toMap() {
+            Map<String, Object> map = new java.util.HashMap<>();
+            map.put("object", "block");
+            map.put("type", type);
+            
+            // Create a mutable copy of the details map
+            Map<String, Object> detailsCopy = new java.util.HashMap<>(details);
+            
+            if (!children.isEmpty()) {
+                List<Map<String, Object>> childMaps = new ArrayList<>();
+                for (NotionBlock child : children) {
+                    childMaps.add(child.toMap());
+                }
+                // Add children inside the block details instead of root level
+                detailsCopy.put("children", childMaps);
+            }
+            
+            map.put(type, detailsCopy);
+            return map;
+        }
     }
 }
 

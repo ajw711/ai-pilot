@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Enable .dark class-based dark mode for Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --text: #6b6375;
   --text-h: #08060d;

@@ -33,6 +33,29 @@ export const useKnowledgeList = () => {
   });
 };
 
+export interface KnowledgeDetailDto {
+  id: number;
+  title: string;
+  rawContent: string;
+  formattedContent: string;
+  verificationScore: number | null;
+  verificationReport: string | null;
+  status: KnowledgeStatus;
+}
+
+export const useKnowledgeDetail = (id: number | null) => {
+  return useQuery<KnowledgeDetailDto | null>({
+    queryKey: ["knowledgeDetail", id],
+    queryFn: async () => {
+      if (id === null) return null;
+      const { data: apiResponse } =
+        await api.get<ApiResponse<KnowledgeDetailDto>>(`/knowledge/${id}`);
+      return apiResponse.data || null;
+    },
+    enabled: id !== null,
+  });
+};
+
 export const useCreateKnowledge = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -42,6 +65,19 @@ export const useCreateKnowledge = () => {
     onSuccess: () => {
       // 캐시 무효화(Invalidate)를 통해 목록을 자동으로 조용히 새로고침
       queryClient.invalidateQueries({ queryKey: ["knowledgeList"] });
+    },
+  });
+};
+
+export const useApproveKnowledge = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: { knowledgeId: number; finalFormattedContent: string }) => {
+      await api.patch("/knowledge/approve", payload);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["knowledgeList"] });
+      queryClient.invalidateQueries({ queryKey: ["knowledgeDetail", variables.knowledgeId] });
     },
   });
 };

@@ -6,6 +6,7 @@ import com.mcp.mcp_pilot.knowledge.adapter.in.web.mapper.KnowledgeWebMapper;
 import com.mcp.mcp_pilot.knowledge.port.in.DeleteKnowledgeUseCase;
 import com.mcp.mcp_pilot.knowledge.port.in.SaveKnowledgeUseCase;
 import com.mcp.mcp_pilot.knowledge.port.in.SearchKnowledgeUseCase;
+import com.mcp.mcp_pilot.knowledge.exception.KnowledgeNotFoundException;
 import com.mcp.mcp_pilot.knowledge.port.in.dto.*;
 import com.mcp.mcp_pilot.knowledge.port.in.ApproveKnowledgeUseCase;
 import jakarta.validation.Valid;
@@ -30,14 +31,22 @@ public class KnowledgeWikiController {
     public ApiResponse<ListKnowledgeResponse> listAll() {
         log.info("Knowledge listAll (Web Adapter)");
         List<KnowledgeSummary> result = searchKnowledgeUseCase.findAll();
-        return ApiResponse.success(KnowledgeWebMapper.toResponse(result));
+        return ApiResponse.success(ListKnowledgeResponse.from(result));
+    }
+
+    @GetMapping(path = "/{knowledgeId}", version = "v1")
+    public ApiResponse<KnowledgeDetailResponse> getDetail(@PathVariable Long knowledgeId) {
+        log.info("지식 단건 상세 조회 (Web Adapter) - ID: {}", knowledgeId);
+        KnowledgeDetailResult result = searchKnowledgeUseCase.findById(knowledgeId)
+                .orElseThrow(() -> new KnowledgeNotFoundException(knowledgeId));
+        return ApiResponse.success(KnowledgeDetailResponse.from(result));
     }
 
     @GetMapping(path = "/search", version = "v1")
     public SearchResponse search(@RequestParam String query) {
         log.info("Knowledge search request (Web Adapter): {}", query);
         String result = searchKnowledgeUseCase.searchWiki(query);
-        return SearchResponse.of(result);
+        return SearchResponse.from(result);
     }
 
     @PostMapping(path = "/save",  version = "v1")

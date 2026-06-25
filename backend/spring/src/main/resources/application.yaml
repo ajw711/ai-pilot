@@ -7,12 +7,14 @@ spring:
       enabled: true
 
   ai:
+    retry:
+      max-attempts: 1
     google:
       genai:
         api-key: ${GEMINI_API_KEY}
         chat:
           options:
-            model: gemini-2.5-flash
+            model: gemini-3.1-flash-lite
             thinkingBudget: 1000
         embedding:
           api-key: ${GEMINI_API_KEY}
@@ -33,7 +35,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     properties:
       hibernate:
         dialect: org.hibernate.dialect.SQLServerDialect

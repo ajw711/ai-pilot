@@ -5,6 +5,7 @@ import com.mcp.mcp_pilot.ai.vector.constant.SimilarityMetric;
 import com.mcp.mcp_pilot.ai.vector.port.VectorSearchPort;
 import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeLog;
 import com.mcp.mcp_pilot.knowledge.port.in.SearchKnowledgeUseCase;
+import com.mcp.mcp_pilot.knowledge.port.in.dto.KnowledgeDetailResult;
 import com.mcp.mcp_pilot.knowledge.port.in.dto.KnowledgeSummary;
 import com.mcp.mcp_pilot.knowledge.port.out.KnowledgeSearchPort;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,24 @@ public class KnowledgeSearchService implements SearchKnowledgeUseCase {
     public List<KnowledgeSummary> findAll() {
         log.info("[SearchService] 전체 목록 요청");
         List<KnowledgeLog> knowledgeLogList = knowledgeSearchPort.findAll();
-        return knowledgeLogList.stream().map(KnowledgeSummary::from).toList();
+        return knowledgeLogList.stream()
+                .map(log -> KnowledgeSummary.of(log.getId(), log.getTitle(), log.getStatus()))
+                .toList();
+    }
+
+    @Override
+    public Optional<KnowledgeDetailResult> findById(Long knowledgeId) {
+        log.info("[SearchService] 단건 상세 조회 요청 - ID: {}", knowledgeId);
+        return knowledgeSearchPort.findSummaryById(knowledgeId)
+                .map(log -> KnowledgeDetailResult.of(
+                        log.getId(),
+                        log.getTitle(),
+                        log.getRawContent(),
+                        log.getFormattedContent(),
+                        log.getVerificationScore(),
+                        log.getVerificationReport(),
+                        log.getStatus()
+                ));
     }
 
     @Override
