@@ -8,7 +8,7 @@ WORKDIR /app
 
 ENV TZ=Asia/Seoul
 
-COPY build/libs/*-SNAPSHOT.jar app.jar
+COPY build/libs/*.jar app.jar
 
 # Root 대신 일반 사용자 권한으로 실행
 RUN addgroup -S spring && adduser -S spring -G spring
@@ -18,4 +18,10 @@ USER spring:spring
 EXPOSE 8080
 
 # 애플리케이션 실행
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT [
+  "java",
+  "-XX:+UseContainerSupport",
+  "-XX:MaxRAMPercentage=75",
+  "-jar",
+  "app.jar"
+]
