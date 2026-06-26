@@ -25,13 +25,13 @@ public class KnowledgeLogJpaEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
+    @Column(nullable = false, columnDefinition = "VARCHAR(255)")
     private String title;
 
-    @Column(columnDefinition = "NVARCHAR(MAX)")
+    @Column(columnDefinition = "TEXT")
     private String rawContent; // 사용자가 입력한 날 것 데이터
 
-    @Column(columnDefinition = "NVARCHAR(MAX)")
+    @Column(columnDefinition = "TEXT")
     private String formattedContent; // Gemini가 요약한 데이터
 
     private String notionPageId; // 노션에 성공적으로 적재 한 페이지 ID
@@ -40,7 +40,7 @@ public class KnowledgeLogJpaEntity extends BaseEntity {
 
     private Integer verificationScore;
 
-    @Column(columnDefinition = "NVARCHAR(MAX)")
+    @Column(columnDefinition = "TEXT")
     private String verificationReport;
 
     @Enumerated(EnumType.STRING)
