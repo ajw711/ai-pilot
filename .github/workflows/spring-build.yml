@@ -19,7 +19,15 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ai-pilot-spring
+  DB_URL: ${{ secrets.DB_URL }}
+  DB_USERNAME: ${{ secrets.DB_USERNAME }}
+  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
+  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+  NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+  NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+  
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
