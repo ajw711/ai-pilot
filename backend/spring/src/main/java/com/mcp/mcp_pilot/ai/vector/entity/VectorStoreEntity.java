@@ -31,7 +31,7 @@ public class VectorStoreEntity extends BaseEntity {
     @Column(nullable = false)
     private Long targetId; // 도메인 pk
 
-    @Column(name = "embedding_vector", columnDefinition = "varbinary(max)", nullable = false)
+    @Column(name = "embedding_vector", columnDefinition = "bytea", nullable = false)
     @JdbcTypeCode(SqlTypes.VARBINARY)
     private float[] embeddingVector; // 768차원 벡터 좌표 배열
 

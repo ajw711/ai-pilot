@@ -51,7 +51,7 @@ dependencies {
 	implementation 'org.springaicommunity:mcp-client-security-spring-boot:0.1.6'
 	implementation 'org.springaicommunity:mcp-server-security-spring-boot:0.1.6'
 
-	runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc'
+	runtimeOnly 'org.postgresql:postgresql'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
