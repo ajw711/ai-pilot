@@ -18,10 +18,4 @@ USER spring:spring
 EXPOSE 8080
 
 # 애플리케이션 실행
-ENTRYPOINT [
-  "java",
-  "-XX:+UseContainerSupport",
-  "-XX:MaxRAMPercentage=75",
-  "-jar",
-  "app.jar"
-]
+ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75", "-jar", "app.jar"]
