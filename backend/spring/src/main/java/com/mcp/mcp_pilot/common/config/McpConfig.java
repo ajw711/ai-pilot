@@ -36,7 +36,6 @@ public class McpConfig {
         // toolCallbackProviders.forEach(provider -> builder.defaultToolCallbacks(provider))와 동일한 의미
         // 이를 통해 로컬 @Tool 기반 도구와 MCP 기반 도구 모두를 ChatClient의 기본 도구로 등록
         toolCallbackProviders.forEach(builder::defaultToolCallbacks);
-        System.out.println(toolCallbackProviders.size());
         return builder.build();
     }
 }
