@@ -113,11 +113,13 @@ jobs:
         with:
           github-token: ${{ secrets.INFRA_DEPLOY_TOKEN }}
           script: |
+            const shortSha = 'sha-' + context.sha.substring(0, 7);
+            
             await github.rest.repos.createDispatchEvent({
               owner: 'ajw711',
               repo: 'ai-pilot-infra',
               event_type: 'deploy-image-updated',
               client_payload: {
-                tag: "${{ steps.meta.outputs.version }}"
+                tag: shortSha
               }
             })
