@@ -68,6 +68,8 @@ jobs:
           file: ./frontend/Dockerfile
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: ${{ steps.meta.outputs.tags }}
+          build-args: |
+            VITE_API_BASE_URL=""
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
