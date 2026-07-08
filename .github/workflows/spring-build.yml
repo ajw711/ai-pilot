@@ -87,7 +87,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-            type=sha,format=short
+            type=sha,prefix=sha-,format=short
 
       # Docker Build
       # develop : Build만
@@ -118,7 +118,7 @@ jobs:
             await github.rest.repos.createDispatchEvent({
               owner: 'ajw711',
               repo: 'ai-pilot-infra',
-              event_type: 'deploy-image-updated',
+              event_type: 'deploy-backend-image-updated',
               client_payload: {
                 tag: shortSha
               }
