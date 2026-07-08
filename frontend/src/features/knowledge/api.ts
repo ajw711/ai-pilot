@@ -1,6 +1,6 @@
 import { api } from "../../lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { KnowledgeStatus } from "../../types/knowledge";
+import type { KnowledgeStatus } from "../../types/Knowledge";
 import type { ApiResponse } from "../../types/api";
 export interface KnowledgeSummaryDto {
   id: number;
@@ -48,8 +48,9 @@ export const useKnowledgeDetail = (id: number | null) => {
     queryKey: ["knowledgeDetail", id],
     queryFn: async () => {
       if (id === null) return null;
-      const { data: apiResponse } =
-        await api.get<ApiResponse<KnowledgeDetailDto>>(`/knowledge/${id}`);
+      const { data: apiResponse } = await api.get<
+        ApiResponse<KnowledgeDetailDto>
+      >(`/knowledge/${id}`);
       return apiResponse.data || null;
     },
     enabled: id !== null,
@@ -72,12 +73,17 @@ export const useCreateKnowledge = () => {
 export const useApproveKnowledge = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: { knowledgeId: number; finalFormattedContent: string }) => {
+    mutationFn: async (payload: {
+      knowledgeId: number;
+      finalFormattedContent: string;
+    }) => {
       await api.patch("/knowledge/approve", payload);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["knowledgeList"] });
-      queryClient.invalidateQueries({ queryKey: ["knowledgeDetail", variables.knowledgeId] });
+      queryClient.invalidateQueries({
+        queryKey: ["knowledgeDetail", variables.knowledgeId],
+      });
     },
   });
 };
