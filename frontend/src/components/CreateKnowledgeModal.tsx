@@ -20,8 +20,9 @@ export const CreateKnowledgeModal: React.FC<CreateKnowledgeModalProps> = ({
   // 원문에 포함된 쌩 이미지 URL들을 감지하여 마크다운 이미지 태그로 자동 변환하는 헬퍼 함수
   const convertRawUrlsToMarkdownImages = (text: string): string => {
     // 이미 ![]() 혹은 []() 안에 들어있는 주소는 제외하고, 이미지 확장자나 gstatic/licensed-image 등 이미지 전용 API 주소를 매칭
-    const imageUrlRegex = /(?<!\!\[[^\]]*\]\()(?<!\[[^\]]*\]\()(https?:\/\/[^\s\)]+?\.(?:png|jpg|jpeg|gif|webp|svg)(?:\?[^\s\)]*)?|https?:\/\/[^\s\)]+?gstatic\.com\/[^\s\)]+|https?:\/\/[^\s\)]+?licensed-image[^\s\)]+)/gi;
-    
+    const imageUrlRegex =
+      /(?<!\!\[[^\]]*\]\()(?<!\[[^\]]*\]\()(https?:\/\/[^\s\)]+?\.(?:png|jpg|jpeg|gif|webp|svg)(?:\?[^\s\)]*)?|https?:\/\/[^\s\)]+?gstatic\.com\/[^\s\)]+|https?:\/\/[^\s\)]+?licensed-image[^\s\)]+)/gi;
+
     return text.replace(imageUrlRegex, (url) => {
       return `![이미지](${url})`;
     });
@@ -65,12 +66,15 @@ export const CreateKnowledgeModal: React.FC<CreateKnowledgeModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-950/60 backdrop-blur-sm animate-fadeIn">
       <div className="w-full max-w-4xl rounded-2xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-8 shadow-2xl flex flex-col max-h-[90vh] transition-colors duration-200">
-        
         {/* 모달 상단 헤더 */}
         <div className="flex items-center justify-between border-b border-slate-300 dark:border-slate-700 pb-5 mb-6">
           <div>
-            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">신규 지식 등록 및 AI 검수</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">원문을 업로드하면 AI가 실시간으로 팩트 에러를 파악하고 가공합니다.</p>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+              신규 지식 등록 및 AI 검수
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              원문을 업로드하면 AI가 실시간으로 팩트 에러를 파악하고 가공합니다.
+            </p>
           </div>
           <button
             type="button"
@@ -82,7 +86,10 @@ export const CreateKnowledgeModal: React.FC<CreateKnowledgeModalProps> = ({
         </div>
 
         {/* 모달 내용 입력 폼 */}
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
+        <form
+          onSubmit={handleSubmit}
+          className="flex-1 flex flex-col overflow-hidden"
+        >
           {/* 스크롤 가능한 입력 필드 영역 */}
           <div className="flex-1 overflow-y-auto pr-1 pb-4 space-y-5 scrollbar-thin">
             {/* 지식 제목 */}
@@ -135,13 +142,13 @@ export const CreateKnowledgeModal: React.FC<CreateKnowledgeModalProps> = ({
                   추가
                 </button>
               </div>
-              
+
               {/* 등록된 출처 리스트 배지 */}
               {sourceUrls.length > 0 && (
                 <div className="flex flex-wrap gap-2 p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-950/20 max-h-24 overflow-y-auto">
                   {sourceUrls.map((url, idx) => (
-                    <div 
-                      key={idx} 
+                    <div
+                      key={idx}
                       className="inline-flex items-center gap-1.5 rounded-lg bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-900/60 px-2.5 py-1 text-xs font-medium text-sky-700 dark:text-sky-300 shadow-sm"
                     >
                       <span className="truncate max-w-xs">{url}</span>
