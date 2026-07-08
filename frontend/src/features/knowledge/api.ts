@@ -1,6 +1,6 @@
 import { api } from "../../lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { KnowledgeStatus } from "../../types/Knowledge";
+import type { KnowledgeStatus } from "../../types/knowledge";
 import type { ApiResponse } from "../../types/api";
 export interface KnowledgeSummaryDto {
   id: number;

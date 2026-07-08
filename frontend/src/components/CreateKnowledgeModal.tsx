@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { KnowledgeRequest } from "../types/Knowledge";
+import type { KnowledgeRequest } from "../types/knowledge";
 
 interface CreateKnowledgeModalProps {
   isOpen: boolean;
