@@ -1,6 +1,7 @@
 package com.mcp.mcp_pilot.knowledge.adapter.out.notion.mapper;
 
 import com.mcp.mcp_pilot.knowledge.adapter.out.notion.dto.NotionPageRequest;
+import com.mcp.mcp_pilot.knowledge.adapter.out.notion.dto.NotionPublishPayload;
 import com.mcp.mcp_pilot.knowledge.adapter.out.notion.dto.Parent;
 import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeLog;
 import org.springframework.stereotype.Component;
@@ -42,22 +43,41 @@ public class NotionMapper {
         return "plain text";
     }
 
-    public NotionPageRequest toRequest(KnowledgeLog log, String databaseId) {
-        // Properties (페이지 제목 매핑)
-        Map<String, Object> properties = Map.of(
-                "title", Map.of(
-                        "title", createRichTextList(log.getTitle())
-                )
-        );
+    public NotionPublishPayload toPublishPayload(KnowledgeLog log, List<String> tags, String databaseId) {
+        Map<String, Object> properties = new java.util.HashMap<>();
+        properties.put("title", Map.of(
+                "title", createRichTextList(log.getTitle())
+        ));
 
-        // 본문(Children) 생성 - Markdown-ish 요약본을 블록으로 변환
-        List<Map<String, Object>> children = parseContentToBlocks(log.getFormattedContent());
+        if (tags != null && !tags.isEmpty()) {
+            List<Map<String, String>> multiSelect = tags.stream()
+                    .map(tag -> Map.of("name", tag))
+                    .toList();
+            properties.put("태그", Map.of("multi_select", multiSelect));
+        }
 
-        return new NotionPageRequest(
+        List<Map<String, Object>> allBlocks = parseContentToBlocks(log.getFormattedContent());
+
+        int firstChunkSize = Math.min(allBlocks.size(), 90);
+        List<Map<String, Object>> firstChunk = allBlocks.subList(0, firstChunkSize);
+
+        NotionPageRequest pageRequest = new NotionPageRequest(
                 new Parent(databaseId),
                 properties,
-                children
+                new ArrayList<>(firstChunk)
         );
+
+        List<List<Map<String, Object>>> remainingChunks = new ArrayList<>();
+        if (allBlocks.size() > 90) {
+            List<Map<String, Object>> remaining = allBlocks.subList(90, allBlocks.size());
+            int chunkSize = 100;
+            for (int i = 0; i < remaining.size(); i += chunkSize) {
+                int end = Math.min(i + chunkSize, remaining.size());
+                remainingChunks.add(new ArrayList<>(remaining.subList(i, end)));
+            }
+        }
+
+        return new NotionPublishPayload(pageRequest, remainingChunks);
     }
 
     private List<Map<String, Object>> parseContentToBlocks(String content) {
@@ -74,12 +94,6 @@ public class NotionMapper {
         String codeLanguage = "plain text";
 
         for (String line : lines) {
-            // Notion API block count limit protection (max 100 blocks, cap at 97 to leave room)
-            if (rootBlocks.size() >= 97) {
-                rootBlocks.add(new NotionBlock("paragraph", Map.of("rich_text", createRichTextList("... (Notion API 블록 개수 제한으로 인해 본문이 생략되었습니다. 전체 내용은 데이터베이스를 확인해 주세요.)")), 0));
-                break;
-            }
-
             String trimmedLine = line.trim();
 
             // 코드 블록 처리

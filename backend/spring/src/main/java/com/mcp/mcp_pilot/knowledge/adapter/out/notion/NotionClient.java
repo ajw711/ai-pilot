@@ -8,6 +8,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -26,6 +27,15 @@ public class NotionClient {
                 .body(request)
                 .retrieve()
                 .body(NotionPageResponse.class);
+    }
+
+    public void appendPageChildren(String pageId, List<Map<String, Object>> children) {
+        log.info("[NotionClient] Appending children blocks to page: {}", pageId);
+        restClient.patch()
+                .uri("/v1/blocks/{blockId}/children", pageId)
+                .body(Map.of("children", children))
+                .retrieve()
+                .toBodilessEntity();
     }
 
 }
