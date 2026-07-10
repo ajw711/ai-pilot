@@ -30,7 +30,7 @@ public class KnowledgeLikeSearchAdapter implements KnowledgeSearchPort {
     @Override
     public List<KnowledgeLog> findAll() {
         log.info("[SearchAdapter] 전체 목록 조회");
-        return KnowledgePersistenceMapper.toDomainList(logRepository.findAll());
+        return KnowledgePersistenceMapper.toDomainList(logRepository.findAllByOrderByUpdateDateDesc());
     }
 
     @Override

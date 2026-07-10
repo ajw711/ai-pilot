@@ -59,4 +59,6 @@ public interface KnowledgeLogRepository extends JpaRepository<KnowledgeLogJpaEnt
             @Param("verificationReport") String reportJson,
             @Param("status") KnowledgeStatus status
     );
+
+    List<KnowledgeLogJpaEntity> findAllByOrderByUpdateDateDesc();
 }

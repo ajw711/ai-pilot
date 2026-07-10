@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -57,8 +58,8 @@ public class KnowledgePublishService implements NotionUseCase {
             KnowledgeLog knowledgeLog = persistencePort.findById(event.knowledgeId())
                     .orElseThrow(() -> new KnowledgeNotFoundException(event.knowledgeId()));
             
-            // 외부 API 호출 (Adapter 호출 - 내부에서 @Retryable 작동)
-            NotionPublishResult result = notionPublishPort.publish(knowledgeLog);
+            List<String> tags = persistencePort.findTagsByKnowledgeId(event.knowledgeId());
+            NotionPublishResult result = notionPublishPort.publish(knowledgeLog, tags);
             log.info("[NotionService] 노션 발행 성공 - Page ID: {}", result.pageId());
             
             // 결과 영속화
