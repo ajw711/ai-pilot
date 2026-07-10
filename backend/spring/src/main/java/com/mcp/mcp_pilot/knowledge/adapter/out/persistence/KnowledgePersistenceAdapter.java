@@ -97,4 +97,11 @@ public class KnowledgePersistenceAdapter implements KnowledgePersistencePort {
                 .orElse(false);
     }
 
+    @Override
+    public List<String> findTagsByKnowledgeId(Long knowledgeId) {
+        return tagRepository.findByKnowledgeLogId(knowledgeId).stream()
+                .map(entity -> entity.getTagName())
+                .collect(Collectors.toList());
+    }
+
 }
