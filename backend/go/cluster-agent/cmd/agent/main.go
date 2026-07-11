@@ -2,6 +2,7 @@ package main
 
 import (
 	"cluster-agent/internal/config" // 패키지 불러오기
+	"cluster-agent/internal/handler"
 	"cluster-agent/internal/natsclient"
 	"cluster-agent/internal/server" // 패키지 불러오기
 	"context"
@@ -29,15 +30,14 @@ func main() {
 		log.Fatalf("[agent] failed to connect NATS: %v", err)
 	}
 	defer natsClient.Close()
+	testHandler := handler.NewTestHandler()
 
-	// 테스트
-	// 위에서 생성한 natsClient 객체 변수의 Subscribe 메서드를 호출
-	err = natsClient.Subscribe("ops.test.reqeust", func(msg *nats.Msg) {
-		log.Printf("[nats] received subject=%s data=%s", msg.Subject, string(msg.Data))
-	})
+	err = natsClient.Subscribe(
+		"ops.test.request",
+		testHandler.Handle,
+	)
 
 	if err != nil {
-		// 에러 로그를 출력하고, 그 즉시 프로그램을 완전히 강제 종료(Exit)시킴
 		log.Fatalf("[agent] failed to subscribe NATS subject: %v", err)
 	}
 
