@@ -95,8 +95,9 @@ export const KnowledgeDetailModal: React.FC<KnowledgeDetailModalProps> = ({
 
   const handleApprove = async () => {
     if (!detail) return;
-    if (detail.status !== "REVIEW_READY") {
-      setErrorMsg("검토 대기(REVIEW_READY) 상태의 지식만 승인할 수 있습니다.");
+    const isApprovable = detail.status === "REVIEW_READY" || detail.status === "FAILED_AT_NOTION_PUBLISH" || detail.status === "FAILED_AT_VECTOR_INDEX";
+    if (!isApprovable) {
+      setErrorMsg("승인 또는 재발행 가능한 상태가 아닙니다.");
       return;
     }
     if (!editedContent.trim()) {
@@ -374,7 +375,7 @@ export const KnowledgeDetailModal: React.FC<KnowledgeDetailModalProps> = ({
             {/* 승인 작업 하단 바 */}
             <div className="bg-slate-50 dark:bg-slate-950/30 border-t border-slate-300 dark:border-slate-600 p-6 flex items-center justify-between">
               <div>
-                {detail.status === "REVIEW_READY" ? (
+                {(detail.status === "REVIEW_READY" || detail.status === "FAILED_AT_NOTION_PUBLISH" || detail.status === "FAILED_AT_VECTOR_INDEX") ? (
                   <p className="text-xs text-slate-500 dark:text-slate-400">
                     * 승인 버튼 클릭 시, <strong>Notion API</strong>와 <strong>벡터 임베딩 모델(Google Gemini)</strong>로 데이터가 실시간 전송됩니다.
                   </p>
@@ -393,13 +394,15 @@ export const KnowledgeDetailModal: React.FC<KnowledgeDetailModalProps> = ({
                   취소
                 </button>
                 
-                {detail.status === "REVIEW_READY" && (
+                {(detail.status === "REVIEW_READY" || detail.status === "FAILED_AT_NOTION_PUBLISH" || detail.status === "FAILED_AT_VECTOR_INDEX") && (
                   <button
                     onClick={handleApprove}
                     disabled={approveMutation.isPending}
                     className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-sky-500/20 hover:from-sky-400 hover:to-indigo-500 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
                   >
-                    {approveMutation.isPending ? "승인 처리 중..." : "최종 승인 및 발행"}
+                    {approveMutation.isPending 
+                      ? "처리 중..." 
+                      : (detail.status === "REVIEW_READY" ? "최종 승인 및 발행" : "재발행 시도")}
                     <FiChevronRight className="h-4.5 w-4.5" />
                   </button>
                 )}

@@ -39,7 +39,9 @@ public class KnowledgeLog {
     }
 
     public void approve(String finalFormattedContent) {
-        if (this.status != KnowledgeStatus.REVIEW_READY) {
+        if (this.status != KnowledgeStatus.REVIEW_READY
+                        && this.status != KnowledgeStatus.FAILED_AT_NOTION_PUBLISH
+                        && this.status != KnowledgeStatus.FAILED_AT_VECTOR_INDEX) {
             throw new InvalidKnowledgeStatusException();
         }
 
