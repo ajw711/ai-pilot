@@ -1,11 +1,18 @@
 export type KnowledgeStatus =
   | 'DRAFT'
   | 'VERIFYING'
+  | 'FAILED_AT_VERIFYING'
   | 'FORMATTING'
+  | 'FAILED_AT_FORMATTING'
   | 'REVIEW_READY'
+  | 'REVIEW_APPROVED'
+  | 'NOTION_PUBLISHING'
+  | 'FAILED_AT_NOTION_PUBLISH'
+  | 'VECTOR_INDEXING'
+  | 'FAILED_AT_VECTOR_INDEX'
+  | 'PUBLISHED'
   | 'APPROVED'
   | 'PUBLISHING'
-  | 'PUBLISHED'
   | 'FAILED';
 
 export interface KnowledgeLog {
