@@ -10,4 +10,7 @@ require (
 	github.com/nats-io/nuid v1.0.1 // indirect
 	golang.org/x/crypto v0.49.0 // indirect
 	golang.org/x/sys v0.42.0 // indirect
+	k8s.io/api v0.28.2 // indirect
+	k8s.io/apimachinery v0.28.2 // indirect
+	k8s.io/client-go v0.28.2 // indirect
 )

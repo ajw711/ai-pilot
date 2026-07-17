@@ -2,9 +2,13 @@ package main
 
 import (
 	"cluster-agent/internal/config" // 패키지 불러오기
+	"cluster-agent/internal/handler"
+	"cluster-agent/internal/k8sclient"
 	"cluster-agent/internal/natsclient"
 	"cluster-agent/internal/server" // 패키지 불러오기
+	"cluster-agent/internal/service"
 	"context"
+	"encoding/json"
 	"log"       // 콘솔 로깅 라이브러리
 	"os"        // 시스템 신호 정의 등 운영체제 소통 도구
 	"os/signal" // 운영체제 시그널 모니터링 라이브러리
@@ -30,16 +34,64 @@ func main() {
 	}
 	defer natsClient.Close()
 
-	// 테스트
-	// 위에서 생성한 natsClient 객체 변수의 Subscribe 메서드를 호출
-	err = natsClient.Subscribe("ops.test.reqeust", func(msg *nats.Msg) {
-		log.Printf("[nats] received subject=%s data=%s", msg.Subject, string(msg.Data))
-	})
-
+	// Kubernetes client-go 초기화
+	k8sClient, err := k8sclient.New()
 	if err != nil {
-		// 에러 로그를 출력하고, 그 즉시 프로그램을 완전히 강제 종료(Exit)시킴
+		log.Fatalf("[agent] failed to connect Kubernetes: %v", err)
+	}
+	log.Println("[agent] successfully connected to Kubernetes cluster")
+
+	testHandler := handler.NewTestHandler()
+	deployService := service.NewDeploymentService(k8sClient)
+	deployHandler := handler.NewDeployHandler(deployService, natsClient)
+
+	err = natsClient.Subscribe(
+		"ops.test.request",
+		testHandler.Handle,
+	)
+	if err != nil {
 		log.Fatalf("[agent] failed to subscribe NATS subject: %v", err)
 	}
+
+	// deploy.request 구독 등록
+	err = natsClient.Subscribe(
+		"ops.deploy.request",
+		deployHandler.Handle,
+	)
+	if err != nil {
+		log.Fatalf("[agent] failed to subscribe ops.deploy.request: %v", err)
+	}
+
+	// 테스트를 위한 deploy.result 모니터링 구독 (자가 테스트 확인용)
+	err = natsClient.Subscribe(
+		"deploy.result",
+		func(msg *nats.Msg) {
+			log.Printf("[test-monitor] received deploy.result: %s", string(msg.Data))
+		},
+	)
+	if err != nil {
+		log.Fatalf("[agent] failed to subscribe deploy.result: %v", err)
+	}
+
+	go func() {
+		time.Sleep(2 * time.Second)
+		log.Println("[test-producer] sending sample deploy request to NATS...")
+		testPayload := map[string]interface{}{
+			"appName":   "my-web-service",
+			"image":     "nginx",
+			"tag":       "1.21.6",
+			"replicas":  3,
+			"namespace": "default"}
+		data, err := json.Marshal(testPayload)
+		if err != nil {
+			log.Printf("[test-producer] failed to marshal payload: %v", err)
+			return
+		}
+		err = natsClient.Publish("ops.deploy.request", data)
+		if err != nil {
+			log.Printf("[test-producer] failed to publish: %v", err)
+		}
+	}()
 
 	// 서버가 실행된 후, 종료 시그널이 오기 전까지 대기하는 함수를 실행
 	waitForShutdown(httpServer, natsClient)
