@@ -40,3 +40,13 @@ func (c *Client) Close() {
 		c.conn.Close()
 	}
 }
+
+// 결과 데이터를 NATS로 되돌려주기 위한 메서드
+func (c *Client) Publish(subject string, data []byte) error {
+	err := c.conn.Publish(subject, data)
+	if err != nil {
+		return err
+	}
+	log.Printf("[nats] published message to subject=%s", subject)
+	return nil
+}
