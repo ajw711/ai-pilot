@@ -9,12 +9,14 @@ import com.mcp.mcp_pilot.knowledge.port.in.SearchKnowledgeUseCase;
 import com.mcp.mcp_pilot.knowledge.exception.KnowledgeNotFoundException;
 import com.mcp.mcp_pilot.knowledge.port.in.dto.*;
 import com.mcp.mcp_pilot.knowledge.port.in.ApproveKnowledgeUseCase;
+import com.mcp.mcp_pilot.knowledge.adapter.out.messaging.NatsPublisher;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -26,6 +28,7 @@ public class KnowledgeWikiController {
     private final SaveKnowledgeUseCase saveKnowledgeUseCase;
     private final ApproveKnowledgeUseCase approveKnowledgeUseCase;
     private final DeleteKnowledgeUseCase deleteKnowledgeUseCase;
+    private final NatsPublisher natsPublisher;
 
     @GetMapping(path = "/list", version = "v1")
     public ApiResponse<ListKnowledgeResponse> listAll() {
@@ -77,4 +80,19 @@ public class KnowledgeWikiController {
         DeleteKnowledgeResult result = deleteKnowledgeUseCase.delete(knowledgeId);
         return ApiResponse.success(DeleteKnowledgeResponse.from(result));
     }
+
+    @PostMapping(path = "/test-deploy", version = "v1")
+    public ApiResponse<String> testDeploy(@RequestParam String appName, @RequestParam int replicas) {
+        log.info("Sending test deploy request via NATS: {}", appName);
+        Map<String, Object> payload = Map.of(
+            "appName", appName,
+            "image", "nginx",
+            "tag", "1.21.6",
+            "replicas", replicas,
+            "namespace", "default"
+        );
+        natsPublisher.publish("ops.deploy.request", payload);
+        return ApiResponse.success("NATS Deploy Request Sent");
+    }
 }
+

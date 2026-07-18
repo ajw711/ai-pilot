@@ -64,3 +64,23 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+tasks.named('bootRun') {
+	if (file(".env").exists()) {
+		file(".env").readLines().each { line ->
+			if (!line.trim().isEmpty() && !line.startsWith("#")) {
+				def pos = line.indexOf("=")
+				if (pos > 0) {
+					def key = line.substring(0, pos).trim()
+					def val = line.substring(pos + 1).trim()
+					if (val.startsWith("\"") && val.endsWith("\"")) {
+						val = val.substring(1, val.length() - 1)
+					} else if (val.startsWith("'") && val.endsWith("'")) {
+						val = val.substring(1, val.length() - 1)
+					}
+					environment key, val
+				}
+			}
+		}
+	}
+}
