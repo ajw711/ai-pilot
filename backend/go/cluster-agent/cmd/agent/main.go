@@ -37,9 +37,11 @@ func main() {
 	// Kubernetes client-go 초기화
 	k8sClient, err := k8sclient.New()
 	if err != nil {
-		log.Fatalf("[agent] failed to connect Kubernetes: %v", err)
+		log.Printf("[agent] WARNING: failed to connect Kubernetes (%v). Running in offline/mock mode.", err)
+		k8sClient = nil
+	} else {
+		log.Println("[agent] successfully connected to Kubernetes cluster")
 	}
-	log.Println("[agent] successfully connected to Kubernetes cluster")
 
 	testHandler := handler.NewTestHandler()
 	deployService := service.NewDeploymentService(k8sClient)
