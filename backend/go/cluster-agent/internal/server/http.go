@@ -49,15 +49,6 @@ func NewHTTPServer(port string) *HTTPServer {
 
 // Start는 객체 인스턴스를 바탕으로 가동되는 메소드이며 포인터 수신기를 사용
 func (h *HTTPServer) Start() {
-	// health check
-	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		_, err := w.Write([]byte("OK"))
-		if err != nil {
-			return
-		}
-	})
-
 	log.Printf("[http] server starting on %s", h.server.Addr)
 
 	// ListenAndServe() 함수는 호출되면 차단되므로 새로운 고루틴(비동기 독립 스레드)을 열어 기동
