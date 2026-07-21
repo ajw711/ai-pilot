@@ -26,7 +26,6 @@ public class SpringAiAdapter implements KnowledgeAiPort {
 
     private final ChatClient chatClient;
     private final MeterRegistry meterRegistry;
-    private final JsonMapper jsonMapper;
 
     // AI API 동시 요청수 조절
     private final Semaphore apiThrottle = new Semaphore(2);
