@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class NatsConfig {
 
-    @Value("${spring.nats.url:nats://localhost:4222}")
+    @Value("${spring.nats.url:nats://nats.nats:4222}")
     private String natsUrl;
 
     @Bean
