@@ -49,13 +49,6 @@ public class NotionMapper {
                 "title", createRichTextList(log.getTitle())
         ));
 
-        if (tags != null && !tags.isEmpty()) {
-            List<Map<String, String>> multiSelect = tags.stream()
-                    .map(tag -> Map.of("name", tag))
-                    .toList();
-            properties.put("태그", Map.of("multi_select", multiSelect));
-        }
-
         List<Map<String, Object>> allBlocks = parseContentToBlocks(log.getFormattedContent());
 
         int firstChunkSize = Math.min(allBlocks.size(), 90);

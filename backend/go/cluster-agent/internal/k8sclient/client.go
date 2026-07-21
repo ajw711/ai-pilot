@@ -1,7 +1,6 @@
 package k8sclient
 
 import (
-	"cluster-agent/internal/config"
 	"context"
 	"fmt"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -92,7 +91,7 @@ func (c *Client) GetPods(namespace string) ([]string, error) {
 // ScaleDeployment는 지정된 Deployment의 Replicas(파드 개수)를 조절
 func (c *Client) ScaleDeployment(namespace string, deployName string, replicas int32) error {
 	scale, err := c.clientset.AppsV1().Deployments(namespace).GetScale(context.TODO(), deployName, metav1.
-	GetOptions{})
+		GetOptions{})
 
 	if err != nil {
 		return fmt.Errorf("failed to get scale: %v", err)
@@ -100,7 +99,7 @@ func (c *Client) ScaleDeployment(namespace string, deployName string, replicas i
 	scale.Spec.Replicas = replicas
 
 	_, err = c.clientset.AppsV1().Deployments(namespace).UpdateScale(context.TODO(), deployName, scale, metav1.
-	UpdateOptions{})
+		UpdateOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to update scale: %v", err)
 	}

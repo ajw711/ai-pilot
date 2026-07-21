@@ -16,6 +16,14 @@ func NewDeploymentService(k8sClient *k8sclient.Client) *DeploymentService {
 
 // Deploy는 배포 요청을 받아 비즈니스 로직을 수행 (현재는 로그만 출력)
 func (s *DeploymentService) Deploy(req model.DeployRequest) error {
+	if s.k8sClient == nil {
+		log.Printf("[service] [MOCK MODE] deploy request received: %+v", req)
+		log.Printf("[service] [MOCK MODE] cluster namespaces: [default, kube-system, mcp-apps]")
+		log.Printf("[service] [MOCK MODE] pods in namespace '%s': [%s-pod-1, %s-pod-2]", req.Namespace, req.AppName, req.AppName)
+		log.Printf("[service] [MOCK MODE] deployments in namespace '%s': [%s]", req.Namespace, req.AppName)
+		return nil
+	}
+
 	// client-go 연동 실습 테스트
 	// Namespace 조회 테스트
 	namespaces, err := s.k8sClient.GetNamespaces()

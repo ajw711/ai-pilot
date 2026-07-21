@@ -48,24 +48,45 @@ export const DashboardPage: React.FC = () => {
   };
 
   // 지식 라이프사이클에 따른 인덱스 상태 배지 처리
+  // 지식 라이프사이클에 따른 인덱스 상태 배지 처리
   const getStatusBadge = (status: string) => {
     const badgeStyles: Record<string, string> = {
-      PUBLISHED: "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 ring-emerald-600/10 dark:ring-emerald-500/20",
+      PUBLISHED: "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 ring-emerald-600/10 dark:ring-emerald-500/20 font-bold",
       VERIFYING: "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 ring-amber-600/10 dark:ring-amber-500/20 animate-pulse",
+      FORMATTING: "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 ring-amber-600/10 dark:ring-amber-500/20 animate-pulse",
       DRAFT: "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 ring-slate-600/10 dark:ring-slate-500/25",
-      REVIEW_READY: "bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-400 ring-indigo-600/10 dark:ring-indigo-500/20",
-      APPROVED: "bg-sky-50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-400 ring-sky-600/10 dark:ring-sky-500/20",
+      REVIEW_READY: "bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-400 ring-indigo-600/10 dark:ring-indigo-500/20 font-bold",
+      REVIEW_APPROVED: "bg-sky-50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-400 ring-sky-600/10 dark:ring-sky-500/20",
+      NOTION_PUBLISHING: "bg-sky-50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-400 ring-sky-600/10 dark:ring-sky-500/20 animate-pulse",
+      VECTOR_INDEXING: "bg-sky-50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-400 ring-sky-600/10 dark:ring-sky-500/20 animate-pulse",
+      FAILED_AT_VERIFYING: "bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 ring-rose-600/10 dark:ring-rose-500/20",
+      FAILED_AT_FORMATTING: "bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 ring-rose-600/10 dark:ring-rose-500/20",
+      FAILED_AT_NOTION_PUBLISH: "bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 ring-rose-600/10 dark:ring-rose-500/20",
+      FAILED_AT_VECTOR_INDEX: "bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 ring-rose-600/10 dark:ring-rose-500/20",
       FAILED: "bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 ring-rose-600/10 dark:ring-rose-500/20",
     };
+
+    const statusLabels: Record<string, string> = {
+      PUBLISHED: "완료",
+      VERIFYING: "AI 검수 중",
+      FORMATTING: "AI 가공 중",
+      DRAFT: "초안",
+      REVIEW_READY: "검토 대기",
+      REVIEW_APPROVED: "승인됨",
+      NOTION_PUBLISHING: "노션 발행 중",
+      VECTOR_INDEXING: "인덱싱 중",
+      FAILED_AT_VERIFYING: "검수 실패",
+      FAILED_AT_FORMATTING: "가공 실패",
+      FAILED_AT_NOTION_PUBLISH: "노션 발행 실패",
+      FAILED_AT_VECTOR_INDEX: "인덱싱 실패",
+      FAILED: "실패",
+    };
+
     return (
       <span
         className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${badgeStyles[status] || "bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300"}`}
       >
-        {status === "PUBLISHED"
-          ? "완료"
-          : status === "VERIFYING"
-            ? "처리 중"
-            : status}
+        {statusLabels[status] || status}
       </span>
     );
   };

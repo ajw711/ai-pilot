@@ -70,8 +70,13 @@ public class KnowledgePublishService implements NotionUseCase {
                 persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.PUBLISHED);
                 log.info("[NotionService] Notion & Vector 적재 완료 -> PUBLISHED 전환 (ID: {})", event.knowledgeId());
             } else {
-                persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.FAILED_AT_VECTOR_INDEX);
-                log.info("[NotionService] Notion 적재 완료 (Vector 대기) -> PUBLISHING 상태 유지 (ID: {})", event.knowledgeId());
+                KnowledgeLog current = persistencePort.findById(event.knowledgeId()).orElse(null);
+                if (current != null && current.getStatus() == KnowledgeStatus.FAILED_AT_VECTOR_INDEX) {
+                    log.info("[NotionService] Notion 적재 완료 되었으나 Vector 저장 실패 상태이므로 상태 유지 (ID: {})", event.knowledgeId());
+                } else {
+                    persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.NOTION_PUBLISHING);
+                    log.info("[NotionService] Notion 적재 완료 (Vector 대기) -> NOTION_PUBLISHING 상태 유지 (ID: {})", event.knowledgeId());
+                }
             }
             
         } catch (Throwable e) {
