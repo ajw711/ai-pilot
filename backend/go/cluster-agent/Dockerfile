@@ -1,7 +1,7 @@
 # ==========================
 # Build Stage
 # ==========================
-FROM golang:1.25 AS builder
+FROM golang:1.26 AS builder
 
 # 작업 디렉토리
 WORKDIR /app
@@ -16,7 +16,7 @@ COPY . .
 
 # linux 실행파일 빌드
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-    go build -o cluster-agent ./cmd/agent
+    go build -ldflags="-s -w" -o cluster-agent ./cmd/agent
 
 # ==========================
 # Runtime Stage
@@ -38,7 +38,7 @@ COPY --from=builder /app/cluster-agent .
 RUN chmod +x cluster-agent
 
 # 일반 사용자로 실행
-USER agent:agent
+USER agent
 
 # 포트
 EXPOSE 8082
