@@ -38,3 +38,4 @@ out/
 .env
 KNOWLEDGE_SYSTEM_PLAN.md
 backend/spring/project_analysis.md
+*.md
