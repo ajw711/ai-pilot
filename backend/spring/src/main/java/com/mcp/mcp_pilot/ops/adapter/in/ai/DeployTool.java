@@ -1,4 +1,4 @@
-package com.mcp.mcp_pilot.ops.application.adapter.in.ai;
+package com.mcp.mcp_pilot.ops.adapter.in.ai;
 
 import com.mcp.mcp_pilot.ai.annotation.AiTool;
 import com.mcp.mcp_pilot.common.enums.ToolType;
@@ -8,7 +8,6 @@ import com.mcp.mcp_pilot.ops.port.in.dto.DeployResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
-import org.springframework.stereotype.Component;
 
 @Slf4j
 @AiTool(ToolType.DEPLOY_APP)
