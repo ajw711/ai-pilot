@@ -1,4 +1,4 @@
-package com.mcp.mcp_pilot.ops.application.adapter.in.web;
+package com.mcp.mcp_pilot.ops.adapter.in.web;
 
 import com.mcp.mcp_pilot.ai.dto.ChatRequest;
 import com.mcp.mcp_pilot.ai.dto.ChatResponse;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PilotChatController {
 
     private final PilotChatUseCase pilotChatUseCase;
-    
+
     @PostMapping("/chat")
     public ChatResponse chat(@RequestBody ChatRequest chatRequest) {
         log.info("[PilotChatController] 운영 비서 챗 요청 수신");
