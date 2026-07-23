@@ -15,6 +15,7 @@ public enum ErrorCode {
      * Vxxx = Vector
      * Axxx = AI
      * Sxxx = Search
+     * Oxxx = OPS
      */
 
     // 공통
@@ -28,7 +29,10 @@ public enum ErrorCode {
     // Knowledge 관련
     KNOWLEDGE_NOT_FOUND(HttpStatus.NOT_FOUND, "K001", "지식 데이터를 찾을 수 없습니다."),
     KNOWLEDGE_PUBLISH_FAILURE(HttpStatus.INTERNAL_SERVER_ERROR,"K002","지식 발행에 실패했습니다."),
-    INVALID_KNOWLEDGE_STATUS(HttpStatus.BAD_REQUEST, "K003", "승인할 수 없는 상태의 지식 데이터입니다.");
+    INVALID_KNOWLEDGE_STATUS(HttpStatus.BAD_REQUEST, "K003", "승인할 수 없는 상태의 지식 데이터입니다."),
+
+    // Ops 관련
+    DEPLOY_PUBLISH_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "OPS001", "배포 요청 전송에 실패했습니다.");
 
     private final HttpStatus status; // HTTP 상태 코드
     private final String code; // 에러 코드
