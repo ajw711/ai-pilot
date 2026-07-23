@@ -73,3 +73,8 @@ springdoc:
 logging:
   level:
     org.springframework.ai: DEBUG
+
+ops:
+  defaults:
+    cpu-limit: 500m
+    memory-limit: 512Mi

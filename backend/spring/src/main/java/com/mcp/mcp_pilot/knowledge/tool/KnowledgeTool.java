@@ -1,10 +1,13 @@
 package com.mcp.mcp_pilot.knowledge.tool;
 
+import com.mcp.mcp_pilot.ai.annotation.AiTool;
+import com.mcp.mcp_pilot.common.enums.ToolType;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@AiTool(ToolType.SEARCH_KNOWLEDGE)
 @Component
 public class KnowledgeTool {
 
