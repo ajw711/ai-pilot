@@ -11,7 +11,9 @@ import lombok.Getter;
 public enum ToolType {
 
     STORE_KNOWLEDGE_DATA("storeKnowledgeData"),
-    SEARCH_KNOWLEDGE("searchKnowledge");
+    SEARCH_KNOWLEDGE("searchKnowledge"),
+    CHAT_DEPLOY("chatDeploy"),
+    DEPLOY_APP("deploy");
 
     private final String toolName;
 
