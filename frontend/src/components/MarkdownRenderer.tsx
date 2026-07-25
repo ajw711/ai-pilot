@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { marked } from "marked";
+import DOMPurify from "dompurify";
 
 interface MarkdownRendererProps {
   content: string;
@@ -12,8 +13,8 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   const rawHtml = useMemo(() => {
     if (!content) return "";
 
-    // GFM (GitHub Flavored Markdown) 활성화 및 줄바꿈 지원 설정
-    return marked.parse(content, { gfm: true, breaks: true }) as string;
+    const parsedHtml = marked.parse(content, { gfm: true, breaks: true }) as string;
+    return DOMPurify.sanitize(parsedHtml);
   }, [content]);
 
   return (
