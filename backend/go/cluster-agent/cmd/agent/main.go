@@ -79,11 +79,12 @@ func main() {
 		time.Sleep(2 * time.Second)
 		log.Println("[test-producer] sending sample deploy request to NATS...")
 		testPayload := map[string]interface{}{
-			"appName":   "my-web-service",
-			"image":     "nginx",
-			"tag":       "1.21.6",
-			"replicas":  3,
-			"namespace": "default"}
+			"trackingId": "DEPLOY-MOCK-999",
+			"appName":    "my-web-service",
+			"image":      "nginx",
+			"tag":        "1.21.6",
+			"replicas":   3,
+			"namespace":  "default"}
 		data, err := json.Marshal(testPayload)
 		if err != nil {
 			log.Printf("[test-producer] failed to marshal payload: %v", err)

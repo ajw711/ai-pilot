@@ -31,24 +31,25 @@ func (h *DeployHandler) Handle(msg *nats.Msg) {
 	if err := json.Unmarshal(msg.Data, &req); err != nil {
 		log.Printf("[handler] failed to unmarshal deploy request: %v", err)
 		h.publishResult(model.DeployResult{
-			Success:   false,
+			Status:    "FAILED",
 			Message:   err.Error(),
 			Timestamp: time.Now().Format(time.RFC3339)})
 	}
 	err := h.deployService.Deploy(req)
 	result := model.DeployResult{
-		AppName:   req.AppName,
-		Timestamp: time.Now().Format(time.RFC3339),
+		TrackingID: req.TrackingId,
+		AppName:    req.AppName,
+		Timestamp:  time.Now().Format(time.RFC3339),
 	}
 
 	// 서비스 계층 호출
 	if err != nil {
 		log.Printf("[handler] deployment failed: %v", err)
-		result.Success = false
+		result.Status = "FAILED"
 		result.Message = err.Error()
 	} else {
 		log.Printf("[handler] deployment succeeded for AppName: %s", req.AppName)
-		result.Success = true
+		result.Status = "DEPLOYING"
 		result.Message = "Deployment successful"
 	}
 
