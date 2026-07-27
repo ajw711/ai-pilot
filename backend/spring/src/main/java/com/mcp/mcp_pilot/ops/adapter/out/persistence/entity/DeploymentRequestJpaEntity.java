@@ -83,6 +83,16 @@ public class DeploymentRequestJpaEntity extends BaseEntity {
     }
 
 
+    public void changeStatus(DeploymentStatus status) {
+        if (status == null) return;
+
+        switch (status) {
+            case DEPLOYING -> markDeploying();
+            case FAILED -> markFailed();
+            case PUBLISHED -> markPublished();
+        }
+    }
+
     public void markPublished() {
         this.status = DeploymentStatus.PUBLISHED;
     }

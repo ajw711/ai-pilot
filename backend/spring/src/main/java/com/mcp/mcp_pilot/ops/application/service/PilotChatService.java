@@ -7,10 +7,12 @@ import com.mcp.mcp_pilot.ai.enums.AIModel;
 import com.mcp.mcp_pilot.ai.factory.AIClientFactory;
 import com.mcp.mcp_pilot.ai.strategy.AiClientStrategy;
 import com.mcp.mcp_pilot.common.enums.ToolType;
+import com.mcp.mcp_pilot.ops.adapter.in.web.dto.ChatEvent;
 import com.mcp.mcp_pilot.ops.port.in.PilotChatUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -20,6 +22,29 @@ import java.util.List;
 public class PilotChatService implements PilotChatUseCase {
 
     private final AIClientFactory aiClientFactory;
+
+    @Override
+    public Flux<ChatEvent> streamChat(ChatRequest chatRequest) {
+        log.info("[PilotChatService] 운영 비서 Agent 스트리밍 구동");
+
+        AiRequest aiRequest = AiRequest.of(
+                chatRequest.message(),
+                AIModel.GEMINI,
+                List.of(
+                        ToolType.SEARCH_KNOWLEDGE,
+                        ToolType.DEPLOY_APP
+                )
+        );
+
+        AiClientStrategy strategy = aiClientFactory.get(aiRequest.model());
+        return strategy.streamCall(aiRequest)
+                .map(ChatEvent::token)
+                .doOnNext(chatEvent -> {
+                    if (log.isDebugEnabled()) {
+                        log.debug("[ChatStream-Token] Token size: {} bytes", chatEvent.message().length());
+                    }
+                });
+    }
 
     @Override
     public ChatResponse chat(ChatRequest chatRequest) {
