@@ -4,7 +4,7 @@ import com.mcp.mcp_pilot.ai.annotation.AiTool;
 import com.mcp.mcp_pilot.common.enums.ToolType;
 import com.mcp.mcp_pilot.ops.port.in.DeployUseCase;
 import com.mcp.mcp_pilot.ops.port.in.dto.DeployCommand;
-import com.mcp.mcp_pilot.ops.port.in.dto.DeployResult;
+import com.mcp.mcp_pilot.ops.port.in.dto.DeployResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
@@ -20,7 +20,7 @@ public class DeployTool {
     public String deploy(DeployCommand command) {
         log.info("[SpringAiDeployTool] AI로부터 배포 요청 Command 수신. AppName: {}", command.appName());
         // UseCase 호출하여 배포 결과 DTO 수신
-        DeployResult result = deployUseCase.deploy(command);
+        DeployResponse result = deployUseCase.deploy(command);
 
         return String.format(
                 "배포 요청 처리 완료. [상태: %s], [추적 ID: %s], [상세 메시지: %s] " +

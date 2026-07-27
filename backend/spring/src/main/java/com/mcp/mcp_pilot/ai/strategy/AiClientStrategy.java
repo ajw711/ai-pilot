@@ -1,6 +1,8 @@
 package com.mcp.mcp_pilot.ai.strategy;
 
 import com.mcp.mcp_pilot.ai.dto.AiRequest;
+import com.mcp.mcp_pilot.ops.adapter.in.web.dto.ChatEvent;
+import reactor.core.publisher.Flux;
 
 /**
  *
@@ -26,4 +28,6 @@ import com.mcp.mcp_pilot.ai.dto.AiRequest;
 public interface AiClientStrategy {
 
     String call(AiRequest request);
+
+    Flux<String> streamCall(AiRequest request);
 }

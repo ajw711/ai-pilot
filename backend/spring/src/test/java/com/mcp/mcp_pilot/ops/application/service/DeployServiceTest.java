@@ -5,6 +5,7 @@ import com.mcp.mcp_pilot.ops.application.policy.DeploymentPolicy;
 import com.mcp.mcp_pilot.ops.exception.DeployPersistenceException;
 import com.mcp.mcp_pilot.ops.exception.DeployPublishException;
 import com.mcp.mcp_pilot.ops.port.in.dto.DeployCommand;
+import com.mcp.mcp_pilot.ops.port.in.dto.DeployResponse;
 import com.mcp.mcp_pilot.ops.port.in.dto.DeployResult;
 import com.mcp.mcp_pilot.ops.port.in.dto.DeployResultStatus;
 import com.mcp.mcp_pilot.ops.port.out.DeployPersistencePort;
@@ -41,7 +42,7 @@ public class DeployServiceTest {
         ArgumentCaptor<DeploymentRequestedEvent> eventCaptor = ArgumentCaptor.forClass(DeploymentRequestedEvent.class);
 
         // When
-        DeployResult result = deployService.deploy(command);
+        DeployResponse result = deployService.deploy(command);
 
         // Then
         assertNotNull(result);
@@ -72,7 +73,7 @@ public class DeployServiceTest {
         DeployCommand command = new DeployCommand(null, "nginx", "latest", 1, "default");
 
         // When
-        DeployResult result = deployService.deploy(command);
+        DeployResponse result = deployService.deploy(command);
 
         // Then
         assertNotNull(result);
@@ -93,7 +94,7 @@ public class DeployServiceTest {
                 .when(deployPersistencePort).save(any(DeploymentRequestedEvent.class));
 
         // When
-        DeployResult result = deployService.deploy(command);
+        DeployResponse result = deployService.deploy(command);
 
         // Then
         assertNotNull(result);

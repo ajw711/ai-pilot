@@ -7,6 +7,8 @@ import com.mcp.mcp_pilot.ops.adapter.out.persistence.repository.DeploymentReques
 import com.mcp.mcp_pilot.ops.adapter.out.persistence.repository.OutboxEventJpaRepository;
 import com.mcp.mcp_pilot.ops.application.event.DeploymentRequestedEvent;
 import com.mcp.mcp_pilot.ops.exception.DeployPersistenceException;
+import com.mcp.mcp_pilot.ops.exception.DeploymentRequestNotFoundException;
+import com.mcp.mcp_pilot.ops.port.in.dto.DeployResult;
 import com.mcp.mcp_pilot.ops.port.in.dto.DeploymentStatus;
 import com.mcp.mcp_pilot.ops.port.out.DeployPersistencePort;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +55,16 @@ public class DeploymentRequestPersistenceAdapter implements DeployPersistencePor
             throw new DeployPersistenceException(e);
         }
         log.info("[PersistenceAdapter] DB 트랜잭션 저장 완료. TrackingID: {}", event.trackingId());
+    }
+
+    @Override
+    public void updateDeployResult(DeployResult result) {
+        log.info("[PersistenceAdapter] 배포 결과 반영 시작. TrackingID: {}", result.trackingId());
+
+        DeploymentRequestJpaEntity request = requestRepository.findByTrackingId(result.trackingId())
+                .orElseThrow(DeploymentRequestNotFoundException::new);
+        request.changeStatus(result.status());
+        log.info("[PersistenceAdapter] 배포 결과 반영 완료. TrackingID: {}", result.trackingId());
     }
 
     private DeploymentRequestJpaEntity toEntity(DeploymentRequestedEvent event) {
