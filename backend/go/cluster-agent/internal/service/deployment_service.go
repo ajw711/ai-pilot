@@ -3,8 +3,15 @@ package service
 import (
 	"cluster-agent/internal/k8sclient"
 	"cluster-agent/internal/model"
+	"context"
 	"log"
 )
+
+type K8sClient interface {
+	GetNamespaces(ctx context.Context) ([]string, error)
+	GetPods(ctx context.Context, namespace string) ([]string, error)
+	GetDeployments(ctx context.Context, namespace string) ([]string, error)
+}
 
 type DeploymentService struct {
 	k8sClient *k8sclient.Client // k8sClient 필드 주입 받기
