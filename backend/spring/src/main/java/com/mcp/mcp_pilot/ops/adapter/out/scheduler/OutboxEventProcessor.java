@@ -1,4 +1,4 @@
-package com.mcp.mcp_pilot.ops.adapter.out.nats;
+package com.mcp.mcp_pilot.ops.adapter.out.scheduler;
 
 import com.mcp.mcp_pilot.ops.adapter.out.persistence.entity.OutboxEventJpaEntity;
 import com.mcp.mcp_pilot.ops.adapter.out.persistence.repository.OutboxEventJpaRepository;

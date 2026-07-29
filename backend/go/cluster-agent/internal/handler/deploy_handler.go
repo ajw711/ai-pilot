@@ -40,6 +40,7 @@ func (h *DeployHandler) Handle(msg *nats.Msg) {
 		TrackingID: req.TrackingId,
 		AppName:    req.AppName,
 		Timestamp:  time.Now().Format(time.RFC3339),
+		UserId:     req.UserId,
 	}
 
 	// 서비스 계층 호출
