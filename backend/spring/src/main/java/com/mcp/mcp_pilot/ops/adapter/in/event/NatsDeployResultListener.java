@@ -7,7 +7,6 @@ import com.mcp.mcp_pilot.ops.port.in.dto.DeploymentStatus;
 import io.nats.client.Connection;
 import io.nats.client.Dispatcher;
 import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -51,6 +50,7 @@ public class NatsDeployResultListener {
                     JsonNode trackingNode = jsonNode.get("trackingId");
                     JsonNode statusNode = jsonNode.get("status");
                     JsonNode messageNode = jsonNode.get("message");
+                    JsonNode userNode = jsonNode.get("requestedBy");
 
                     if (trackingNode == null || trackingNode.asString().isBlank() ||
                             statusNode == null || statusNode.asString().isBlank()) {
@@ -61,9 +61,10 @@ public class NatsDeployResultListener {
                     String trackingId = trackingNode.asString();
                     String statusStr = statusNode.asString();
                     String message = (messageNode != null) ? messageNode.asString() : "";
+                    Long requestedBy = (userNode != null) ? userNode.asLong() : 1L;
 
                     DeploymentStatus status = DeploymentStatus.valueOf(statusStr.toUpperCase());
-                    DeployResult result = new DeployResult(trackingId, status, message);
+                    DeployResult result = new DeployResult(trackingId, status, message, requestedBy);
 
                     // 2. submit() 대신 execute()를 사용하여 비동기 스레드 내부의 예외를 명시적으로 catch해 로깅합니다.
                     asyncEventExecutor.execute(() -> {

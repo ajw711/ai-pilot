@@ -58,6 +58,8 @@ public class SpringAiAdapter implements KnowledgeAiPort {
               * 중요: 모든 제목(예: ##, ###)은 반드시 독립된 행(Line)에 작성되어야 하며, 제목 뒤에는 반드시 줄바꿈 문자(\\n)를 넣어 본문 내용이 제목과 같은 줄에 연속되어 위치하지 않도록 완전히 격리하십시오.
             - 예제 코드는 주석을 포함하여 원문 그대로 완전히 보존하고, 가급적 포맷을 정돈하여 표시하십시오.
             - 원문의 모든 설명글과 문단은 절대 생략하거나 생축하지 말고 원본 문장을 100% 다 기입해 주십시오.
+            - 중요: 글머리 기호(- 또는 *) 목록을 작성할 때, 들여쓰기 중첩 깊이는 가독성 및 노션 API 호환성을 위해 최대 3단계(Depth 3)까지만 중첩하여 작성하십시오.
+              4단계 이상의 깊은 중첩은 절대 금지합니다.
             - 문서 마지막에 원문의 키워드를 나타내는 태그를 3개 이상 '#' 기호와 함께 추가하십시오.
             """;
 
@@ -156,27 +158,25 @@ public class SpringAiAdapter implements KnowledgeAiPort {
      * 재귀적으로 원인(Cause) 예외를 추적하여 리트라이 대상인지 판별합니다.
      */
     private boolean isRetryable(Throwable t) {
-        if (t == null) {
-            return false;
-        }
+        Throwable current = t;
+        while (current != null) {
+            if (current instanceof ApiException apiException) {
+                int statusCode = apiException.code();
+                if (statusCode >= 500 && statusCode < 600) {
+                    return true;
+                }
+            }
 
-        if (t instanceof ApiException apiException) {
-            int statusCode = apiException.code();
-            // 5xx 계열 (500, 502, 503, 504 등) 서버 과부화 상황에서만 retry 작동
-            return statusCode >= 500 && statusCode < 600;
+            if (current instanceof SocketTimeoutException ||
+                    current instanceof ConnectException ||
+                    current instanceof SocketException ||
+                    current instanceof IOException
+            ) {
+                return true;
+            }
+            current = current.getCause();
         }
-
-        // 네트워크 및 I/O 타임아웃, 커넥션 유실 판별
-        if (t instanceof SocketTimeoutException ||
-                t instanceof ConnectException ||
-                t instanceof SocketException ||
-                t instanceof IOException
-        ) {
-            return true;
-        }
-
-        // 재귀적으로 원인 추적
-        return isRetryable(t.getCause());
+        return false;
     }
 
     /**

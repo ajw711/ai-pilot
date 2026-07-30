@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiDatabase, FiMessageSquare, FiSettings, FiGrid, FiMenu, FiX, FiSun, FiMoon } from 'react-icons/fi';
+import { FiDatabase, FiMessageSquare, FiSettings, FiGrid, FiMenu, FiX, FiSun, FiMoon, FiHome, FiLogOut } from 'react-icons/fi';
 
 interface SidebarLayoutProps {
   children: React.ReactNode;
@@ -19,9 +19,9 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
   const [isOpen, setIsOpen] = useState(false); // 모바일 사이드바 토글 상태
 
   const menuItems = [
+    { id: 'home', label: '홈', icon: FiHome },
     { id: 'dashboard', label: '지식 대시보드', icon: FiGrid },
     { id: 'chat', label: 'AI 지식 챗봇', icon: FiMessageSquare },
-    { id: 'sources', label: '데이터 소스 관리', icon: FiDatabase },
   ];
 
   const handleMenuClick = (id: string) => {
@@ -30,41 +30,42 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans transition-colors duration-200">
+    <div className="flex h-screen w-full overflow-hidden bg-[#F5F6F7] dark:bg-[#16171d] text-[#1E1E1E] dark:text-slate-100 font-sans transition-colors duration-200">
       
-      {/* 1. 모바일용 Backdrop 오버레이 (사이드바 오픈 시 뒷배경 어둡게 처리) */}
+      {/* 1. 모바일용 Backdrop 오버레이 */}
       {isOpen && (
         <div 
-          className="fixed inset-0 z-40 bg-slate-900/20 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-40 bg-slate-900/10 backdrop-blur-xs md:hidden"
           onClick={() => setIsOpen(false)}
         />
       )}
 
-      {/* 2. 반응형 사이드바 (반응형 다크/라이트 테마) */}
-      <aside className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${
-        isOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
-        {/* 사이드바 헤더 및 닫기 버튼 */}
-        <div className="flex h-16 items-center justify-between border-b border-slate-300 dark:border-slate-600 px-6">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center font-bold text-white shadow-md shadow-sky-500/10">
+      {/* 2. 반응형 사이드바 (가독성 높은 백그라운드 및 옅은 그레이 보더) */}
+      <aside className="fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-[#E4E8EB] dark:border-slate-800 bg-white dark:bg-slate-900 transition-transform duration-300 ease-in-out md:relative md:translate-x-0">
+        {/* 사이드바 헤더 */}
+        <div className="flex h-16 items-center justify-between border-b border-[#E4E8EB] dark:border-slate-800 px-6 bg-white dark:bg-slate-900">
+          <div 
+            onClick={() => handleMenuClick('home')}
+            className="flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity"
+          >
+            <div className="h-8 w-8 rounded-md bg-[#03C75A] flex items-center justify-center font-bold text-white">
               AI
             </div>
-            <span className="text-lg font-bold tracking-wider bg-gradient-to-r from-sky-500 to-indigo-500 bg-clip-text text-transparent">
+            <span className="text-base font-bold tracking-wider text-[#1E1E1E] dark:text-white">
               AI-PILOT
             </span>
           </div>
           {/* 모바일 닫기 버튼 */}
           <button 
             onClick={() => setIsOpen(false)}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 md:hidden transition-colors"
+            className="rounded-md p-1.5 text-slate-400 hover:bg-[#F5F6F7] dark:hover:bg-slate-800 md:hidden transition-colors"
           >
             <FiX className="h-6 w-6" />
           </button>
         </div>
 
-        {/* 메뉴 목록 (다크/라이트 테마 스타일) */}
-        <nav className="flex-1 space-y-1.5 p-4 overflow-y-auto">
+        {/* 메뉴 목록 (단정한 텍스트/아이콘 컬러 스위칭) */}
+        <nav className="flex-1 space-y-1.5 p-4 bg-white dark:bg-slate-900 overflow-y-auto">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -72,15 +73,15 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
               <button
                 key={item.id}
                 onClick={() => handleMenuClick(item.id)}
-                className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 group cursor-pointer ${
+                className={`flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-bold transition-all group cursor-pointer ${
                   isActive
-                    ? 'bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 border-l-4 border-sky-500 shadow-sm'
-                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-slate-100'
+                    ? 'text-[#03C75A] bg-[#E6F7ED] hover:bg-[#D4F0DF] dark:bg-[#1E3A27] dark:hover:bg-[#152e1c]'
+                    : 'text-[#333333] dark:text-slate-300 hover:bg-[#EBECEF] dark:hover:bg-[#25272f] hover:text-[#1E1E1E] dark:hover:text-white'
                 }`}
               >
                 <Icon
-                  className={`h-5 w-5 transition-transform duration-200 group-hover:scale-110 ${
-                    isActive ? 'text-sky-600 dark:text-sky-400' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300'
+                  className={`h-5 w-5 ${
+                    isActive ? 'text-[#03C75A]' : 'text-[#666666] dark:text-slate-400 group-hover:text-[#1E1E1E] dark:group-hover:text-white'
                   }`}
                 />
                 {item.label}
@@ -89,12 +90,12 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
           })}
         </nav>
 
-        {/* 하단 테마 전환 및 설정 영역 */}
-        <div className="border-t border-slate-300 dark:border-slate-600 p-4 space-y-1.5">
+        {/* 하단 테마 전환 및 설정 영역 (고대비 및 정렬) */}
+        <div className="border-t border-[#E4E8EB] dark:border-slate-800 p-4 space-y-1.5 bg-white dark:bg-slate-900">
           {/* 테마 토글 버튼 */}
           <button
             onClick={() => setDarkMode(!darkMode)}
-            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-slate-100 transition-all cursor-pointer"
+            className="flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-bold text-[#333333] dark:text-slate-300 hover:bg-[#EBECEF] dark:hover:bg-[#25272f] hover:text-[#1E1E1E] dark:hover:text-white transition-all cursor-pointer"
           >
             {darkMode ? (
               <>
@@ -108,37 +109,39 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
               </>
             )}
           </button>
-
+          {/* 로그아웃 버튼 */}
           <button
-            onClick={() => handleMenuClick('settings')}
-            className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all cursor-pointer ${
-              activeTab === 'settings'
-                ? 'bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 border-l-4 border-sky-500'
-                : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-slate-100'
-            }`}
+            onClick={() => {
+              localStorage.removeItem('isLoggedIn');
+              window.location.reload();
+            }}
+            className="flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all cursor-pointer"
           >
-            <FiSettings className="h-5 w-5" />
-            설정
+            <FiLogOut className="h-5 w-5" />
+            로그아웃
           </button>
         </div>
       </aside>
 
-      {/* 3. 메인 콘텐츠 영역 (반응형 테마 배경) */}
-      <main className="flex flex-1 flex-col overflow-hidden bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
+      {/* 3. 메인 콘텐츠 영역 */}
+      <main className="flex flex-1 flex-col overflow-hidden bg-[#F5F6F7] dark:bg-[#16171d] transition-colors duration-200">
         
-        {/* 모바일용 상단 헤더 (햄버거 버튼) */}
-        <header className="flex h-16 items-center justify-between border-b border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-4 md:hidden">
+        {/* 모바일용 상단 헤더 */}
+        <header className="flex h-16 items-center justify-between border-b border-[#E4E8EB] dark:border-slate-800 bg-white dark:bg-slate-900 px-4 md:hidden">
           <button
             onClick={() => setIsOpen(true)}
-            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 transition-colors"
+            className="rounded-lg p-2 text-slate-500 hover:bg-[#F5F6F7] transition-colors"
           >
             <FiMenu className="h-6 w-6" />
           </button>
-          <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-md bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center font-bold text-white text-sm">
+          <div 
+            onClick={() => { setActiveTab('home'); setIsOpen(false); }}
+            className="flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity"
+          >
+            <div className="h-7 w-7 rounded-md bg-[#03C75A] flex items-center justify-center font-bold text-white text-sm">
               AI
             </div>
-            <span className="text-sm font-bold tracking-wider text-slate-800 dark:text-slate-100">AI-PILOT</span>
+            <span className="text-sm font-bold tracking-wider text-[#1E1E1E] dark:text-white">AI-PILOT</span>
           </div>
           <div className="w-10"></div>
         </header>

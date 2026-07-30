@@ -66,20 +66,14 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
           font-size: 0.875rem;
           line-height: 1.625;
           margin-bottom: 0.75rem;
-          color: #334155;
+          color: inherit;
         }
-        .dark .markdown-preview-container p {
-          color: #cbd5e1;
-        }
-
+        
         .markdown-preview-container ul {
           list-style-type: disc;
           padding-left: 1.25rem;
           margin-bottom: 0.75rem;
-          color: #334155;
-        }
-        .dark .markdown-preview-container ul {
-          color: #cbd5e1;
+          color: inherit;
         }
         .markdown-preview-container li {
           margin-bottom: 0.25rem;
@@ -137,7 +131,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         }
       `}</style>
       <div
-        className="markdown-body font-sans text-sm text-slate-800 dark:text-slate-200 leading-relaxed"
+        className="markdown-body font-sans text-sm text-inherit leading-relaxed"
         dangerouslySetInnerHTML={{ __html: rawHtml }}
       />
     </div>

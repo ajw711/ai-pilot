@@ -37,10 +37,10 @@ func (h *DeployHandler) Handle(msg *nats.Msg) {
 	}
 	err := h.deployService.Deploy(req)
 	result := model.DeployResult{
-		TrackingID: req.TrackingId,
-		AppName:    req.AppName,
-		Timestamp:  time.Now().Format(time.RFC3339),
-		UserId:     req.UserId,
+		TrackingID:  req.TrackingId,
+		AppName:     req.AppName,
+		Timestamp:   time.Now().Format(time.RFC3339),
+		RequestedBy: req.RequestedBy,
 	}
 
 	// 서비스 계층 호출
@@ -50,7 +50,7 @@ func (h *DeployHandler) Handle(msg *nats.Msg) {
 		result.Message = err.Error()
 	} else {
 		log.Printf("[handler] deployment succeeded for AppName: %s", req.AppName)
-		result.Status = "DEPLOYING"
+		result.Status = "RUNNING"
 		result.Message = "Deployment successful"
 	}
 

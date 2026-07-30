@@ -1,32 +1,38 @@
 package com.mcp.mcp_pilot.ops.application.service;
 
+import com.mcp.mcp_pilot.knowledge.port.out.NotionPublishPort;
 import com.mcp.mcp_pilot.ops.application.event.DeploymentRequestedEvent;
 import com.mcp.mcp_pilot.ops.application.model.DeploySpec;
 import com.mcp.mcp_pilot.ops.application.policy.DeploymentPolicy;
 import com.mcp.mcp_pilot.ops.exception.DeployPersistenceException;
 import com.mcp.mcp_pilot.ops.port.in.DeployResultUseCase;
 import com.mcp.mcp_pilot.ops.port.in.DeployUseCase;
+import com.mcp.mcp_pilot.ops.port.in.OpsNotificationSubscribeUseCase;
 import com.mcp.mcp_pilot.ops.port.in.dto.DeployCommand;
 import com.mcp.mcp_pilot.ops.port.in.dto.DeployResponse;
 import com.mcp.mcp_pilot.ops.port.in.dto.DeployResult;
-import com.mcp.mcp_pilot.ops.port.in.dto.DeploymentStatus;
+import com.mcp.mcp_pilot.ops.port.out.OpsNotificationPort;
 import com.mcp.mcp_pilot.ops.port.out.DeployPersistencePort;
+import com.mcp.mcp_pilot.ops.port.out.OpsNotificationEvent;
+import com.mcp.mcp_pilot.ops.adapter.out.notification.dto.OperationType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DeployService implements DeployUseCase, DeployResultUseCase {
+public class DeployService implements DeployUseCase, DeployResultUseCase, OpsNotificationSubscribeUseCase {
 
     private final DeployPersistencePort deployPersistencePort;
+    private final OpsNotificationPort notificationPort;
     private final DeploymentPolicy deploymentPolicy;
 
     @Override
-    public DeployResponse deploy(DeployCommand command) {
+    public DeployResponse deploy(DeployCommand command, Long requestedBy) {
         // 비동기 작업 추적용 고유ID 생성
         String trackingId = "DEPLOY-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 
@@ -52,7 +58,7 @@ public class DeployService implements DeployUseCase, DeployResultUseCase {
                 .memoryLimit(deploymentPolicy.memoryLimit()) // Record getter 호출
                 .build();
 
-        DeploymentRequestedEvent event = DeploymentRequestedEvent.from(spec);
+        DeploymentRequestedEvent event = DeploymentRequestedEvent.create(spec, requestedBy);
         try {
             // 비즈니스 레벨에서는 JSON 직렬화에 대해 전혀 모름
             // DB + Outbox 단일 트랜잭션 저장 호출
@@ -79,6 +85,19 @@ public class DeployService implements DeployUseCase, DeployResultUseCase {
 
         // deployPersistencePort(주입된 필드명) 호출 및 결과 전달
         deployPersistencePort.updateDeployResult(result);
+
+        notificationPort.sendToUser(new OpsNotificationEvent(
+                result.requestedBy(),
+                OperationType.DEPLOY,
+                result.trackingId(),
+                "nginx",
+                result.status().name(),
+                result.message()
+        ));
     }
 
+    @Override
+    public SseEmitter subscribe(Long userId) {
+        return notificationPort.subscribe(userId);
+    }
 }

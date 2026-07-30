@@ -42,16 +42,14 @@ public class DeploymentRequestJpaEntity extends BaseEntity {
     @Column(nullable = false, length = 30)
     private DeploymentStatus status;
 
+    @Column(nullable = true)
+    private Long requestedBy;
+
     private LocalDateTime deletedAt;
 
-    private DeploymentRequestJpaEntity(String trackingId,
-                                       String appName,
-                                       String image,
-                                       String tag,
-                                       Integer replicas,
-                                       String namespace,
-                                       DeploymentStatus status,
-                                       LocalDateTime deletedAt) {
+    private DeploymentRequestJpaEntity(String trackingId, String appName, String image, String tag,
+                                       Integer replicas, String namespace, DeploymentStatus status,
+                                       Long requestedBy, LocalDateTime deletedAt) {
         this.trackingId = trackingId;
         this.appName = appName;
         this.image = image;
@@ -59,27 +57,14 @@ public class DeploymentRequestJpaEntity extends BaseEntity {
         this.replicas = replicas;
         this.namespace = namespace;
         this.status = status;
+        this.requestedBy = requestedBy;
         this.deletedAt = deletedAt;
     }
 
-    public static DeploymentRequestJpaEntity create(String trackingId,
-                                                    String appName,
-                                                    String image,
-                                                    String tag,
-                                                    Integer replicas,
-                                                    String namespace,
-                                                    DeploymentStatus status,
-                                                    LocalDateTime deletedAt) {
-        return new DeploymentRequestJpaEntity(
-                trackingId,
-                appName,
-                image,
-                tag,
-                replicas,
-                namespace,
-                status,
-                deletedAt
-        );
+    public static DeploymentRequestJpaEntity create(String trackingId, String appName, String image, String tag,
+                                                    Integer replicas, String namespace, DeploymentStatus status,
+                                                    Long requestedBy, LocalDateTime deletedAt) {
+        return new DeploymentRequestJpaEntity(trackingId, appName, image, tag, replicas, namespace, status, requestedBy, deletedAt);
     }
 
 
