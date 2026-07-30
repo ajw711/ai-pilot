@@ -27,11 +27,24 @@ public class JwtProvider {
                 .getPayload();
     }
 
-    public String generateToken(long expirationTimeMs) {
+    public String generateAccessToken(Long id, String username, String role) {
+        long expirationTimeMs = 3600 * 1000; // 1시간
         return Jwts.builder()
-                .subject("test-user")
-                .claim("id", 1L)
-                .claim("role", "ROLE_ADMIN")
+                .subject(username)
+                .claim("id", id)
+                .claim("role", role)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expirationTimeMs))
+                .signWith(secretKey)
+                .compact();
+    }
+
+    public String generateRefreshToken(Long id) {
+        long expirationTimeMs = 14L * 24 * 3600 * 1000; // 14일
+        return Jwts.builder()
+                .subject(String.valueOf(id))
+                .claim("id", id)
+                .claim("type", "REFRESH")
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationTimeMs))
                 .signWith(secretKey)

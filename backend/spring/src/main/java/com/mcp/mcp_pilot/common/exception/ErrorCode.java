@@ -35,7 +35,10 @@ public enum ErrorCode {
     DEPLOY_PUBLISH_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "OPS001", "배포 요청 전송에 실패했습니다."),
     DEPLOY_PERSISTENCE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "OPS002", "배포 요청 데이터 저장에 실패했습니다."),
     OUTBOX_EVENT_NOT_FOUND(HttpStatus.NOT_FOUND, "OPS003", "존재하지 않는 아웃박스 이벤트입니다."),
-    DEPLOYMENT_REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "OPS004", "존재하지 않는 배포 요청입니다.");
+    DEPLOYMENT_REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "OPS004", "존재하지 않는 배포 요청입니다."),
+
+    // User 관련
+    UNAUTHORIZED_USER(HttpStatus.UNAUTHORIZED, "U001", "아이디 또는 비밀번호가 올바르지 않습니다.");
 
     private final HttpStatus status; // HTTP 상태 코드
     private final String code; // 에러 코드

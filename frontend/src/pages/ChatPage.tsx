@@ -241,7 +241,7 @@ export const ChatPage: React.FC = () => {
 
   return (
     <div className="flex flex-1 flex-col h-screen overflow-hidden bg-[#F5F6F7] dark:bg-[#16171d] transition-colors duration-200">
-      {/* 챗 상단 바 (네이버 테마 스타일) */}
+      {/* 챗 상단 바  */}
       <div className="hidden md:flex h-16 items-center justify-between border-b border-[#E4E8EB] dark:border-[#2e303a] bg-white dark:bg-[#16171d] px-6">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#F4F6F8] dark:bg-[#1f2028] text-[#03C75A] border border-[#E4E8EB] dark:border-[#2e303a]">
@@ -254,7 +254,6 @@ export const ChatPage: React.FC = () => {
           </div>
         </div>
       </div>
-
 
       {/* 메시지 영역 */}
       <div className="flex-1 overflow-y-auto p-6 space-y-5">
