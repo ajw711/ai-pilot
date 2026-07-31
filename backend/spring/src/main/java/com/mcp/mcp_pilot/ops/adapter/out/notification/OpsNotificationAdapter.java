@@ -23,6 +23,11 @@ public class OpsNotificationAdapter implements OpsNotificationPort {
     @Override
     public void sendToUser(OpsNotificationEvent event) {
         Long userId = event.userId();
+        if (userId == null) {
+            log.warn("[OpsNotificationAdapter] userId가 없어 알림을 전송할 수 없습니다. TrackingId: {}", event.trackingId());
+            return;
+        }
+
         List<SseEmitter> list = userEmitters.get(userId);
         if (list == null || list.isEmpty()) {
             log.warn("[OpsNotificationAdapter] 연결된 Emitter 세션이 없습니다. UserId: {}", userId);

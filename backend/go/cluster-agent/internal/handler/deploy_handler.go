@@ -34,6 +34,7 @@ func (h *DeployHandler) Handle(msg *nats.Msg) {
 			Status:    "FAILED",
 			Message:   err.Error(),
 			Timestamp: time.Now().Format(time.RFC3339)})
+		return
 	}
 	err := h.deployService.Deploy(req)
 	result := model.DeployResult{

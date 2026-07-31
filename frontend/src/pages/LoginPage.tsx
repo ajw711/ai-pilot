@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { loginApi } from "../features/auth/api";
+import { setAccessToken } from "../lib/api";
 import { FiLock, FiUser, FiCheckSquare, FiSquare } from "react-icons/fi";
 
 interface LoginPageProps {
@@ -27,6 +28,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         password: password,
       });
 
+      setAccessToken(data.accessToken);
       localStorage.setItem("access_token", data.accessToken);
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("userId", userId);

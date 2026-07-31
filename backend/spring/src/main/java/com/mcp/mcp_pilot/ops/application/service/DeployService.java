@@ -89,7 +89,7 @@ public class DeployService implements DeployUseCase, DeployResultUseCase, OpsNot
     }
 
     @Override
-    public void handleDeployResult(DeployResult result) {
+    public void handleDeployResult(DeployResult result){
         log.info("[DeployService] 결과 처리 시작. 스레드명: {}, 가상 스레드 여부: {}",
                 Thread.currentThread().getName(),
                 Thread.currentThread().isVirtual());
