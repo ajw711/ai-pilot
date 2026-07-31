@@ -1,8 +1,8 @@
 package com.mcp.mcp_pilot.user.port.in;
 
 import com.mcp.mcp_pilot.user.port.in.dto.LoginCommand;
-import com.mcp.mcp_pilot.user.port.in.dto.LoginResult;
+import com.mcp.mcp_pilot.user.port.out.dto.TokenResult;
 
 public interface LoginUseCase {
-    LoginResult login(LoginCommand command);
+    TokenResult login(LoginCommand command);
 }

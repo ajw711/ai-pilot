@@ -27,8 +27,8 @@ public class LoginService implements LoginUseCase {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public LoginResult login(LoginCommand command) {
-        log.info("[LoginService] 비즈니스 로그인 프로세스 가동. Username: {}", command.username());
+    public TokenResult login(LoginCommand command) {
+        log.info("[LoginService] 비즈니스 로그인 프로세스 가동. ");
 
         Optional<User> userOpt = userPersistencePort.findByUsername(command.username());
         if (userOpt.isEmpty()) {
@@ -45,6 +45,6 @@ public class LoginService implements LoginUseCase {
         TokenResult token = tokenPort.generateTokens(user);
         log.info("[LoginService] 로그인 성공 및 JWT 발급 완료. Username: {}", command.username());
 
-        return new LoginResult(true, token.accessToken(), token.refreshToken(), "로그인에 성공했습니다.");
+        return new TokenResult(token.accessToken(), token.refreshToken());
     }
 }

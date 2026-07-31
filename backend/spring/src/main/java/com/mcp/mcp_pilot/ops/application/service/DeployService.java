@@ -22,6 +22,10 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.UUID;
 
+import com.mcp.mcp_pilot.ops.port.out.UserAuthorizationPort;
+import com.mcp.mcp_pilot.user.exception.UserException;
+import com.mcp.mcp_pilot.common.exception.ErrorCode;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -30,9 +34,16 @@ public class DeployService implements DeployUseCase, DeployResultUseCase, OpsNot
     private final DeployPersistencePort deployPersistencePort;
     private final OpsNotificationPort notificationPort;
     private final DeploymentPolicy deploymentPolicy;
+    private final UserAuthorizationPort userAuthorizationPort;
 
     @Override
     public DeployResponse deploy(DeployCommand command, Long requestedBy) {
+        // 실시간 권한 재검증 가드 (위험 API DB 재조회)
+        if (!userAuthorizationPort.canDeploy(requestedBy)) {
+            log.warn("[DeployService] 인프라 배포 권한 거부. UserId: {}", requestedBy);
+            throw new UserException(ErrorCode.UNAUTHORIZED_USER);
+        }
+
         // 비동기 작업 추적용 고유ID 생성
         String trackingId = "DEPLOY-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 

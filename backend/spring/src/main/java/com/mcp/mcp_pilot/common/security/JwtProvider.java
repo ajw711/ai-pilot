@@ -28,7 +28,7 @@ public class JwtProvider {
     }
 
     public String generateAccessToken(Long id, String username, String role) {
-        long expirationTimeMs = 3600 * 1000; // 1시간
+        long expirationTimeMs = 300 * 1000L; // 5분
         return Jwts.builder()
                 .subject(username)
                 .claim("id", id)

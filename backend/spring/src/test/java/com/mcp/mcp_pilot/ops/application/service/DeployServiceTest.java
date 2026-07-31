@@ -8,6 +8,7 @@ import com.mcp.mcp_pilot.ops.port.in.dto.DeployResponse;
 import com.mcp.mcp_pilot.ops.port.in.dto.DeployResultStatus;
 import com.mcp.mcp_pilot.ops.port.out.DeployPersistencePort;
 import com.mcp.mcp_pilot.ops.port.out.OpsNotificationPort;
+import com.mcp.mcp_pilot.ops.port.out.UserAuthorizationPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,12 +27,15 @@ public class DeployServiceTest {
     private DeployPersistencePort deployPersistencePort;  // 외부 시스템(NATS) MOCK 사용
     @Mock
     private OpsNotificationPort notificationPort;
+    @Mock
+    private UserAuthorizationPort authorizationPort;
+
     private DeployService deployService;
 
     @BeforeEach
     void setUp() {
         DeploymentPolicy deploymentPolicy = new DeploymentPolicy("500m", "512Mi");
-        deployService = new DeployService(deployPersistencePort, notificationPort, deploymentPolicy);
+        deployService = new DeployService(deployPersistencePort, notificationPort, deploymentPolicy, authorizationPort);
     }
 
     @Test

@@ -37,6 +37,12 @@ public class UserPersistenceAdapter implements UserPersistencePort {
         return entityOpt.map(this::toDomain);
     }
 
+    @Override
+    public Optional<User> findById(Long id) {
+        log.info("[UserPersistenceAdapter] DB 사용자 조회 요청. ID: {}", id);
+        return repository.findById(id).map(this::toDomain);
+    }
+
     private User toDomain(UserJpaEntity entity) {
         return User.builder()
                 .id(entity.getId())
