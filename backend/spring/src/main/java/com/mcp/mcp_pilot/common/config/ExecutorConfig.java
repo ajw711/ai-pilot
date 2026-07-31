@@ -11,6 +11,6 @@ public class ExecutorConfig {
 
     @Bean(destroyMethod = "close")
     public ExecutorService wikiExecutor() {
-        return Executors.newSingleThreadExecutor();
+        return Executors.newVirtualThreadPerTaskExecutor();
     }
 }

@@ -76,6 +76,7 @@ public class DeploymentRequestPersistenceAdapter implements DeployPersistencePor
                 event.replicas(),
                 event.namespace(),
                 DeploymentStatus.REQUESTED,
+                event.requestedBy(),
                 null
         );
     }

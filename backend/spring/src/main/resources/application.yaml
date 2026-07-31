@@ -78,3 +78,6 @@ ops:
   defaults:
     cpu-limit: 500m
     memory-limit: 512Mi
+
+jwt:
+  secret: ${JWT_SECRET}

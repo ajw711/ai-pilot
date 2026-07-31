@@ -3,12 +3,12 @@ package com.mcp.mcp_pilot.ops.application.service;
 import com.mcp.mcp_pilot.ops.application.event.DeploymentRequestedEvent;
 import com.mcp.mcp_pilot.ops.application.policy.DeploymentPolicy;
 import com.mcp.mcp_pilot.ops.exception.DeployPersistenceException;
-import com.mcp.mcp_pilot.ops.exception.DeployPublishException;
 import com.mcp.mcp_pilot.ops.port.in.dto.DeployCommand;
 import com.mcp.mcp_pilot.ops.port.in.dto.DeployResponse;
-import com.mcp.mcp_pilot.ops.port.in.dto.DeployResult;
 import com.mcp.mcp_pilot.ops.port.in.dto.DeployResultStatus;
 import com.mcp.mcp_pilot.ops.port.out.DeployPersistencePort;
+import com.mcp.mcp_pilot.ops.port.out.OpsNotificationPort;
+import com.mcp.mcp_pilot.ops.port.out.UserAuthorizationPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,13 +25,18 @@ public class DeployServiceTest {
 
     @Mock
     private DeployPersistencePort deployPersistencePort;  // 외부 시스템(NATS) MOCK 사용
+    @Mock
+    private OpsNotificationPort notificationPort;
+    @Mock
+    private UserAuthorizationPort authorizationPort;
 
     private DeployService deployService;
 
     @BeforeEach
     void setUp() {
         DeploymentPolicy deploymentPolicy = new DeploymentPolicy("500m", "512Mi");
-        deployService = new DeployService(deployPersistencePort, deploymentPolicy);
+        deployService = new DeployService(deployPersistencePort, notificationPort, deploymentPolicy, authorizationPort);
+        lenient().when(authorizationPort.canDeploy(anyLong())).thenReturn(true);
     }
 
     @Test
@@ -39,10 +44,11 @@ public class DeployServiceTest {
     void deploySuccess() {
         // Given
         DeployCommand command = new DeployCommand("my-app", "nginx", "1.21", 3, "production");
+        String requestedBy = "test-user";
         ArgumentCaptor<DeploymentRequestedEvent> eventCaptor = ArgumentCaptor.forClass(DeploymentRequestedEvent.class);
 
         // When
-        DeployResponse result = deployService.deploy(command);
+        DeployResponse result = deployService.deploy(command, 1L);
 
         // Then
         assertNotNull(result);
@@ -73,7 +79,7 @@ public class DeployServiceTest {
         DeployCommand command = new DeployCommand(null, "nginx", "latest", 1, "default");
 
         // When
-        DeployResponse result = deployService.deploy(command);
+        DeployResponse result = deployService.deploy(command, 1L);
 
         // Then
         assertNotNull(result);
@@ -94,7 +100,7 @@ public class DeployServiceTest {
                 .when(deployPersistencePort).save(any(DeploymentRequestedEvent.class));
 
         // When
-        DeployResponse result = deployService.deploy(command);
+        DeployResponse result = deployService.deploy(command, 1L);
 
         // Then
         assertNotNull(result);

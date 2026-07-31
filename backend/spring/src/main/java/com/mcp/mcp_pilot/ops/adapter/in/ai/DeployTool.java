@@ -18,9 +18,10 @@ public class DeployTool {
 
     @Tool(description = "Kubernetes 클러스터에 애플리케이션(Deployment)을 신규 배포하거나 업데이트합니다.")
     public String deploy(DeployCommand command) {
+        Long userId = 1L;
         log.info("[SpringAiDeployTool] AI로부터 배포 요청 Command 수신. AppName: {}", command.appName());
         // UseCase 호출하여 배포 결과 DTO 수신
-        DeployResponse result = deployUseCase.deploy(command);
+        DeployResponse result = deployUseCase.deploy(command, userId);
 
         return String.format(
                 "배포 요청 처리 완료. [상태: %s], [추적 ID: %s], [상세 메시지: %s] " +

@@ -36,7 +36,7 @@ export const KnowledgeDetailModal: React.FC<KnowledgeDetailModalProps> = ({
   onClose,
   knowledgeId,
 }) => {
-  const { data: detail, isLoading, error } = useKnowledgeDetail(knowledgeId);
+  const { data: detail, isLoading, error, refetch } = useKnowledgeDetail(knowledgeId);
   const approveMutation = useApproveKnowledge();
 
   const [editedContent, setEditedContent] = useState("");
@@ -51,8 +51,9 @@ export const KnowledgeDetailModal: React.FC<KnowledgeDetailModalProps> = ({
       setIsSuccess(false);
       setErrorMsg(null);
       setPreviewMode("edit");
+      refetch();
     }
-  }, [isOpen]);
+  }, [isOpen, refetch]);
 
   // Load formatted content when detail is loaded
   useEffect(() => {
@@ -292,7 +293,13 @@ export const KnowledgeDetailModal: React.FC<KnowledgeDetailModalProps> = ({
                       </div>
                     </div>
                     
-                    {previewMode === "edit" ? (
+                    {detail.status === "VERIFYING" || detail.status === "FORMATTING" ? (
+                      <div className="flex-1 flex flex-col items-center justify-center p-6 text-slate-400 dark:text-slate-500 bg-slate-50/50 dark:bg-slate-950/10">
+                        <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-3" />
+                        <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">AI가 본문을 열심히 가공(포맷팅)하고 있습니다.</p>
+                        <p className="text-xs text-slate-400 mt-1">완료되면 가공된 마크다운을 이곳에서 편집하실 수 있습니다.</p>
+                      </div>
+                    ) : previewMode === "edit" ? (
                       <textarea
                         value={editedContent}
                         onChange={(e) => setEditedContent(e.target.value)}
@@ -314,7 +321,13 @@ export const KnowledgeDetailModal: React.FC<KnowledgeDetailModalProps> = ({
                     <FiCpu className="h-5 w-5 text-indigo-600" />
                     AI 기술 문서 팩트체킹 분석 결과
                   </h4>
-                  {issues.length === 0 ? (
+                  {detail.status === "VERIFYING" || detail.status === "FORMATTING" ? (
+                    <div className="flex flex-col items-center justify-center py-16 text-slate-400 dark:text-slate-500">
+                      <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4" />
+                      <p className="font-semibold text-slate-700 dark:text-slate-300">AI 기술 문서 팩트체킹 분석을 진행하고 있습니다.</p>
+                      <p className="text-xs text-slate-400 mt-1">분석이 완료되면 검수 리포트 항목이 여기에 업데이트됩니다.</p>
+                    </div>
+                  ) : issues.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500">
                       <FiCheckCircle className="h-12 w-12 text-emerald-500 mb-2" />
                       <p className="font-semibold text-slate-700 dark:text-slate-300">팩트 및 개념적 오류가 발견되지 않았습니다.</p>

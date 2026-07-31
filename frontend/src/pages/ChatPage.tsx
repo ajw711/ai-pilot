@@ -1,99 +1,312 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { FiSend, FiCpu, FiUser, FiInfo } from 'react-icons/fi';
+import React, { useState, useRef, useEffect } from "react";
+import { FiSend, FiCpu, FiUser } from "react-icons/fi";
+import { fetchPilotChatStream, useOpsNotification } from "../features/ops/api";
+import { MarkdownRenderer } from "../components/MarkdownRenderer";
 
-interface Message {
+export interface ChatRequestDto {
+  message: string;
+}
+
+export interface ChatEventDto {
+  type: "TOKEN" | "COMPLETE";
+  message?: string;
+}
+
+export interface Message {
   id: string;
-  sender: 'user' | 'ai';
+  sender: "user" | "ai";
   text: string;
   timestamp: string;
+  trackingId?: string;
+  deployStatus?: "RUNNING" | "SUCCESS" | "FAILED";
+  deployMessage?: string;
 }
 
 export const ChatPage: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
-    { id: '1', sender: 'ai', text: '안녕하세요! 등록된 지식 정보를 기반으로 질문에 답변해 드립니다. 궁금한 점을 물어보세요.', timestamp: '오후 2:30' },
+    {
+      id: "1",
+      sender: "ai",
+      text: "안녕하세요! 등록된 지식 정보를 기반으로 질문에 답변해 드립니다. 궁금한 점을 물어보세요.",
+      timestamp: "오후 2:30",
+    },
   ]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const pendingResultsRef = useRef<
+    Record<string, { status: string; message: string }>
+  >({});
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  // 실시간 SSE 인프라 운영 피드백 수신 리스너 장착 (1:1 타겟 갱신)
+  useOpsNotification("test-user", (payload) => {
+    if (payload.type !== "DEPLOY") return;
 
-    const userMsg: Message = {
-      id: Date.now().toString(),
-      sender: 'user',
-      text: input,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    };
+    setMessages((prev) => {
+      const isExist = prev.some((msg) => msg.trackingId === payload.trackingId);
+      if (!isExist) {
+        const nextPending = {
+          ...pendingResultsRef.current,
+          [payload.trackingId]: {
+            status: payload.status,
+            message: payload.message,
+          },
+        };
+        pendingResultsRef.current = nextPending;
+        return prev;
+      }
+      return prev.map((msg) =>
+        msg.trackingId === payload.trackingId
+          ? {
+              ...msg,
+              deployStatus:
+                payload.status === "RUNNING"
+                  ? "SUCCESS"
+                  : payload.status === "DEPLOYING"
+                    ? "RUNNING"
+                    : (payload.status as any),
+              deployMessage: payload.message,
+            }
+          : msg,
+      );
+    });
+  });
 
-    setMessages((prev) => [...prev, userMsg]);
-    setInput('');
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
+
+    const userQuery = input;
+    setInput("");
     setIsLoading(true);
 
-    // Mock API 응답 애니메이션
-    setTimeout(() => {
-      const aiMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        sender: 'ai',
-        text: `'${userMsg.text}'에 대한 답변 샘플입니다. (Spring Boot 백엔드의 AI / MCP 도메인이 연동되면 여기에 연동된 기밀 지식을 검색하여 실시간 답변을 출력하게 됩니다.)`,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      };
-      setMessages((prev) => [...prev, aiMsg]);
+    const userMsg: Message = {
+      id: `user-${Date.now()}`,
+      sender: "user",
+      text: userQuery,
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
+
+    const aiMessageId = `ai-${Date.now()}`;
+    const initialAiMsg: Message = {
+      id: aiMessageId,
+      sender: "ai",
+      text: "",
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
+
+    setMessages((prev) => [...prev, userMsg, initialAiMsg]);
+
+    let accumulatedText = "";
+    let trackingIdExtracted = false;
+
+    try {
+      await fetchPilotChatStream(userQuery, {
+        onMessage: (event) => {
+          try {
+            const eventData: ChatEventDto = JSON.parse(event.data);
+            if (eventData.type === "TOKEN" && eventData.message) {
+              accumulatedText += eventData.message;
+
+              const match = accumulatedText.match(/DEPLOY-[A-Z0-9]{8}/);
+
+              if (match && !trackingIdExtracted) {
+                const extractedId = match[0];
+                trackingIdExtracted = true;
+
+                setMessages((prev) =>
+                  prev.map((msg) => {
+                    if (msg.id === aiMessageId) {
+                      const pending = pendingResultsRef.current[extractedId];
+                      let finalStatus: "RUNNING" | "SUCCESS" | "FAILED" =
+                        "RUNNING";
+                      let finalMessage = "";
+
+                      if (pending) {
+                        finalStatus =
+                          pending.status === "RUNNING"
+                            ? "SUCCESS"
+                            : (pending.status as any);
+                        finalMessage = pending.message;
+
+                        delete pendingResultsRef.current[extractedId];
+                      }
+
+                      return {
+                        ...msg,
+                        text: accumulatedText,
+                        trackingId: extractedId,
+                        deployStatus: finalStatus,
+                        deployMessage: finalMessage,
+                      };
+                    }
+                    return msg;
+                  }),
+                );
+              } else {
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === aiMessageId
+                      ? { ...msg, text: accumulatedText }
+                      : msg,
+                  ),
+                );
+              }
+            } else if (eventData.type === "COMPLETE") {
+              setIsLoading(false);
+            }
+          } catch (e) {
+            console.error("[ChatPage] Event Data 파싱 에러:", event.data, e);
+          }
+        },
+        onComplete: () => {
+          setIsLoading(false);
+          if (!trackingIdExtracted) {
+            const match = accumulatedText.match(/DEPLOY-[A-Z0-9]{8}/);
+            if (match) {
+              const extractedId = match[0];
+              const pending = pendingResultsRef.current[extractedId];
+              let finalStatus: "RUNNING" | "SUCCESS" | "FAILED" = "RUNNING";
+              let finalMessage = "";
+
+              if (pending) {
+                finalStatus =
+                  pending.status === "RUNNING"
+                    ? "SUCCESS"
+                    : (pending.status as any);
+                finalMessage = pending.message;
+
+                delete pendingResultsRef.current[extractedId];
+              }
+
+              setMessages((prev) =>
+                prev.map((msg) =>
+                  msg.id === aiMessageId
+                    ? {
+                        ...msg,
+                        trackingId: extractedId,
+                        deployStatus: finalStatus,
+                        deployMessage: finalMessage,
+                      }
+                    : msg,
+                ),
+              );
+            }
+          }
+        },
+        onError: (error) => {
+          console.error("스트리밍 에러 발생:", error);
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === aiMessageId
+                ? {
+                    ...msg,
+                    text: "죄송합니다. 답변 수신 중 오류가 발생했습니다.",
+                  }
+                : msg,
+            ),
+          );
+          setIsLoading(false);
+        },
+      });
+    } catch (e) {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
-    <div className="flex flex-1 flex-col h-screen overflow-hidden bg-slate-50">
-      {/* 챗 상단 바 (밝은 테마 스타일) */}
-      <div className="hidden md:flex h-16 items-center justify-between border-b border-slate-200 bg-white px-6 shadow-sm">
+    <div className="flex flex-1 flex-col h-screen overflow-hidden bg-[#F5F6F7] dark:bg-[#16171d] transition-colors duration-200">
+      {/* 챗 상단 바  */}
+      <div className="hidden md:flex h-16 items-center justify-between border-b border-[#E4E8EB] dark:border-[#2e303a] bg-white dark:bg-[#16171d] px-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 text-sky-600 border border-sky-100">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#F4F6F8] dark:bg-[#1f2028] text-[#03C75A] border border-[#E4E8EB] dark:border-[#2e303a]">
             <FiCpu className="h-6 w-6" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-slate-800">AI 지식 어시스턴트</h2>
-            <div className="flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
-              <span className="text-xs text-emerald-600 font-semibold">실시간 지식 검색 활성화</span>
-            </div>
+            <h2 className="text-sm font-bold text-[#1E1E1E] dark:text-[#f3f4f6]">
+              Ops AI 어시스턴트
+            </h2>
           </div>
         </div>
       </div>
 
-      {/* 챗 알림 배너 (파스텔톤 블루) */}
-      <div className="bg-sky-50 px-6 py-3 border-b border-sky-100 flex items-center gap-3 text-xs text-sky-700 font-medium">
-        <FiInfo className="h-4.5 w-4.5 flex-shrink-0 text-sky-500" />
-        <span>현재 데모 답변 모드입니다. 백엔드와 연동하려면 API 통신 인터페이스를 구성해 주세요.</span>
-      </div>
-
       {/* 메시지 영역 */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+      <div className="flex-1 overflow-y-auto p-6 space-y-5">
         {messages.map((msg) => {
-          const isAi = msg.sender === 'ai';
+          const isAi = msg.sender === "ai";
           return (
-            <div key={msg.id} className={`flex gap-4 max-w-3xl ${isAi ? '' : 'ml-auto flex-row-reverse'}`}>
-              {/* 프로필 이미지 아이콘 (테마 정돈) */}
-              <div className={`flex h-9 w-9 items-center justify-center rounded-xl shadow-sm ${
-                isAi ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200 text-slate-600'
-              }`}>
-                {isAi ? <FiCpu className="h-5 w-5" /> : <FiUser className="h-5 w-5" />}
+            <div
+              key={msg.id}
+              className={`flex gap-3 max-w-3xl ${isAi ? "" : "ml-auto flex-row-reverse"}`}
+            >
+              {/* 프로필 이미지 아이콘 */}
+              <div
+                className={`flex h-9 w-9 items-center justify-center rounded-lg ${
+                  isAi
+                    ? "bg-[#03C75A] text-white"
+                    : "bg-white dark:bg-[#1f2028] border border-[#E4E8EB] dark:border-[#2e303a] text-[#404040] dark:text-slate-300"
+                }`}
+              >
+                {isAi ? (
+                  <FiCpu className="h-5 w-5" />
+                ) : (
+                  <FiUser className="h-5 w-5" />
+                )}
               </div>
 
               {/* 말풍선 */}
               <div className="space-y-1">
-                <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
-                  isAi
-                    ? 'bg-white border border-slate-200 text-slate-800'
-                    : 'bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-medium'
-                }`}>
-                  <p>{msg.text}</p>
+                <div
+                  className={`rounded-lg px-4 py-2.5 text-sm leading-relaxed ${
+                    isAi
+                      ? "bg-white dark:bg-[#1f2028] border border-[#E4E8EB] dark:border-[#2e303a] text-[#1E1E1E] dark:text-[#f3f4f6]"
+                      : "bg-[#03C75A] text-white font-normal"
+                  }`}
+                >
+                  {isAi ? (
+                    <MarkdownRenderer content={msg.text} />
+                  ) : (
+                    <p className="whitespace-pre-wrap">{msg.text}</p>
+                  )}
                 </div>
-                <p className={`text-[10px] text-slate-400 ${isAi ? '' : 'text-right'}`}>
+                {msg.trackingId && (
+                  <div
+                    className={`mt-2 p-3.5 rounded-lg border transition-all ${
+                      msg.deployStatus === "SUCCESS"
+                        ? "bg-[#F0FAF5] border-[#D1F2E1] dark:bg-emerald-950/20 dark:border-emerald-900/30 text-[#098243] dark:text-[#a3e635]"
+                        : msg.deployStatus === "FAILED"
+                          ? "bg-[#FFF0F0] border-[#FCD4D4] dark:bg-rose-950/20 dark:border-rose-900/30 text-[#D83A3A] dark:text-[#f87171]"
+                          : "bg-[#FFF9EB] border-[#FFE9C4] dark:bg-amber-950/20 dark:border-amber-900/30 text-[#8F6B00] dark:text-[#fbbf24]"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between font-bold text-xs">
+                      <span>배포 추적 ID: {msg.trackingId}</span>
+                      <span className="uppercase px-2 py-0.5 rounded-md text-[10px] bg-white dark:bg-[#16171d] border border-[#E4E8EB] dark:border-[#2e303a] text-[#1E1E1E] dark:text-[#f3f4f6]">
+                        {msg.deployStatus}
+                      </span>
+                    </div>
+                    <p className="text-xs mt-1.5 font-medium">
+                      {msg.deployStatus === "SUCCESS" &&
+                        "🟢 " + (msg.deployMessage || "배포 완료")}
+                      {msg.deployStatus === "FAILED" &&
+                        "🔴 " + (msg.deployMessage || "배포 실패")}
+                      {msg.deployStatus === "RUNNING" &&
+                        "🟡 kubectl apply 및 Rollout 진행 중..."}
+                    </p>
+                  </div>
+                )}
+                <p
+                  className={`text-[10px] text-slate-400 ${isAi ? "" : "text-right"}`}
+                >
                   {msg.timestamp}
                 </p>
               </div>
@@ -103,36 +316,63 @@ export const ChatPage: React.FC = () => {
 
         {/* 로딩 표시 */}
         {isLoading && (
-          <div className="flex gap-4 max-w-3xl">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
+          <div className="flex gap-3 max-w-3xl">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#03C75A] text-white">
               <FiCpu className="h-5 w-5" />
             </div>
-            <div className="flex items-center gap-1.5 rounded-2xl bg-white border border-slate-200 px-4 py-3.5 shadow-sm">
-              <div className="h-2 w-2 rounded-full bg-slate-300 animate-bounce" style={{ animationDelay: '0ms' }}></div>
-              <div className="h-2 w-2 rounded-full bg-slate-300 animate-bounce" style={{ animationDelay: '150ms' }}></div>
-              <div className="h-2 w-2 rounded-full bg-slate-300 animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            <div className="flex items-center gap-1.5 rounded-lg bg-white dark:bg-[#1f2028] border border-[#E4E8EB] dark:border-[#2e303a] px-4 py-3">
+              <div
+                className="h-1.5 w-1.5 rounded-full bg-slate-300 dark:bg-slate-600 animate-bounce"
+                style={{ animationDelay: "0ms" }}
+              ></div>
+              <div
+                className="h-1.5 w-1.5 rounded-full bg-slate-300 dark:bg-slate-600 animate-bounce"
+                style={{ animationDelay: "150ms" }}
+              ></div>
+              <div
+                className="h-1.5 w-1.5 rounded-full bg-slate-300 dark:bg-slate-600 animate-bounce"
+                style={{ animationDelay: "300ms" }}
+              ></div>
             </div>
           </div>
         )}
         <div ref={chatEndRef} />
       </div>
 
-      {/* 하단 입력 폼 (화이트 카드 레이아웃) */}
-      <div className="border-t border-slate-200 p-6 bg-white shadow-md">
-        <div className="flex items-center gap-3 max-w-4xl mx-auto bg-slate-50 border border-slate-200 rounded-2xl p-2.5 focus-within:bg-white focus-within:ring-2 focus-within:ring-sky-500/20 focus-within:border-sky-500 transition-all">
+      {/* 하단 입력 폼 */}
+      <div className="border-t border-[#E4E8EB] dark:border-[#2e303a] p-4 bg-white dark:bg-[#16171d]">
+        <div
+          className={`flex items-center gap-2 max-w-4xl mx-auto border rounded-lg p-1.5 transition-all ${
+            isLoading
+              ? "bg-[#F4F6F8] dark:bg-[#16171d] border-[#E4E8EB] dark:border-[#2e303a] cursor-not-allowed"
+              : "bg-white dark:bg-[#1f2028] border-[#E4E8EB] dark:border-[#2e303a] focus-within:border-[#03C75A]"
+          }`}
+        >
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="AI에게 무엇이든 물어보세요... (지식 정보 조회 가능)"
-            className="flex-1 bg-transparent px-3 text-sm text-slate-800 placeholder-slate-400 outline-none"
+            onKeyDown={(e) => e.key === "Enter" && handleSend()}
+            disabled={isLoading}
+            placeholder={
+              isLoading
+                ? "답변을 대기 중입니다..."
+                : "명령어 또는 문의 사항을 입력하세요..."
+            }
+            className={`flex-1 bg-transparent px-2.5 text-sm text-[#1E1E1E] dark:text-[#f3f4f6] placeholder-slate-400 outline-none ${
+              isLoading ? "cursor-not-allowed opacity-60" : ""
+            }`}
           />
           <button
             onClick={handleSend}
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-600 hover:bg-sky-500 text-white shadow-md shadow-sky-600/10 active:scale-95 transition-all"
+            disabled={isLoading}
+            className={`flex h-9 w-9 items-center justify-center rounded-lg text-white transition-all ${
+              isLoading
+                ? "bg-slate-300 dark:bg-slate-700 cursor-not-allowed"
+                : "bg-[#03C75A] hover:bg-[#02b350] active:scale-95"
+            }`}
           >
-            <FiSend className="h-5 w-5" />
+            <FiSend className="h-4.5 w-4.5" />
           </button>
         </div>
       </div>

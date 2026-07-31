@@ -123,11 +123,11 @@ export const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="p-8 bg-slate-50 dark:bg-slate-950 min-h-screen transition-colors duration-200">
+    <div className="p-8 bg-[#F5F6F7] dark:bg-[#16171d] min-h-screen transition-colors duration-200">
       {/* 상단 헤더 영역 */}
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between border-b border-slate-300 dark:border-slate-600 pb-6 mb-8">
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between border-b border-[#E4E8EB] dark:border-slate-800 pb-6 mb-8">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-800 dark:text-slate-100">
+          <h1 className="text-2xl font-bold tracking-tight text-[#1E1E1E] dark:text-slate-100">
             지식 대시보드
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -136,7 +136,7 @@ export const DashboardPage: React.FC = () => {
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-sky-500/20 hover:from-sky-400 hover:to-indigo-500 transition-all active:scale-95 cursor-pointer"
+          className="flex items-center gap-2 rounded-lg bg-[#03C75A] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#02b350] transition-all active:scale-95 cursor-pointer"
         >
           <FiPlus className="h-5 w-5" />새 지식 등록
         </button>
@@ -154,43 +154,43 @@ export const DashboardPage: React.FC = () => {
               label: "전체 지식 소스",
               count: sources.length,
               desc: "등록된 지식 자료 수",
-              color: "from-sky-500/5 dark:from-sky-500/10",
+              numColor: "text-[#1E1E1E] dark:text-white",
             },
             {
               label: "완료 및 연동됨",
               count: sources.filter((s) => s.status === "PUBLISHED").length,
               desc: "검색 가능한 지식",
-              color: "from-emerald-500/5 dark:from-emerald-500/10",
+              numColor: "text-[#03C75A]",
             },
             {
               label: "처리 대기 중",
               count: sources.filter((s) => s.status === "VERIFYING").length,
               desc: "벡터라이징 대기",
-              color: "from-amber-500/5 dark:from-amber-500/10",
+              numColor: "text-[#FF9500]",
             },
           ].map((stat, idx) => (
             <div
               key={idx}
-              className={`relative overflow-hidden rounded-2xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-6 shadow-sm bg-gradient-to-tr ${stat.color} to-transparent`}
+              className="relative overflow-hidden rounded-lg p-6 bg-white dark:bg-[#1f2028] border border-[#E4E8EB] dark:border-slate-800"
             >
-              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+              <p className="text-xs font-bold text-[#666666] dark:text-slate-400">
                 {stat.label}
               </p>
-              <p className="mt-2 text-3xl font-bold tracking-tight text-slate-800 dark:text-slate-100">
+              <p className={`mt-2 text-3xl font-extrabold tracking-tight ${stat.numColor}`}>
                 {stat.count}
               </p>
-              <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">{stat.desc}</p>
+              <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500 font-medium">{stat.desc}</p>
             </div>
           ))}
         </div>
       )}
 
       {/* 테이블 영역 */}
-      <div className="rounded-2xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-300 dark:border-slate-600 p-6 gap-4">
+      <div className="rounded-lg border border-[#E4E8EB] dark:border-slate-800 bg-white dark:bg-[#1f2028] overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-[#E4E8EB] dark:border-slate-800 p-6 gap-4">
           <div>
-            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">등록된 지식 목록</h2>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+            <h2 className="text-lg font-bold text-[#1E1E1E] dark:text-[#f3f4f6]">등록된 지식 목록</h2>
+            <p className="text-xs text-[#666666] dark:text-slate-400 mt-0.5">
               {filteredSources.length !== sources.length 
                 ? `검색 결과: ${filteredSources.length}개 / 전체: ${sources.length}개`
                 : `전체: ${sources.length}개`}
@@ -207,13 +207,13 @@ export const DashboardPage: React.FC = () => {
                 placeholder="지식 제목으로 검색..."
                 value={searchQuery}
                 onChange={handleSearchChange}
-                className="w-full pl-9 pr-4 py-2 border border-slate-300 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-sky-500 focus:border-sky-500 transition-all text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-950 hover:bg-slate-50/50"
+                className="w-full pl-9 pr-4 py-2 border border-[#E4E8EB] dark:border-slate-800 rounded-lg text-sm focus:outline-none focus:border-[#03C75A] transition-all text-[#1E1E1E] dark:text-[#f3f4f6] bg-slate-50 dark:bg-[#16171d] hover:bg-slate-50/50"
               />
             </div>
             <button
               onClick={() => refetch()}
               disabled={isRefetching}
-              className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 disabled:opacity-50 transition-colors border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 flex-shrink-0 cursor-pointer"
+              className="flex items-center gap-1.5 text-xs font-semibold text-[#666666] dark:text-slate-300 hover:text-[#1E1E1E] dark:hover:text-white disabled:opacity-50 transition-colors border border-[#E4E8EB] dark:border-slate-800 rounded-lg px-3 py-2 bg-white dark:bg-[#1f2028] hover:bg-[#F5F6F7] dark:hover:bg-slate-800 flex-shrink-0 cursor-pointer"
             >
               <FiRefreshCw
                 className={`h-3.5 w-3.5 ${isRefetching ? "animate-spin" : ""}`}
@@ -229,28 +229,28 @@ export const DashboardPage: React.FC = () => {
               목록 구성 중...
             </div>
           ) : filteredSources.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-12 text-center text-slate-400 dark:text-slate-500 bg-slate-50/30 dark:bg-slate-950/20">
+            <div className="flex flex-col items-center justify-center p-12 text-center text-slate-400 dark:text-slate-500 bg-[#F5F6F7]/30 dark:bg-[#16171d]/20">
               <FiSearch className="h-10 w-10 text-slate-300 dark:text-slate-600 mb-2" />
-              <p className="font-semibold text-slate-600 dark:text-slate-300">검색 조건에 맞는 지식이 없습니다.</p>
+              <p className="font-semibold text-[#1E1E1E] dark:text-[#f3f4f6]">검색 조건에 맞는 지식이 없습니다.</p>
               <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">검색어를 다르게 입력하거나 새 지식을 등록해 보세요.</p>
             </div>
           ) : (
             <>
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-950/40 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  <tr className="border-b border-[#E4E8EB] dark:border-slate-800 bg-[#F5F6F7] dark:bg-[#16171d] text-xs font-bold text-[#666666] dark:text-slate-400 uppercase tracking-wider">
                     <th className="py-4 px-6">지식 제목</th>
                     <th className="py-4 px-6">벡터 상태</th>
                     <th className="py-4 px-6 text-right">관리</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-300 dark:divide-slate-600 text-sm text-slate-600 dark:text-slate-300">
+                <tbody className="divide-y divide-[#E4E8EB] dark:divide-slate-800 text-sm text-[#333333] dark:text-slate-300">
                   {paginatedSources.map((source) => (
                     <tr
                       key={source.id}
                       className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors"
                     >
-                      <td className="py-4 px-6 font-semibold text-slate-800 dark:text-slate-200">
+                      <td className="py-4 px-6 font-semibold text-[#1E1E1E] dark:text-[#f3f4f6]">
                         {source.title}
                       </td>
                       <td className="py-4 px-6">
@@ -262,7 +262,7 @@ export const DashboardPage: React.FC = () => {
                             setSelectedKnowledgeId(source.id);
                             setIsDetailModalOpen(true);
                           }}
-                          className="text-xs font-bold text-sky-600 dark:text-sky-400 hover:text-sky-800 dark:hover:text-sky-300 mr-4 transition-colors cursor-pointer"
+                          className="text-xs font-bold text-[#03C75A] hover:text-[#02b350] mr-4 transition-colors cursor-pointer"
                         >
                           상세
                         </button>
@@ -281,8 +281,8 @@ export const DashboardPage: React.FC = () => {
 
               {/* 페이징 네비게이션 영역 */}
               {filteredSources.length > 0 && (
-                <div className="flex flex-col sm:flex-row items-center justify-between border-t border-slate-300 dark:border-slate-600 bg-slate-50/50 dark:bg-slate-950/20 px-6 py-4 gap-4">
-                  <div className="text-xs text-slate-500 dark:text-slate-400">
+                <div className="flex flex-col sm:flex-row items-center justify-between border-t border-[#E4E8EB] dark:border-slate-800 bg-[#F5F6F7]/50 dark:bg-[#16171d]/20 px-6 py-4 gap-4">
+                  <div className="text-xs text-[#666666] dark:text-slate-400">
                     전체 <strong>{filteredSources.length}</strong>개 중 <strong>{(activePage - 1) * itemsPerPage + 1}</strong> ~ <strong>{Math.min(activePage * itemsPerPage, filteredSources.length)}</strong> 표시 중
                   </div>
                   
@@ -290,7 +290,7 @@ export const DashboardPage: React.FC = () => {
                     <button
                       onClick={() => setCurrentPage(1)}
                       disabled={activePage === 1}
-                      className="p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:hover:bg-white dark:disabled:hover:bg-slate-900 text-slate-500 dark:text-slate-400 transition-colors cursor-pointer disabled:cursor-not-allowed"
+                      className="p-2 rounded-lg border border-[#E4E8EB] dark:border-slate-800 bg-white dark:bg-[#1f2028] hover:bg-[#F5F6F7] dark:hover:bg-slate-800 disabled:opacity-40 disabled:hover:bg-white dark:disabled:hover:bg-[#1f2028] text-slate-500 dark:text-slate-400 transition-colors cursor-pointer disabled:cursor-not-allowed"
                       title="첫 페이지"
                     >
                       <FiChevronLeft className="h-4 w-4 stroke-[3px]" />
@@ -298,7 +298,7 @@ export const DashboardPage: React.FC = () => {
                     <button
                       onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                       disabled={activePage === 1}
-                      className="px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:hover:bg-white dark:disabled:hover:bg-slate-900 text-xs font-semibold text-slate-600 dark:text-slate-300 transition-colors cursor-pointer disabled:cursor-not-allowed"
+                      className="px-3 py-1.5 rounded-lg border border-[#E4E8EB] dark:border-slate-800 bg-white dark:bg-[#1f2028] hover:bg-[#F5F6F7] dark:hover:bg-slate-800 disabled:opacity-40 disabled:hover:bg-white dark:disabled:hover:bg-[#1f2028] text-xs font-semibold text-slate-600 dark:text-slate-300 transition-colors cursor-pointer disabled:cursor-not-allowed"
                     >
                       이전
                     </button>
@@ -312,8 +312,8 @@ export const DashboardPage: React.FC = () => {
                           onClick={() => setCurrentPage(page)}
                           className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                             page === activePage
-                              ? "bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-sm"
-                              : "border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+                              ? "bg-[#03C75A] text-white"
+                              : "border border-[#E4E8EB] dark:border-slate-800 bg-white dark:bg-[#1f2028] text-slate-600 dark:text-[#9ca3af] hover:bg-[#F5F6F7] dark:hover:bg-slate-800"
                           }`}
                         >
                           {page}
@@ -323,14 +323,14 @@ export const DashboardPage: React.FC = () => {
                     <button
                       onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                       disabled={activePage === totalPages}
-                      className="px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:hover:bg-white dark:disabled:hover:bg-slate-900 text-xs font-semibold text-slate-600 dark:text-slate-300 transition-colors cursor-pointer disabled:cursor-not-allowed"
+                      className="px-3 py-1.5 rounded-lg border border-[#E4E8EB] dark:border-slate-800 bg-white dark:bg-[#1f2028] hover:bg-[#F5F6F7] dark:hover:bg-slate-800 disabled:opacity-40 disabled:hover:bg-white dark:disabled:hover:bg-[#1f2028] text-xs font-semibold text-slate-600 dark:text-slate-300 transition-colors cursor-pointer disabled:cursor-not-allowed"
                     >
                       다음
                     </button>
                     <button
                       onClick={() => setCurrentPage(totalPages)}
                       disabled={activePage === totalPages}
-                      className="p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:hover:bg-white dark:disabled:hover:bg-slate-900 text-slate-500 dark:text-slate-400 transition-colors cursor-pointer disabled:cursor-not-allowed"
+                      className="p-2 rounded-lg border border-[#E4E8EB] dark:border-slate-800 bg-white dark:bg-[#1f2028] hover:bg-[#F5F6F7] dark:hover:bg-slate-800 disabled:opacity-40 disabled:hover:bg-white dark:disabled:hover:bg-[#1f2028] text-slate-500 dark:text-slate-400 transition-colors cursor-pointer disabled:cursor-not-allowed"
                       title="마지막 페이지"
                     >
                       <FiChevronRight className="h-4 w-4 stroke-[3px]" />
