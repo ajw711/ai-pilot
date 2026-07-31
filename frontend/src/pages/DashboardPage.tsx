@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { FiPlus, FiRefreshCw, FiSearch, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import {
+  FiPlus,
+  FiRefreshCw,
+  FiSearch,
+  FiChevronLeft,
+  FiChevronRight,
+} from "react-icons/fi";
 import { CreateKnowledgeModal } from "../components/CreateKnowledgeModal";
 import { KnowledgeDetailModal } from "../components/KnowledgeDetailModal";
 import {
@@ -10,7 +16,9 @@ import {
 
 export const DashboardPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedKnowledgeId, setSelectedKnowledgeId] = useState<number | null>(null);
+  const [selectedKnowledgeId, setSelectedKnowledgeId] = useState<number | null>(
+    null,
+  );
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // Search & Pagination States
@@ -31,15 +39,18 @@ export const DashboardPage: React.FC = () => {
 
   // Search filtering logic
   const filteredSources = sources.filter((source) =>
-    source.title.toLowerCase().includes(searchQuery.toLowerCase())
+    source.title.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   // Pagination logic
-  const totalPages = Math.max(1, Math.ceil(filteredSources.length / itemsPerPage));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredSources.length / itemsPerPage),
+  );
   const activePage = Math.min(currentPage, totalPages);
   const paginatedSources = filteredSources.slice(
     (activePage - 1) * itemsPerPage,
-    activePage * itemsPerPage
+    activePage * itemsPerPage,
   );
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,22 +59,34 @@ export const DashboardPage: React.FC = () => {
   };
 
   // 지식 라이프사이클에 따른 인덱스 상태 배지 처리
-  // 지식 라이프사이클에 따른 인덱스 상태 배지 처리
   const getStatusBadge = (status: string) => {
     const badgeStyles: Record<string, string> = {
-      PUBLISHED: "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 ring-emerald-600/10 dark:ring-emerald-500/20 font-bold",
-      VERIFYING: "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 ring-amber-600/10 dark:ring-amber-500/20 animate-pulse",
-      FORMATTING: "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 ring-amber-600/10 dark:ring-amber-500/20 animate-pulse",
-      DRAFT: "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 ring-slate-600/10 dark:ring-slate-500/25",
-      REVIEW_READY: "bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-400 ring-indigo-600/10 dark:ring-indigo-500/20 font-bold",
-      REVIEW_APPROVED: "bg-sky-50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-400 ring-sky-600/10 dark:ring-sky-500/20",
-      NOTION_PUBLISHING: "bg-sky-50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-400 ring-sky-600/10 dark:ring-sky-500/20 animate-pulse",
-      VECTOR_INDEXING: "bg-sky-50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-400 ring-sky-600/10 dark:ring-sky-500/20 animate-pulse",
-      FAILED_AT_VERIFYING: "bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 ring-rose-600/10 dark:ring-rose-500/20",
-      FAILED_AT_FORMATTING: "bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 ring-rose-600/10 dark:ring-rose-500/20",
-      FAILED_AT_NOTION_PUBLISH: "bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 ring-rose-600/10 dark:ring-rose-500/20",
-      FAILED_AT_VECTOR_INDEX: "bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 ring-rose-600/10 dark:ring-rose-500/20",
-      FAILED: "bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 ring-rose-600/10 dark:ring-rose-500/20",
+      PUBLISHED:
+        "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 ring-emerald-600/10 dark:ring-emerald-500/20 font-bold",
+      VERIFYING:
+        "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 ring-amber-600/10 dark:ring-amber-500/20 animate-pulse",
+      FORMATTING:
+        "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 ring-amber-600/10 dark:ring-amber-500/20 animate-pulse",
+      DRAFT:
+        "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 ring-slate-600/10 dark:ring-slate-500/25",
+      REVIEW_READY:
+        "bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-400 ring-indigo-600/10 dark:ring-indigo-500/20 font-bold",
+      REVIEW_APPROVED:
+        "bg-sky-50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-400 ring-sky-600/10 dark:ring-sky-500/20",
+      NOTION_PUBLISHING:
+        "bg-sky-50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-400 ring-sky-600/10 dark:ring-sky-500/20 animate-pulse",
+      VECTOR_INDEXING:
+        "bg-sky-50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-400 ring-sky-600/10 dark:ring-sky-500/20 animate-pulse",
+      FAILED_AT_VERIFYING:
+        "bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 ring-rose-600/10 dark:ring-rose-500/20",
+      FAILED_AT_FORMATTING:
+        "bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 ring-rose-600/10 dark:ring-rose-500/20",
+      FAILED_AT_NOTION_PUBLISH:
+        "bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 ring-rose-600/10 dark:ring-rose-500/20",
+      FAILED_AT_VECTOR_INDEX:
+        "bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 ring-rose-600/10 dark:ring-rose-500/20",
+      FAILED:
+        "bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 ring-rose-600/10 dark:ring-rose-500/20",
     };
 
     const statusLabels: Record<string, string> = {
@@ -176,10 +199,14 @@ export const DashboardPage: React.FC = () => {
               <p className="text-xs font-bold text-[#666666] dark:text-slate-400">
                 {stat.label}
               </p>
-              <p className={`mt-2 text-3xl font-extrabold tracking-tight ${stat.numColor}`}>
+              <p
+                className={`mt-2 text-3xl font-extrabold tracking-tight ${stat.numColor}`}
+              >
                 {stat.count}
               </p>
-              <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500 font-medium">{stat.desc}</p>
+              <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+                {stat.desc}
+              </p>
             </div>
           ))}
         </div>
@@ -189,14 +216,16 @@ export const DashboardPage: React.FC = () => {
       <div className="rounded-lg border border-[#E4E8EB] dark:border-slate-800 bg-white dark:bg-[#1f2028] overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-[#E4E8EB] dark:border-slate-800 p-6 gap-4">
           <div>
-            <h2 className="text-lg font-bold text-[#1E1E1E] dark:text-[#f3f4f6]">등록된 지식 목록</h2>
+            <h2 className="text-lg font-bold text-[#1E1E1E] dark:text-[#f3f4f6]">
+              등록된 지식 목록
+            </h2>
             <p className="text-xs text-[#666666] dark:text-slate-400 mt-0.5">
-              {filteredSources.length !== sources.length 
+              {filteredSources.length !== sources.length
                 ? `검색 결과: ${filteredSources.length}개 / 전체: ${sources.length}개`
                 : `전체: ${sources.length}개`}
             </p>
           </div>
-          
+
           <div className="flex items-center gap-3 flex-1 sm:max-w-md justify-end">
             <div className="relative w-full">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400 dark:text-slate-500">
@@ -222,7 +251,7 @@ export const DashboardPage: React.FC = () => {
             </button>
           </div>
         </div>
-        
+
         <div className="overflow-x-auto">
           {isLoading ? (
             <div className="p-10 text-center text-slate-400 dark:text-slate-500">
@@ -231,8 +260,12 @@ export const DashboardPage: React.FC = () => {
           ) : filteredSources.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-12 text-center text-slate-400 dark:text-slate-500 bg-[#F5F6F7]/30 dark:bg-[#16171d]/20">
               <FiSearch className="h-10 w-10 text-slate-300 dark:text-slate-600 mb-2" />
-              <p className="font-semibold text-[#1E1E1E] dark:text-[#f3f4f6]">검색 조건에 맞는 지식이 없습니다.</p>
-              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">검색어를 다르게 입력하거나 새 지식을 등록해 보세요.</p>
+              <p className="font-semibold text-[#1E1E1E] dark:text-[#f3f4f6]">
+                검색 조건에 맞는 지식이 없습니다.
+              </p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                검색어를 다르게 입력하거나 새 지식을 등록해 보세요.
+              </p>
             </div>
           ) : (
             <>
@@ -257,7 +290,7 @@ export const DashboardPage: React.FC = () => {
                         {getStatusBadge(source.status)}
                       </td>
                       <td className="py-4 px-6 text-right">
-                        <button 
+                        <button
                           onClick={() => {
                             setSelectedKnowledgeId(source.id);
                             setIsDetailModalOpen(true);
@@ -283,9 +316,17 @@ export const DashboardPage: React.FC = () => {
               {filteredSources.length > 0 && (
                 <div className="flex flex-col sm:flex-row items-center justify-between border-t border-[#E4E8EB] dark:border-slate-800 bg-[#F5F6F7]/50 dark:bg-[#16171d]/20 px-6 py-4 gap-4">
                   <div className="text-xs text-[#666666] dark:text-slate-400">
-                    전체 <strong>{filteredSources.length}</strong>개 중 <strong>{(activePage - 1) * itemsPerPage + 1}</strong> ~ <strong>{Math.min(activePage * itemsPerPage, filteredSources.length)}</strong> 표시 중
+                    전체 <strong>{filteredSources.length}</strong>개 중{" "}
+                    <strong>{(activePage - 1) * itemsPerPage + 1}</strong> ~{" "}
+                    <strong>
+                      {Math.min(
+                        activePage * itemsPerPage,
+                        filteredSources.length,
+                      )}
+                    </strong>{" "}
+                    표시 중
                   </div>
-                  
+
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => setCurrentPage(1)}
@@ -296,13 +337,15 @@ export const DashboardPage: React.FC = () => {
                       <FiChevronLeft className="h-4 w-4 stroke-[3px]" />
                     </button>
                     <button
-                      onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.max(1, prev - 1))
+                      }
                       disabled={activePage === 1}
                       className="px-3 py-1.5 rounded-lg border border-[#E4E8EB] dark:border-slate-800 bg-white dark:bg-[#1f2028] hover:bg-[#F5F6F7] dark:hover:bg-slate-800 disabled:opacity-40 disabled:hover:bg-white dark:disabled:hover:bg-[#1f2028] text-xs font-semibold text-slate-600 dark:text-slate-300 transition-colors cursor-pointer disabled:cursor-not-allowed"
                     >
                       이전
                     </button>
-                    
+
                     {/* 페이지 번호 목록 */}
                     {Array.from({ length: totalPages }, (_, i) => i + 1)
                       .filter((page) => Math.abs(page - activePage) <= 2)
@@ -319,9 +362,11 @@ export const DashboardPage: React.FC = () => {
                           {page}
                         </button>
                       ))}
-                    
+
                     <button
-                      onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                      }
                       disabled={activePage === totalPages}
                       className="px-3 py-1.5 rounded-lg border border-[#E4E8EB] dark:border-slate-800 bg-white dark:bg-[#1f2028] hover:bg-[#F5F6F7] dark:hover:bg-slate-800 disabled:opacity-40 disabled:hover:bg-white dark:disabled:hover:bg-[#1f2028] text-xs font-semibold text-slate-600 dark:text-slate-300 transition-colors cursor-pointer disabled:cursor-not-allowed"
                     >
