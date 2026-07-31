@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FiSend, FiCpu, FiUser } from "react-icons/fi";
 import { fetchPilotChatStream, useOpsNotification } from "../features/ops/api";
+import type { OpsNotificationPayload } from "../features/ops/api";
 import { MarkdownRenderer } from "../components/MarkdownRenderer";
 
 export interface ChatRequestDto {
@@ -43,7 +44,7 @@ export const ChatPage: React.FC = () => {
   }, [messages]);
 
   // 실시간 SSE 인프라 운영 피드백 수신 리스너 장착 (1:1 타겟 갱신)
-  useOpsNotification("test-user", (payload) => {
+  useOpsNotification((payload: OpsNotificationPayload) => {
     if (payload.type !== "DEPLOY") return;
 
     setMessages((prev) => {
@@ -111,7 +112,7 @@ export const ChatPage: React.FC = () => {
 
     try {
       await fetchPilotChatStream(userQuery, {
-        onMessage: (event) => {
+        onMessage: (event: any) => {
           try {
             const eventData: ChatEventDto = JSON.parse(event.data);
             if (eventData.type === "TOKEN" && eventData.message) {
@@ -203,7 +204,7 @@ export const ChatPage: React.FC = () => {
             }
           }
         },
-        onError: (error) => {
+        onError: (error: any) => {
           console.error("스트리밍 에러 발생:", error);
           setMessages((prev) =>
             prev.map((msg) =>
