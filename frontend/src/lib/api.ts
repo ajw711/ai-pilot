@@ -15,6 +15,10 @@ export const api = axios.create({
 // API 요청 인터셉터 (인증 등 공통 처리)
 api.interceptors.request.use(
   (config) => {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => {
@@ -47,17 +51,17 @@ export interface SseStreamOptions {
 export const fetchSseStream = async <Req>(
   url: string,
   payload: Req,
-  options: SseStreamOptions
+  options: SseStreamOptions,
 ): Promise<void> => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
-  
+
   const response = await fetch(`${API_BASE_URL}${url}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Accept": "text/event-stream"
+      Accept: "text/event-stream",
     },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
@@ -71,7 +75,7 @@ export const fetchSseStream = async <Req>(
   }
 
   let lineBuffer = "";
-  
+
   let currentEventName = "";
   let currentDataBuffer = "";
   let currentId = "";
@@ -83,9 +87,9 @@ export const fetchSseStream = async <Req>(
         event: currentEventName || "message",
         data: currentDataBuffer.trim(),
         id: currentId,
-        retry: currentRetry
+        retry: currentRetry,
       });
-      
+
       currentDataBuffer = "";
       currentEventName = "";
     }
@@ -145,13 +149,13 @@ export const fetchSseStream = async <Req>(
   try {
     while (true) {
       const { value, done } = await reader.read();
-      
+
       if (done) {
         const remain = decoder.decode();
         if (remain) {
           lineBuffer += remain;
         }
-        
+
         if (lineBuffer) {
           const lastLines = lineBuffer.split(/\r?\n/);
           lastLines.forEach(processLine);
@@ -167,9 +171,13 @@ export const fetchSseStream = async <Req>(
       let lineEndIndex: number;
       while ((lineEndIndex = findLineEnd(lineBuffer)) !== -1) {
         const line = lineBuffer.substring(0, lineEndIndex);
-        const cleanLine = line.endsWith("\r") ? line.substring(0, line.length - 1) : line;
-        
-        lineBuffer = lineBuffer.substring(lineEndIndex + (lineBuffer.charAt(lineEndIndex) === "\n" ? 1 : 2));
+        const cleanLine = line.endsWith("\r")
+          ? line.substring(0, line.length - 1)
+          : line;
+
+        lineBuffer = lineBuffer.substring(
+          lineEndIndex + (lineBuffer.charAt(lineEndIndex) === "\n" ? 1 : 2),
+        );
         processLine(cleanLine);
       }
     }
@@ -179,4 +187,3 @@ export const fetchSseStream = async <Req>(
     throw err;
   }
 };
-

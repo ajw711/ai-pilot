@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { loginApi } from "../features/auth/api";
 import { FiLock, FiUser, FiCheckSquare, FiSquare } from "react-icons/fi";
 
 interface LoginPageProps {
@@ -11,7 +12,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const [rememberId, setRememberId] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!userId.trim() || !password.trim()) {
@@ -19,13 +20,22 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       return;
     }
 
-    // 데모용 정적 로그인 세션 처리 (아이디: test-user, 비번: 1234)
-    if (userId === "test-user" && password === "1234") {
+    try {
+      // 캡슐화된 loginApi 우회 호출
+      const data = await loginApi({
+        username: userId,
+        password: password,
+      });
+
+      localStorage.setItem("access_token", data.accessToken);
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("userId", userId);
       onLoginSuccess();
-    } else {
-      setErrorMsg("아이디 또는 비밀번호가 올바르지 않습니다.");
+    } catch (err: any) {
+      console.error(err);
+      setErrorMsg(
+        err.response?.data?.error?.message || "로그인에 실패했습니다.",
+      );
     }
   };
 

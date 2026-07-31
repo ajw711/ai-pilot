@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.time.LocalDateTime;
+
 @SQLRestriction("deleted_at IS NULL")
 @Table(name = "users")
 @Entity
@@ -27,6 +29,8 @@ public class UserJpaEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private Role role;
+
+    private LocalDateTime deletedAt;
 
     private UserJpaEntity(String username, String password, Role role) {
         this.username = username;
