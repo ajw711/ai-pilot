@@ -1,5 +1,18 @@
 import { api } from "../../lib/api";
+import { fetchSseStream } from "../../lib/api";
+import type { SseStreamOptions } from "../../lib/api";
 import { useEffect, useRef } from "react";
+
+export const fetchPilotChatStream = async (
+  message: string,
+  options: SseStreamOptions
+): Promise<void> => {
+  return fetchSseStream(
+    "/api/v1/pilot/chat/stream",
+    { message },
+    options
+  );
+};
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
