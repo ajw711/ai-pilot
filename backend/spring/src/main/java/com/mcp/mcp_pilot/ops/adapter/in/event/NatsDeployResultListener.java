@@ -61,7 +61,7 @@ public class NatsDeployResultListener {
                     String trackingId = trackingNode.asString();
                     String statusStr = statusNode.asString();
                     String message = (messageNode != null) ? messageNode.asString() : "";
-                    Long requestedBy = (userNode != null) ? userNode.asLong() : 1L;
+                    Long requestedBy = parseRequestedBy(userNode);
 
                     DeploymentStatus status = DeploymentStatus.valueOf(statusStr.toUpperCase());
                     DeployResult result = new DeployResult(trackingId, status, message, requestedBy);
@@ -83,6 +83,25 @@ public class NatsDeployResultListener {
             dispatcher.subscribe("deploy.result");
         } catch (Exception e) {
             log.error("[NATS Listener] 구독 실패", e);
+        }
+    }
+
+    private Long parseRequestedBy(JsonNode userNode) {
+        if (userNode == null || userNode.isNull()) {
+            return null;
+        }
+
+        String raw = userNode.asString("");
+        if (raw.isBlank()) {
+            log.warn("[NATS Listener] requestedBy 값이 비어있음 (Go 쪽 직렬화 실패로 추정)");
+            return null;
+        }
+
+        try {
+            return Long.parseLong(raw);
+        } catch (NumberFormatException e) {
+            log.warn("[NATS Listener] requestedBy 파싱 실패. raw={}", raw);
+            return null;
         }
     }
 }
