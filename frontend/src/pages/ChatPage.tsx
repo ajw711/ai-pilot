@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { FiSend, FiCpu, FiUser, FiInfo } from "react-icons/fi";
+import { FiSend, FiCpu, FiUser } from "react-icons/fi";
 import { fetchPilotChatStream, useOpsNotification } from "../features/ops/api";
 import { MarkdownRenderer } from "../components/MarkdownRenderer";
 
@@ -33,9 +33,6 @@ export const ChatPage: React.FC = () => {
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [pendingResults, setPendingResults] = useState<
-    Record<string, { status: string; message: string }>
-  >({});
   const pendingResultsRef = useRef<
     Record<string, { status: string; message: string }>
   >({});
@@ -52,17 +49,14 @@ export const ChatPage: React.FC = () => {
     setMessages((prev) => {
       const isExist = prev.some((msg) => msg.trackingId === payload.trackingId);
       if (!isExist) {
-        setPendingResults((prevPending) => {
-          const nextPending = {
-            ...prevPending,
-            [payload.trackingId]: {
-              status: payload.status,
-              message: payload.message,
-            },
-          };
-          pendingResultsRef.current = nextPending;
-          return nextPending;
-        });
+        const nextPending = {
+          ...pendingResultsRef.current,
+          [payload.trackingId]: {
+            status: payload.status,
+            message: payload.message,
+          },
+        };
+        pendingResultsRef.current = nextPending;
         return prev;
       }
       return prev.map((msg) =>
