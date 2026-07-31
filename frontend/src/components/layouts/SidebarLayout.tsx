@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { logoutApi } from "../../features/auth/api";
 import {
-  FiDatabase,
   FiMessageSquare,
-  FiSettings,
   FiGrid,
   FiMenu,
   FiX,
