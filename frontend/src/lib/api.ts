@@ -1,23 +1,28 @@
 import axios from "axios";
 
-// 백엔드 API 서버 주소 (스프링 부트 기본 포트 8080 및 공통 프리픽스 /api/v1 설정)
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 const API_VERSION_URL = `${API_BASE_URL}/api/v1`;
+
+let accessTokenInMemory: string | null = null;
+
+export const setAccessToken = (token: string | null) => {
+  accessTokenInMemory = token;
+};
+
+export const getAccessToken = () => accessTokenInMemory;
 
 export const api = axios.create({
   baseURL: API_VERSION_URL,
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 15000, // 15초 타임아웃 (AI 연동 시 길어질 수 있음)
+  timeout: 15000,
 });
 
-// API 요청 인터셉터 (인증 등 공통 처리)
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (accessTokenInMemory) {
+      config.headers.Authorization = `Bearer ${accessTokenInMemory}`;
     }
     return config;
   },
@@ -26,11 +31,62 @@ api.interceptors.request.use(
   },
 );
 
-// API 응답 인터셉터 (에러 공통 처리)
+let isRefreshing = false;
+let failedQueue: any[] = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    console.error("API Error:", error.response?.data || error.message);
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return api(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const res = await axios.post(`${API_VERSION_URL}/auth/refresh`, {}, { withCredentials: true });
+        const { accessToken } = res.data.data;
+
+        setAccessToken(accessToken);
+        api.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+
+        processQueue(null, accessToken);
+        isRefreshing = false;
+
+        return api(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        isRefreshing = false;
+
+        setAccessToken(null);
+        localStorage.removeItem("isLoggedIn");
+        window.location.href = "/login";
+        return Promise.reject(refreshError);
+      }
+    }
     return Promise.reject(error);
   },
 );
@@ -54,13 +110,19 @@ export const fetchSseStream = async <Req>(
   options: SseStreamOptions,
 ): Promise<void> => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+  const token = getAccessToken();
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    Accept: "text/event-stream",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
 
   const response = await fetch(`${API_BASE_URL}${url}`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "text/event-stream",
-    },
+    headers,
     body: JSON.stringify(payload),
   });
 

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -33,5 +34,11 @@ public class RefreshTokenPersistenceAdapter implements RefreshTokenPort {
             entity.revoke();
             log.info("[RefreshTokenPersistenceAdapter] Refresh Token 무효화 완료. DB ID: {}", entity.getId());
         });
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<RefreshTokenJpaEntity> findByTokenHash(String tokenHash) {
+        return repository.findByTokenHash(tokenHash);
     }
 }
