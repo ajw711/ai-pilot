@@ -36,6 +36,7 @@ public class DeployServiceTest {
     void setUp() {
         DeploymentPolicy deploymentPolicy = new DeploymentPolicy("500m", "512Mi");
         deployService = new DeployService(deployPersistencePort, notificationPort, deploymentPolicy, authorizationPort);
+        lenient().when(authorizationPort.canDeploy(anyLong())).thenReturn(true);
     }
 
     @Test
