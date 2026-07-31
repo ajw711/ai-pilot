@@ -138,12 +138,7 @@ export const ChatPage: React.FC = () => {
                             : (pending.status as any);
                         finalMessage = pending.message;
 
-                        setPendingResults((prevPending) => {
-                          const copy = { ...prevPending };
-                          delete copy[extractedId];
-                          pendingResultsRef.current = copy;
-                          return copy;
-                        });
+                        delete pendingResultsRef.current[extractedId];
                       }
 
                       return {
@@ -190,12 +185,7 @@ export const ChatPage: React.FC = () => {
                     : (pending.status as any);
                 finalMessage = pending.message;
 
-                setPendingResults((prevPending) => {
-                  const copy = { ...prevPending };
-                  delete copy[extractedId];
-                  pendingResultsRef.current = copy;
-                  return copy;
-                });
+                delete pendingResultsRef.current[extractedId];
               }
 
               setMessages((prev) =>
