@@ -1,8 +1,7 @@
+import { api } from "../../lib/api";
 import { fetchSseStream } from "../../lib/api";
 import type { SseStreamOptions } from "../../lib/api";
 import { useEffect, useRef } from "react";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 export const fetchPilotChatStream = async (
   message: string,
@@ -15,6 +14,8 @@ export const fetchPilotChatStream = async (
   );
 };
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+
 export interface OpsNotificationPayload {
   type: string;
   trackingId: string;
@@ -24,32 +25,46 @@ export interface OpsNotificationPayload {
 }
 
 export const useOpsNotification = (
-  userId: string,
   onOpsResult: (payload: OpsNotificationPayload) => void
 ) => {
   const callbackRef = useRef(onOpsResult);
-  
+
   useEffect(() => {
     callbackRef.current = onOpsResult;
   }, [onOpsResult]);
 
   useEffect(() => {
-    const eventSource = new EventSource(
-      `${API_BASE_URL}/api/v1/ops/notifications?userId=${userId}`,
-      { withCredentials: true }
-    );
+    let eventSource: EventSource | null = null;
 
-    eventSource.addEventListener("ops-result", (event) => {
+    const establishSse = async () => {
       try {
-        const payload = JSON.parse(event.data);
-        callbackRef.current(payload);
+        const res = await api.post("/sse/ticket");
+        const { ticket } = res.data.data;
+
+        eventSource = new EventSource(
+          `${API_BASE_URL}/api/v1/ops/notifications?ticket=${ticket}`,
+          { withCredentials: true }
+        );
+
+        eventSource.addEventListener("ops-result", (event) => {
+          try {
+            const payload = JSON.parse(event.data);
+            callbackRef.current(payload);
+          } catch (err) {
+            console.error("실시간 Ops 알림 데이터 파싱 오류:", err);
+          }
+        });
       } catch (err) {
-        console.error("실시간 Ops 알림 수신 실패:", err);
+        console.error("SSE 연결 수립 실패:", err);
       }
-    });
+    };
+
+    establishSse();
 
     return () => {
-      eventSource.close();
+      if (eventSource) {
+        eventSource.close();
+      }
     };
-  }, [userId]);
+  }, []);
 };

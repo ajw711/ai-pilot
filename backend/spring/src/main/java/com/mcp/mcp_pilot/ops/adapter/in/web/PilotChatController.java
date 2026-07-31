@@ -2,6 +2,7 @@ package com.mcp.mcp_pilot.ops.adapter.in.web;
 
 import com.mcp.mcp_pilot.ai.dto.ChatRequest;
 import com.mcp.mcp_pilot.ai.dto.ChatResponse;
+import com.mcp.mcp_pilot.common.dto.ApiResponse;
 import com.mcp.mcp_pilot.ops.adapter.in.web.dto.ChatEvent;
 import com.mcp.mcp_pilot.ops.port.in.PilotChatUseCase;
 import lombok.RequiredArgsConstructor;
@@ -35,9 +36,9 @@ public class PilotChatController {
     }
 
     @PostMapping("/chat")
-    public ChatResponse chat(@RequestBody ChatRequest chatRequest) {
+    public ApiResponse<ChatResponse> chat(@RequestBody ChatRequest chatRequest) {
         log.info("[PilotChatController] 운영 비서 챗 요청 수신");
-        return pilotChatUseCase.chat(chatRequest);
+        return ApiResponse.success(pilotChatUseCase.chat(chatRequest));
     }
 
     @GetMapping(value = "/test/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
