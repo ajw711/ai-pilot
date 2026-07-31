@@ -38,7 +38,9 @@ public enum ErrorCode {
     DEPLOYMENT_REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "OPS004", "존재하지 않는 배포 요청입니다."),
 
     // User 관련
-    UNAUTHORIZED_USER(HttpStatus.UNAUTHORIZED, "U001", "아이디 또는 비밀번호가 올바르지 않습니다.");
+    UNAUTHORIZED_USER(HttpStatus.UNAUTHORIZED, "U001", "아이디 또는 비밀번호가 올바르지 않습니다."),
+    INVALID_TICKET(HttpStatus.UNAUTHORIZED, "U002", "유효하지 않은 인증입니다."),
+    EXPIRED_TICKET(HttpStatus.UNAUTHORIZED, "U003", "만료된 인증입니다.");
 
     private final HttpStatus status; // HTTP 상태 코드
     private final String code; // 에러 코드
