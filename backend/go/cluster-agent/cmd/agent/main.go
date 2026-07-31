@@ -8,7 +8,6 @@ import (
 	"cluster-agent/internal/server" // 패키지 불러오기
 	"cluster-agent/internal/service"
 	"context"
-	"encoding/json"
 	"log"       // 콘솔 로깅 라이브러리
 	"os"        // 시스템 신호 정의 등 운영체제 소통 도구
 	"os/signal" // 운영체제 시그널 모니터링 라이브러리
@@ -75,26 +74,26 @@ func main() {
 		log.Fatalf("[agent] failed to subscribe deploy.result: %v", err)
 	}
 
-	go func() {
-		time.Sleep(2 * time.Second)
-		log.Println("[test-producer] sending sample deploy request to NATS...")
-		testPayload := map[string]interface{}{
-			"trackingId": "DEPLOY-MOCK-999",
-			"appName":    "my-web-service",
-			"image":      "nginx",
-			"tag":        "1.21.6",
-			"replicas":   3,
-			"namespace":  "default"}
-		data, err := json.Marshal(testPayload)
-		if err != nil {
-			log.Printf("[test-producer] failed to marshal payload: %v", err)
-			return
-		}
-		err = natsClient.Publish("ops.deploy.request", data)
-		if err != nil {
-			log.Printf("[test-producer] failed to publish: %v", err)
-		}
-	}()
+	//go func() {
+	//	time.Sleep(2 * time.Second)
+	//	log.Println("[test-producer] sending sample deploy request to NATS...")
+	//	testPayload := map[string]interface{}{
+	//		"trackingId": "DEPLOY-MOCK-999",
+	//		"appName":    "my-web-service",
+	//		"image":      "nginx",
+	//		"tag":        "1.21.6",
+	//		"replicas":   3,
+	//		"namespace":  "default"}
+	//	data, err := json.Marshal(testPayload)
+	//	if err != nil {
+	//		log.Printf("[test-producer] failed to marshal payload: %v", err)
+	//		return
+	//	}
+	//	err = natsClient.Publish("ops.deploy.request", data)
+	//	if err != nil {
+	//		log.Printf("[test-producer] failed to publish: %v", err)
+	//	}
+	//}()
 
 	// 서버가 실행된 후, 종료 시그널이 오기 전까지 대기하는 함수를 실행
 	waitForShutdown(httpServer, natsClient)

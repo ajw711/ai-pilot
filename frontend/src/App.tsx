@@ -2,9 +2,15 @@ import { useState, useEffect } from 'react';
 import { SidebarLayout } from './components/layouts/SidebarLayout';
 import { DashboardPage } from './pages/DashboardPage';
 import { ChatPage } from './pages/ChatPage';
+import { HomePage } from './pages/HomePage';
+import { LoginPage } from './pages/LoginPage';
+import { NotFoundPage } from './pages/NotFoundPage';
 
 function App() {
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
+    return localStorage.getItem('isLoggedIn') === 'true';
+  });
+  const [activeTab, setActiveTab] = useState<string>('home');
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     const saved = localStorage.getItem('theme');
     if (saved) return saved === 'dark';
@@ -24,26 +30,20 @@ function App() {
 
   const renderContent = () => {
     switch (activeTab) {
+      case 'home':
+        return <HomePage setActiveTab={setActiveTab} />;
       case 'dashboard':
         return <DashboardPage />;
       case 'chat':
         return <ChatPage />;
-      case 'sources':
-        return (
-          <div className="flex flex-1 items-center justify-center text-slate-400 dark:text-slate-500">
-            <p className="text-lg">데이터 소스 관리 기능 준비 중...</p>
-          </div>
-        );
-      case 'settings':
-        return (
-          <div className="flex flex-1 items-center justify-center text-slate-400 dark:text-slate-500">
-            <p className="text-lg">설정 페이지 준비 중...</p>
-          </div>
-        );
       default:
-        return <DashboardPage />;
+        return <NotFoundPage setActiveTab={setActiveTab} />;
     }
   };
+
+  if (!isLoggedIn) {
+    return <LoginPage onLoginSuccess={() => setIsLoggedIn(true)} />;
+  }
 
   return (
     <SidebarLayout 

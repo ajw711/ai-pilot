@@ -152,6 +152,13 @@ public class NotionMapper {
                     }
                 }
 
+                if (parentStack.size() >= 2) {
+                    while (parentStack.size() > 2) {
+                        parentStack.remove(parentStack.size() - 1);
+                    }
+                    parent = parentStack.get(1); // depth 2 블록을 부모로 강제 매핑하여 depth 3에 고정
+                }
+
                 if (parent != null) {
                     parent.children.add(newBlock);
                 } else {

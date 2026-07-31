@@ -17,8 +17,7 @@ import java.util.concurrent.Executors;
 @RestController
 @RequestMapping("/api/{version}/pilot")
 @RequiredArgsConstructor
-public class
-PilotChatController {
+public class PilotChatController {
 
     private final PilotChatUseCase pilotChatUseCase;
 

@@ -15,5 +15,6 @@ public class DeploySpec {
     private final String namespace;
     private final String cpuLimit;
     private final String memoryLimit;
+    private final String userId;
 
 }

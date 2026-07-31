@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 
 @Slf4j
 @RestControllerAdvice
@@ -60,5 +61,13 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail(
                         ErrorCode.INTERNAL_SERVER_ERROR
                 ));
+    }
+
+    /**
+     *이미 끊어진 비동기 클라이언트 연결(SSE)에 대한 예외는 로그만 남기고 조용히 넘김
+     */
+    @ExceptionHandler(AsyncRequestNotUsableException.class)
+    public void handleAsyncRequestNotUsableException(AsyncRequestNotUsableException e) {
+        log.info("[GlobalExceptionHandler] 이미 닫힌 비동기 연결(SSE)에 대한 complete/send 시도 감지. (커넥션 정리 완료)");
     }
 }
