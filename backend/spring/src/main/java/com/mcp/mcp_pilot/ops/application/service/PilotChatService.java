@@ -24,10 +24,11 @@ public class PilotChatService implements PilotChatUseCase {
     private final AIClientFactory aiClientFactory;
 
     @Override
-    public Flux<ChatEvent> streamChat(ChatRequest chatRequest) {
+    public Flux<ChatEvent> streamChat(ChatRequest chatRequest, Long userId) {
         log.info("[PilotChatService] 운영 비서 Agent 스트리밍 구동");
 
         AiRequest aiRequest = AiRequest.of(
+                userId,
                 chatRequest.message(),
                 AIModel.GEMINI,
                 List.of(
@@ -47,11 +48,12 @@ public class PilotChatService implements PilotChatUseCase {
     }
 
     @Override
-    public ChatResponse chat(ChatRequest chatRequest) {
+    public ChatResponse chat(ChatRequest chatRequest, Long userId) {
         log.info("[PilotChatService] 운영 비서 Agent 구동");
 
         // 이 비서는 지식 검색과 배포 액션 툴을 둘 다 장착하여 뇌(Gemini)에 전달합니다.
         AiRequest aiRequest = AiRequest.of(
+                userId,
                 chatRequest.message(),
                 AIModel.GEMINI,
                 List.of(

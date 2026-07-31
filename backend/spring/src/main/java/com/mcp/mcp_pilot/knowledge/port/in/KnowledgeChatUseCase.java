@@ -4,5 +4,5 @@ import com.mcp.mcp_pilot.ai.dto.ChatRequest;
 import com.mcp.mcp_pilot.ai.dto.ChatResponse;
 
 public interface KnowledgeChatUseCase {
-    ChatResponse chat(ChatRequest chatRequest);
+    ChatResponse chat(ChatRequest chatRequest, Long userId);
 }

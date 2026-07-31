@@ -12,13 +12,14 @@ import java.util.List;
  * @param tools
  */
 public record AiRequest(
+        Long userId,
         String message,
         AIModel model,
         List<ToolType> tools
 ) {
 
-    public static AiRequest of(String message, AIModel model, List<ToolType> tools) {
-        return new AiRequest(message, model, tools);
+    public static AiRequest of(Long userId, String message, AIModel model, List<ToolType> tools) {
+        return new AiRequest(userId, message, model, tools);
         
     }
 }

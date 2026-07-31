@@ -26,10 +26,11 @@ public class KnowledgeChatService implements KnowledgeChatUseCase {
     private final KnowledgePersistencePort knowledgePersistencePort;
 
     @Override
-    public ChatResponse chat(ChatRequest chatRequest) {
+    public ChatResponse chat(ChatRequest chatRequest, Long userId) {
         log.info("[ChatService] 챗 요청");
 
         AiRequest aiRequest = AiRequest.of(
+                userId,
                 chatRequest.message(),
                 AIModel.GEMINI,
                 List.of(

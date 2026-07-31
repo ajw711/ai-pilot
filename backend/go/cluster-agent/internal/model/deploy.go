@@ -8,7 +8,7 @@ type DeployRequest struct {
 	Tag         string `json:"tag"`
 	Replicas    int32  `json:"replicas"`
 	Namespace   string `json:"namespace"`
-	RequestedBy string `json:"requestedBy"`
+	RequestedBy int64  `json:"requestedBy"`
 }
 
 // DeployResult는 배포 처리 결과를 외부 시스템(스프링)으로 리턴할 때 사용하는 구조체
@@ -18,5 +18,5 @@ type DeployResult struct {
 	Status      string `json:"status"`
 	Message     string `json:"message"`
 	Timestamp   string `json:"timestamp"`
-	RequestedBy string `json:"requestedBy"`
+	RequestedBy int64  `json:"requestedBy"`
 }

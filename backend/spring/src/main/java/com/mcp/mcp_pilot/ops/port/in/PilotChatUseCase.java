@@ -6,6 +6,6 @@ import com.mcp.mcp_pilot.ops.adapter.in.web.dto.ChatEvent;
 import reactor.core.publisher.Flux;
 
 public interface PilotChatUseCase {
-    ChatResponse chat(ChatRequest chatRequest);
-    Flux<ChatEvent> streamChat(ChatRequest chatRequest);
+    ChatResponse chat(ChatRequest chatRequest, Long userId);
+    Flux<ChatEvent> streamChat(ChatRequest chatRequest, Long userId);
 }
