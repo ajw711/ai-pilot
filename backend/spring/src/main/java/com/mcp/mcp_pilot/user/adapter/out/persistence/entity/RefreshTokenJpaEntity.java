@@ -34,6 +34,9 @@ public class RefreshTokenJpaEntity extends BaseEntity {
     @Column(nullable = false)
     private boolean revoked;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     private RefreshTokenJpaEntity(Long userId, String tokenHash, LocalDateTime expiredAt, boolean revoked) {
         this.userId = userId;
         this.tokenHash = tokenHash;

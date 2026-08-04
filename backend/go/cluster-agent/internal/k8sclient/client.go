@@ -19,6 +19,16 @@ type Client struct {
 	clientset *kubernetes.Clientset
 }
 
+// DeploymentParams는 Deployment 생성/업데이트에 필요한 값들을 묶은 구조체.
+// k8sclient 패키지는 model 패키지(NATS DTO)에 의존하지 않도록 별도로 정의.
+type DeploymentParams struct {
+	Namespace string
+	AppName   string
+	Image     string
+	Tag       string
+	Replicas  int32
+}
+
 // 로컬 kubeconfig를 로드하여 Kubernetes Clientset을 초기화
 func New() (*Client, error) {
 	var kubeconfig string
@@ -88,6 +98,15 @@ func (c *Client) GetPods(namespace string) ([]string, error) {
 	}
 	return list, nil
 }
+
+func (p DeploymentParams) fullImage() string {
+	if p.Tag == "" {
+		return p.Image
+	}
+	return fmt.Sprintf("%s:%s", p.Image, p.Tag)
+}
+
+// 쿠버네티스 Deployment를 생성하거나 업데이트
 
 // ScaleDeployment는 지정된 Deployment의 Replicas(파드 개수)를 조절
 func (c *Client) ScaleDeployment(namespace string, deployName string, replicas int32) error {
