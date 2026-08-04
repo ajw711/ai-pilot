@@ -1,6 +1,8 @@
 package com.mcp.mcp_pilot.common.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -46,8 +48,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
-            }  catch (Exception e) {
-                log.error("[JwtAuthenticationFilter] JWT 토큰 검증 오류", e);
+            } catch (ExpiredJwtException e) {
+                log.debug("[JwtAuthenticationFilter] Access Token 만료");
+            } catch (JwtException e) {
+                log.warn("[JwtAuthenticationFilter] 잘못된 JWT 요청: {}", e.getMessage());
+            } catch (Exception e) {
+                log.error("[JwtAuthenticationFilter] JWT 처리 중 예상치 못한 오류", e);
             }
         }
         filterChain.doFilter(request, response);
