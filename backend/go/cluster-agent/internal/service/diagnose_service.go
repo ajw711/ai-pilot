@@ -33,14 +33,14 @@ func (s *DiagnoseService) Diagnose(ctx context.Context, req model.DiagnoseReques
 		return result, nil
 	}
 
-	// 1. Warning 이벤트 수집 (최신 30개 정렬)
+	// Warning 이벤트 수집 (최신 30개 정렬)
 	warningEvents, err := s.k8sClient.GetWarningEvents(ctx, req.Namespace)
 	if err != nil {
 		log.Printf("[diagnose-service] failed to get warning events: %v", err)
 	}
 	result.WarningEvents = warningEvents
 
-	// 2. 진단 대상 파드 결정
+	// 진단 대상 파드 결정
 	targetPods := []string{}
 	if req.PodName != "" {
 		targetPods = append(targetPods, req.PodName)
@@ -63,7 +63,7 @@ func (s *DiagnoseService) Diagnose(ctx context.Context, req model.DiagnoseReques
 	}
 	result.Pods = targetPods
 
-	// 3. 대상 파드들의 로그 수집 (TailLines 200줄, Previous=true 크래시 직전 로그)
+	// 대상 파드들의 로그 수집 (TailLines 200줄, Previous=true 크래시 직전 로그)
 	var logsBuilder strings.Builder
 	for _, pod := range targetPods {
 		// 먼저 크래시 직전(previous=true) 로그 시도 후, 없으면 현재 로그(previous=false) 시도
