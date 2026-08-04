@@ -1,11 +1,16 @@
 package k8sclient
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"path/filepath"
+	"sort"
 	"time"
 
+	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
@@ -106,7 +111,91 @@ func (p DeploymentParams) fullImage() string {
 	return fmt.Sprintf("%s:%s", p.Image, p.Tag)
 }
 
-// 쿠버네티스 Deployment를 생성하거나 업데이트
+func (c *Client) GetPodLogs(ctx context.Context, namespace, podName, containerName string, tailLines int64, previous bool) (string, error) {
+	if tailLines <= 0 {
+		tailLines = 200 // 기본값 200줄
+	}
+
+	opts := &corev1.PodLogOptions{
+		TailLines: &tailLines,
+		Previous:  previous,
+	}
+	// 멀티 컨테이너 파드일 경우 특정 컨테이너명 지정
+	if containerName != "" {
+		opts.Container = containerName
+	}
+
+	req := c.clientset.CoreV1().Pods(namespace).GetLogs(podName, opts)
+	podLogs, err := req.Stream(ctx)
+	if err != nil {
+		// k8s 명확한 에러 분기 (AI가 원인을 오해하지 않도록 처리)
+		if apierrors.IsNotFound(err) {
+			return "", fmt.Errorf("POD_NOT_FOUND: pod '%s' does not exist in namespace '%s'", podName, namespace)
+		}
+		if apierrors.IsForbidden(err) {
+			return "", fmt.Errorf("PERMISSION_DENIED: no permission to read logs for pod '%s'", podName)
+		}
+		return "", fmt.Errorf("failed to open log stream for pod %s: %w", podName, err)
+	}
+	defer podLogs.Close()
+
+	// 64KB 안전 바이트 제한 (초장문 single-line 로그 방지)
+	limitedReader := io.LimitReader(podLogs, 64*1024)
+
+	buf := new(bytes.Buffer)
+	_, err = io.Copy(buf, limitedReader)
+	if err != nil {
+		return "", fmt.Errorf("failed to read pod log stream: %w", err)
+	}
+
+	return buf.String(), nil
+}
+
+// GetWarningEvents는 Warning 이벤트를 수집하여 최신순으로 정렬 후 최대 30개만 반환
+func (c *Client) GetWarningEvents(ctx context.Context, namespace string) ([]string, error) {
+	opts := metav1.ListOptions{
+		FieldSelector: "type=Warning", // Warning 이벤트만 필터링
+	}
+
+	events, err := c.clientset.CoreV1().Events(namespace).List(ctx, opts)
+	if err != nil {
+		if apierrors.IsForbidden(err) {
+			return nil, fmt.Errorf("PERMISSION_DENIED: no permission to list events in namespace '%s'", namespace)
+		}
+		return nil, fmt.Errorf("failed to list warning events in namespace %s: %w", namespace, err)
+	}
+
+	if len(events.Items) == 0 {
+		return []string{}, nil
+	}
+
+	// 1. 최신 시간순 정렬 (LastTimestamp 기준 내림차순)
+	sort.Slice(events.Items, func(i, j int) bool {
+		return events.Items[i].LastTimestamp.After(events.Items[j].LastTimestamp.Time)
+	})
+
+	// 2. 최대 30개로 캡핑
+	const maxEvents = 30
+	items := events.Items
+	if len(items) > maxEvents {
+		items = items[:maxEvents]
+	}
+
+	var eventMessages []string
+	for _, event := range items {
+		msg := fmt.Sprintf("[%s] Reason: %s | Message: %s | Object: %s/%s (Count: %d)",
+			event.LastTimestamp.Format(time.RFC3339),
+			event.Reason,
+			event.Message,
+			event.InvolvedObject.Kind,
+			event.InvolvedObject.Name,
+			event.Count,
+		)
+		eventMessages = append(eventMessages, msg)
+	}
+
+	return eventMessages, nil
+}
 
 // ScaleDeployment는 지정된 Deployment의 Replicas(파드 개수)를 조절
 func (c *Client) ScaleDeployment(namespace string, deployName string, replicas int32) error {
