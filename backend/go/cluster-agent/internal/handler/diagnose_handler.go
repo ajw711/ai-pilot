@@ -30,7 +30,7 @@ func (h *DiagnoseHandler) Handle(msg *nats.Msg) {
 	}
 	log.Printf("[diagnose-handler] received diagnose request: trackingId=%s, namespace=%s, requestedBy=%d",
 		req.TrackingID, req.Namespace, req.RequestedBy)
-	
+
 	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
 	defer cancel()
 
