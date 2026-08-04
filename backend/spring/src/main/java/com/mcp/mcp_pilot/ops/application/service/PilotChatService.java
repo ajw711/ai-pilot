@@ -33,6 +33,7 @@ public class PilotChatService implements PilotChatUseCase {
                 AIModel.GEMINI,
                 List.of(
                         ToolType.SEARCH_KNOWLEDGE,
+                        ToolType.K8S_DIAGNOSTIC,
                         ToolType.DEPLOY_APP
                 )
         );
@@ -58,7 +59,7 @@ public class PilotChatService implements PilotChatUseCase {
                 AIModel.GEMINI,
                 List.of(
                         ToolType.SEARCH_KNOWLEDGE,
-                        ToolType.DEPLOY_APP  // 배포 툴 추가
+                        ToolType.K8S_DIAGNOSTIC  // 배포 툴 추가
                 )
         );
 

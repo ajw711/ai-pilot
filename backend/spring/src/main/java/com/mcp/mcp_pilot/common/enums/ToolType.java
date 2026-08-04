@@ -13,7 +13,8 @@ public enum ToolType {
     STORE_KNOWLEDGE_DATA("storeKnowledgeData"),
     SEARCH_KNOWLEDGE("searchKnowledge"),
     CHAT_DEPLOY("chatDeploy"),
-    DEPLOY_APP("deploy");
+    DEPLOY_APP("deploy"),
+    K8S_DIAGNOSTIC("k8sDiagnostic");
 
     private final String toolName;
 
