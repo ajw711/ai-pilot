@@ -1,6 +1,5 @@
 package com.mcp.mcp_pilot.ops.adapter.out.nats;
 
-import com.mcp.mcp_pilot.knowledge.adapter.out.messaging.NatsPublisher;
 import com.mcp.mcp_pilot.ops.exception.DeployPublishException;
 import com.mcp.mcp_pilot.ops.port.out.DeployPort;
 import io.nats.client.Connection;

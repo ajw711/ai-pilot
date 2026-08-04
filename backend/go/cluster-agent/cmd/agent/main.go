@@ -63,6 +63,18 @@ func main() {
 		log.Fatalf("[agent] failed to subscribe ops.deploy.request: %v", err)
 	}
 
+	diagnoseService := service.NewDiagnoseService(k8sClient)
+	diagnoseHandler := handler.NewDiagnoseHandler(diagnoseService)
+
+	// ops.diagnose.request 토픽 구독 등록
+	err = natsClient.Subscribe(
+		"ops.diagnose.request",
+		diagnoseHandler.Handle,
+	)
+	if err != nil {
+		log.Fatalf("[agent] failed to subscribe ops.diagnose.request: %v", err)
+	}
+
 	// 테스트를 위한 deploy.result 모니터링 구독 (자가 테스트 확인용)
 	err = natsClient.Subscribe(
 		"deploy.result",
