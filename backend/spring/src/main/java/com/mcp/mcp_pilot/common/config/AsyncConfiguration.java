@@ -19,6 +19,7 @@ public class AsyncConfiguration implements WebMvcConfigurer {
     @Bean(name = "asyncEventExecutor")
     public AsyncTaskExecutor asyncEventExecutor() {
         return new TaskExecutorAdapter(
+                // @Async 및 비동기 작업 시 가상 스레드 생성기 주입
                 Executors.newVirtualThreadPerTaskExecutor()
         );
     }

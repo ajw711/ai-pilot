@@ -1,5 +1,6 @@
 package com.mcp.mcp_pilot.ops.adapter.out.nats;
 
+import com.mcp.mcp_pilot.common.config.NatsConnectionHolder;
 import com.mcp.mcp_pilot.ops.adapter.out.nats.dto.DiagnoseRequest;
 import com.mcp.mcp_pilot.ops.port.in.dto.DiagnoseResult;
 import com.mcp.mcp_pilot.ops.port.out.DiagnosePort;
@@ -23,20 +24,27 @@ public class NatsDiagnoseAdapter implements DiagnosePort {
     private static final String DIAGNOSE_SUBJECT = "ops.diagnose.request";
     private static final Duration DIAGNOSE_TIMEOUT = Duration.ofSeconds(10);
 
-    private final Connection natsConnection;
+    private final NatsConnectionHolder connectionHolder;
     private final JsonMapper jsonMapper;
 
 
     @Override
     public DiagnoseResult requestDiagnose(DiagnoseRequest request) {
         log.info("[NatsDiagnoseAdapter] NATS 동기 진단 요청 시작 (boundedElastic 격리). TrackingID: {}", request.trackingId());
-        // WebFlux Netty Event Loop 스레드를 블로킹하지 않도록 별도 boundedElastic 스레드풀로 격리 수행
-        return Mono.fromCallable(() -> executeNatsRequest(request))
-                .subscribeOn(Schedulers.boundedElastic())
-                .block(DIAGNOSE_TIMEOUT);
+        Thread t = Thread.currentThread();
+        log.info("[THREAD-CHECK] NatsAdapter: name={}, isVirtual={}", t.getName(), t.isVirtual());
+
+        // 가상 스레드가 NATS blocking 호출을 직접 수용하여 처리 (Reactor 레이어 불필요)
+        return executeNatsRequest(request);
     }
 
     private DiagnoseResult executeNatsRequest(DiagnoseRequest request) {
+        Connection natsConnection  = connectionHolder.getConnection();
+        if (natsConnection  == null || natsConnection .getStatus() != Connection.Status.CONNECTED) {
+            log.warn("[NatsDiagnoseAdapter] NATS 미연결 상태 - 진단 일시 비활성화. TrackingID: {}", request.trackingId());
+            return failResult(request.trackingId(), request.namespace(), "FAILED", "진단 서비스가 일시적으로 이용 불가능합니다. (인프라 연결 대기 중)");
+        }
+
         byte[] data;
         try {
             data = jsonMapper.writeValueAsBytes(request);
@@ -47,7 +55,7 @@ public class NatsDiagnoseAdapter implements DiagnosePort {
 
         Message reply;
         try {
-            reply = natsConnection.request(DIAGNOSE_SUBJECT, data, DIAGNOSE_TIMEOUT);
+            reply = natsConnection .request(DIAGNOSE_SUBJECT, data, DIAGNOSE_TIMEOUT);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             log.warn("[NatsDiagnoseAdapter] 요청 스레드 인터럽트 - TrackingID: {}", request.trackingId());

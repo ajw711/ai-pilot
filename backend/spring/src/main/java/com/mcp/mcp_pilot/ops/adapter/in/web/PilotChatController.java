@@ -31,6 +31,9 @@ public class PilotChatController {
     @PostMapping(value = "/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
     public Flux<ChatEvent> streamChar(@RequestBody ChatRequest chatRequest, @AuthenticationPrincipal CustomUserPrincipal customUserPrincipal) {
         log.info("[PilotChatController] 실시간 스트리밍 요청 수신");
+        Thread t = Thread.currentThread();
+        log.info("[THREAD-CHECK] Controller: name={}, isVirtual={}", t.getName(), t.isVirtual());
+
         Long userId = customUserPrincipal.getId();
         return pilotChatUseCase.streamChat(chatRequest, userId)
                 .doOnSubscribe(s ->log.info("stream start"))

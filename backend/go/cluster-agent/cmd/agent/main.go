@@ -43,8 +43,6 @@ func main() {
 	}
 
 	testHandler := handler.NewTestHandler()
-	deployService := service.NewDeploymentService(k8sClient)
-	deployHandler := handler.NewDeployHandler(deployService, natsClient)
 
 	err = natsClient.Subscribe(
 		"ops.test.request",
@@ -52,15 +50,6 @@ func main() {
 	)
 	if err != nil {
 		log.Fatalf("[agent] failed to subscribe NATS subject: %v", err)
-	}
-
-	// deploy.request 구독 등록
-	err = natsClient.Subscribe(
-		"ops.deploy.request",
-		deployHandler.Handle,
-	)
-	if err != nil {
-		log.Fatalf("[agent] failed to subscribe ops.deploy.request: %v", err)
 	}
 
 	diagnoseService := service.NewDiagnoseService(k8sClient)
@@ -85,27 +74,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("[agent] failed to subscribe deploy.result: %v", err)
 	}
-
-	//go func() {
-	//	time.Sleep(2 * time.Second)
-	//	log.Println("[test-producer] sending sample deploy request to NATS...")
-	//	testPayload := map[string]interface{}{
-	//		"trackingId": "DEPLOY-MOCK-999",
-	//		"appName":    "my-web-service",
-	//		"image":      "nginx",
-	//		"tag":        "1.21.6",
-	//		"replicas":   3,
-	//		"namespace":  "default"}
-	//	data, err := json.Marshal(testPayload)
-	//	if err != nil {
-	//		log.Printf("[test-producer] failed to marshal payload: %v", err)
-	//		return
-	//	}
-	//	err = natsClient.Publish("ops.deploy.request", data)
-	//	if err != nil {
-	//		log.Printf("[test-producer] failed to publish: %v", err)
-	//	}
-	//}()
 
 	// 서버가 실행된 후, 종료 시그널이 오기 전까지 대기하는 함수를 실행
 	waitForShutdown(httpServer, natsClient)
