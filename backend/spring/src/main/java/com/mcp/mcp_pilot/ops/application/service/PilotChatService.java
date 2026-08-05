@@ -33,8 +33,7 @@ public class PilotChatService implements PilotChatUseCase {
                 AIModel.GEMINI,
                 List.of(
                         ToolType.SEARCH_KNOWLEDGE,
-                        ToolType.K8S_DIAGNOSTIC,
-                        ToolType.DEPLOY_APP
+                        ToolType.K8S_DIAGNOSTIC
                 )
         );
 
