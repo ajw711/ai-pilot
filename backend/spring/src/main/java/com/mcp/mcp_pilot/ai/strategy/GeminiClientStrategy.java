@@ -49,7 +49,7 @@ public class GeminiClientStrategy implements AiClientStrategy {
 
         return chatClient.prompt()
                 .system("너는 Kubernetes 조작 및 개인 지식 관리를 돕는 지능형 플랫폼 비서(Pilot)야. " +
-                        "사용자가 배포(Deploy) 요청을 하면, 되묻지 말고 주저 없이 제공된 DEPLOY_APP 도구를 즉시 실행해서 배포를 수행해줘.")
+                        "사용자가 요청하는 바에 따라 제공되는 도구(Tool)들을 자유롭게 사용하여 일을 수행하고 답해줘")
                 .user(request.message())
                 .tools(resolvedTools)
                 .toolContext(Map.of("userId", request.userId()))
