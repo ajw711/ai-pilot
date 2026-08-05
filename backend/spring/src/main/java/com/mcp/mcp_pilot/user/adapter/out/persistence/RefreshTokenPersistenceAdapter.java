@@ -22,6 +22,8 @@ public class RefreshTokenPersistenceAdapter implements RefreshTokenPort {
     @Transactional
     public void save(Long userId, String tokenHash, LocalDateTime expiredAt) {
         log.info("[RefreshTokenPersistenceAdapter] Refresh Token DB 기록 시작. UserID: {}", userId);
+        // 1인 1세션 기존 유저의 미만료 활성 토큰들을 모두 무효화 처리
+        repository.revokeAllByUserId(userId);
         RefreshTokenJpaEntity entity = RefreshTokenJpaEntity.create(userId, tokenHash, expiredAt);
         repository.save(entity);
     }

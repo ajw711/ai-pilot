@@ -1,8 +1,8 @@
 package com.mcp.mcp_pilot.common.exception;
 
 import com.mcp.mcp_pilot.common.dto.ApiResponse;
-import com.mcp.mcp_pilot.common.dto.ExceptionResponse;
 import com.mcp.mcp_pilot.common.dto.ToolResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -11,6 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
+import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import java.io.IOException;
 
 @Slf4j
 @RestControllerAdvice
@@ -32,16 +36,21 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ApiResponse<?>> handleBusinessException(BusinessException e) {
+    public Object handleBusinessException(BusinessException e, HttpServletRequest request) {
+        if (isSseRequest(request)) {
+            return buildSseErrorResponse(e.getMessage());
+        }
         log.warn("비즈니스 로직 오류: {} (Code: {})", e.getMessage(), e.getErrorCode());
-        ErrorCode errorCode = e.getErrorCode();
         return ResponseEntity
                 .status(e.getErrorCode().getStatus())
                 .body(ApiResponse.fail(e.getErrorCode()));
     }
 
     @ExceptionHandler(DataAccessException.class)
-    public ResponseEntity<ApiResponse<?>> handleDatabaseException(DataAccessException e) {
+    public Object handleDatabaseException(DataAccessException e, HttpServletRequest request) {
+        if (isSseRequest(request)) {
+            return buildSseErrorResponse("데이터베이스 오류가 발생했습니다.");
+        }
         log.error("데이터베이스 에러 발생: {}", e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -54,7 +63,10 @@ public class GlobalExceptionHandler {
      *일반적인 모든 예외 처리
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<?>> handleAllException(Exception e) {
+    public Object handleAllException(Exception e, HttpServletRequest request) {
+        if (isSseRequest(request)) {
+            return buildSseErrorResponse("서버 오류가 발생했습니다.");
+        }
         log.error("서버 오류", e);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -64,10 +76,30 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     *이미 끊어진 비동기 클라이언트 연결(SSE)에 대한 예외는 로그만 남기고 조용히 넘김
+     *이미 끊어진 비동기 클라이언트 연결(SSE)에 대한 예외 및 타임아웃은 로그만 남기고 조용히 넘김
      */
-    @ExceptionHandler(AsyncRequestNotUsableException.class)
-    public void handleAsyncRequestNotUsableException(AsyncRequestNotUsableException e) {
-        log.info("[GlobalExceptionHandler] 이미 닫힌 비동기 연결(SSE)에 대한 complete/send 시도 감지. (커넥션 정리 완료)");
+    @ExceptionHandler({AsyncRequestNotUsableException.class, AsyncRequestTimeoutException.class})
+    public void handleAsyncExceptions(Exception e) {
+        log.info("[GlobalExceptionHandler] 비동기 SSE 세션 정리 완료: {}", e.getClass().getSimpleName());
+    }
+
+    private boolean isSseRequest(HttpServletRequest request) {
+        String accept = request.getHeader("Accept");
+        String uri = request.getRequestURI();
+        return (accept != null && accept.contains("text/event-stream"))
+                || (uri != null && (uri.contains("/stream") || uri.contains("/notifications")));
+    }
+
+    private SseEmitter buildSseErrorResponse(String message) {
+        SseEmitter emitter =
+                new SseEmitter(0L);
+        try {
+            emitter.send(SseEmitter.event()
+                    .name("error").data(message));
+            emitter.complete();
+        } catch (IOException e) {
+            emitter.completeWithError(e);
+        }
+        return emitter;
     }
 }

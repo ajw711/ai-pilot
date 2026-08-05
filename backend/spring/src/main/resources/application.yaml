@@ -5,7 +5,7 @@ spring:
   nats:
     url: ${NATS_URL}
 
-  thread:
+  threads:
     virtual:
       enabled: true
 
