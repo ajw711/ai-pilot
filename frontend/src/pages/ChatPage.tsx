@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FiSend, FiCpu, FiUser } from "react-icons/fi";
-import { fetchPilotChatStream, useOpsNotification } from "../features/ops/api";
-import type { OpsNotificationPayload } from "../features/ops/api";
+import { fetchPilotChatStream } from "../features/ops/api";
 import { MarkdownRenderer } from "../components/MarkdownRenderer";
 
 export interface ChatRequestDto {
