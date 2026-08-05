@@ -1,17 +1,11 @@
 package com.mcp.mcp_pilot.common.config;
 
-import com.mcp.mcp_pilot.knowledge.tool.KnowledgeTool;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
-import org.springframework.ai.tool.method.MethodToolCallbackProvider;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Method;
 import java.util.List;
 
 @Configuration
@@ -35,7 +29,7 @@ public class McpConfig {
 
         // toolCallbackProviders.forEach(provider -> builder.defaultToolCallbacks(provider))와 동일한 의미
         // 이를 통해 로컬 @Tool 기반 도구와 MCP 기반 도구 모두를 ChatClient의 기본 도구로 등록
-        toolCallbackProviders.forEach(builder::defaultToolCallbacks);
+        toolCallbackProviders.forEach(builder::defaultTools);
         return builder.build();
     }
 }
