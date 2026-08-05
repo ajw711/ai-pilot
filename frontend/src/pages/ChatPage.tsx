@@ -43,7 +43,8 @@ export const ChatPage: React.FC = () => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // 실시간 SSE 인프라 운영 피드백 수신 리스너 장착 (1:1 타겟 갱신)
+  // 레거시 배포 전용 SSE 알림 리스너 주석 처리 (챗봇 스트리밍 전용 전환)
+  /*
   useOpsNotification((payload: OpsNotificationPayload) => {
     if (payload.type !== "DEPLOY") return;
 
@@ -76,6 +77,7 @@ export const ChatPage: React.FC = () => {
       );
     });
   });
+  */
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
