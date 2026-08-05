@@ -21,7 +21,6 @@ public class K8sDiagnosticTool {
     @Tool(description = "Kubernetes 파드의 에러 로그와 Warning 이벤트를 수집하여 클러스터 상태 및 장애 원인을 진단합니다.")
     public String inspectCluster(DiagnoseCommand command, ToolContext toolContext) throws UserException {
         log.info("[K8sDiagnosticTool] AI 진단 툴 호출. Namespace: {}, PodName: {}", command.namespace(), command.podName());
-        if (true) throw new RuntimeException("테스트용 강제 예외 발생!");
         Thread t = Thread.currentThread();
         log.info("[THREAD-CHECK] Tool: name={}, isVirtual={}", t.getName(), t.isVirtual());
         
