@@ -29,7 +29,7 @@ public class PilotChatController {
      * 브라우저에 Server-Sent Events(SSE) 스트리밍 형식으로 전송할 것임을 명시
      */
     @PostMapping(value = "/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
-    public Flux<ChatEvent> streamChar(@RequestBody ChatRequest chatRequest, @AuthenticationPrincipal CustomUserPrincipal customUserPrincipal) {
+    public Flux<ChatEvent> streamChat(@RequestBody ChatRequest chatRequest, @AuthenticationPrincipal CustomUserPrincipal customUserPrincipal) {
         log.info("[PilotChatController] 실시간 스트리밍 요청 수신");
         Thread t = Thread.currentThread();
         log.info("[THREAD-CHECK] Controller: name={}, isVirtual={}", t.getName(), t.isVirtual());
@@ -38,7 +38,10 @@ public class PilotChatController {
         return pilotChatUseCase.streamChat(chatRequest, userId)
                 .doOnSubscribe(s ->log.info("stream start"))
                 .doOnComplete(() -> log.info("stream complete"))
-                .doOnError(e -> log.error("stream error", e));
+                .onErrorResume(e -> {
+                    log.error("[PilotChatController] 스트리밍 중 예외 발생", e);
+                    return Flux.just(ChatEvent.error("일시적인 오류가 발생했습니다. 잠시 후 다시 시도해 주세요."));
+                });
     }
 
     @PostMapping("/chat")
