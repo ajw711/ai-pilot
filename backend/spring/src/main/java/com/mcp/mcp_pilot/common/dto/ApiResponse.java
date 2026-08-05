@@ -1,10 +1,9 @@
 package com.mcp.mcp_pilot.common.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mcp.mcp_pilot.common.exception.ErrorCode;
-import net.minidev.json.annotate.JsonIgnore;
-import org.springframework.http.HttpStatus;
 
-import javax.annotation.Nullable;
+import org.springframework.http.HttpStatus;
 
 public record ApiResponse<T>(
         @JsonIgnore
