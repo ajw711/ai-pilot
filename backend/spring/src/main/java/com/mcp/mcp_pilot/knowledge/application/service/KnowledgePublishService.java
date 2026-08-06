@@ -6,10 +6,7 @@ import com.mcp.mcp_pilot.knowledge.domain.vo.KnowledgeStatus;
 import com.mcp.mcp_pilot.knowledge.exception.KnowledgeNotFoundException;
 import com.mcp.mcp_pilot.knowledge.exception.KnowledgePublishException;
 import com.mcp.mcp_pilot.knowledge.port.in.NotionUseCase;
-import com.mcp.mcp_pilot.knowledge.port.out.KnowledgePersistencePort;
-import com.mcp.mcp_pilot.knowledge.port.out.KnowledgeSearchPort;
-import com.mcp.mcp_pilot.knowledge.port.out.KnowledgeVectorPort;
-import com.mcp.mcp_pilot.knowledge.port.out.NotionPublishPort;
+import com.mcp.mcp_pilot.knowledge.port.out.*;
 import com.mcp.mcp_pilot.knowledge.port.out.dto.NotionPublishResult;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -27,7 +24,7 @@ import java.util.List;
 public class KnowledgePublishService implements NotionUseCase {
 
     private final KnowledgePersistencePort persistencePort;
-    private final KnowledgeVectorPort knowledgeVectorPort;
+    private final KnowledgeEventPublishPort knowledgeEventPublishPort;
     private final NotionPublishPort notionPublishPort;
     private final MeterRegistry meterRegistry;
 
@@ -65,25 +62,15 @@ public class KnowledgePublishService implements NotionUseCase {
             // 결과 영속화
             persistencePort.updatePublicationResult(event.knowledgeId(), result.pageId(), result.pageUrl());
 
-            boolean vectorDone = knowledgeVectorPort.isVectorStored(event.knowledgeId());
-            if (vectorDone) {
-                persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.PUBLISHED);
-                log.info("[NotionService] Notion & Vector 적재 완료 -> PUBLISHED 전환 (ID: {})", event.knowledgeId());
-            } else {
-                KnowledgeLog current = persistencePort.findById(event.knowledgeId()).orElse(null);
-                if (current != null && current.getStatus() == KnowledgeStatus.FAILED_AT_VECTOR_INDEX) {
-                    log.info("[NotionService] Notion 적재 완료 되었으나 Vector 저장 실패 상태이므로 상태 유지 (ID: {})", event.knowledgeId());
-                } else {
-                    persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.NOTION_PUBLISHING);
-                    log.info("[NotionService] Notion 적재 완료 (Vector 대기) -> NOTION_PUBLISHING 상태 유지 (ID: {})", event.knowledgeId());
-                }
-            }
-            
+            log.info("[NotionService] Notion 적재 완료 - Outbox 이벤트 발행 (ID: {})", event.knowledgeId());
+            knowledgeEventPublishPort.publish("knowledge.notion.published", event.knowledgeId());
+
         } catch (Throwable e) {
             status = "fail";
             errorType = classifyError(e);
             log.error("[NotionService] 노션 발행 실패 (ID: {}): {}", event.knowledgeId(), e.getMessage());
             persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.FAILED_AT_NOTION_PUBLISH);
+            knowledgeEventPublishPort.publish("knowledge.notion.failed", event.knowledgeId());
             throw new KnowledgePublishException(e);
         } finally {
             // <domain>_<subsystem>_<metric>_<unit> 메트릭 패턴 적용
@@ -102,7 +89,7 @@ public class KnowledgePublishService implements NotionUseCase {
     private String classifyError(Throwable e) {
         String message = e.getMessage() != null ? e.getMessage().toLowerCase() : "";
         if (message.contains("timeout")) return "timeout";
-        if (message.contains("429")) return "rate_limmit";
+        if (message.contains("429")) return "rate_limit";
         if (message.contains("401") || message.contains("403")) return "auth_error";
         if (message.contains("5xx")) return "server_error";
         return "unknown";
