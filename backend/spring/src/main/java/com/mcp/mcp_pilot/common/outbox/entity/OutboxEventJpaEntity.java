@@ -1,4 +1,4 @@
-package com.mcp.mcp_pilot.ops.adapter.out.persistence.entity;
+package com.mcp.mcp_pilot.common.outbox.entity;
 
 import com.mcp.mcp_pilot.common.entitiy.BaseEntity;
 import jakarta.persistence.*;
@@ -28,17 +28,22 @@ public class OutboxEventJpaEntity extends BaseEntity {
     private boolean published;
 
     @Column(nullable = false)
+    private boolean failed;
+
+    @Column(nullable = false)
     private int retryCount;
 
     private OutboxEventJpaEntity(String eventId,
                                  String eventType,
                                  String payload,
                                  boolean published,
+                                 boolean failed,
                                  int retryCount) {
         this.eventId = eventId;
         this.eventType = eventType;
         this.payload = payload;
         this.published = published;
+        this.failed = failed;
         this.retryCount = retryCount;
     }
 
@@ -52,13 +57,17 @@ public class OutboxEventJpaEntity extends BaseEntity {
                 eventType,
                 payload,
                 published,
+                false,
                 retryCount
         );
     }
 
-    // 성공 상태를 명확히 정의
     public void markPublished() {
         this.published = true;
+    }
+
+    public void markFailed() {
+        this.failed = true;
     }
 
     public void incrementRetry() {

@@ -32,6 +32,7 @@ public class NatsDiagnoseAdapter implements DiagnosePort {
         Thread t = Thread.currentThread();
         log.info("[THREAD-CHECK] NatsAdapter: name={}, isVirtual={}", t.getName(), t.isVirtual());
 
+        // 메시지를 보내고 응답이 올 때까지 블로킹 대기
         // 가상 스레드가 NATS blocking 호출을 직접 수용하여 처리 (Reactor 레이어 불필요)
         return executeNatsRequest(request);
     }

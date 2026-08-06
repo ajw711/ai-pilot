@@ -9,6 +9,7 @@ import com.mcp.mcp_pilot.user.exception.UserException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ToolContext;
+import org.springframework.ai.google.genai.GoogleGenAiChatModel;
 import org.springframework.ai.tool.annotation.Tool;
 
 @Slf4j
