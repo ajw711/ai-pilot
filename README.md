@@ -51,11 +51,14 @@ k3s 기반 홈랩 클러스터 위에서 동작하며, Tailscale VPN을 통해 �
 | 영역 | 기술 |
 |---|---|
 | Frontend | React |
-| Backend | Spring Boot (가상 스레드 기반) |
-| 메시징 | NATS (request-reply) |
+| Backend | Spring Boot 4.1.0 / Java 25 (Virtual Threads) |
+| AI | Spring AI 2.0.0 / Google Gemini |
+| 메시징 | NATS 2.25.3 (request-reply) |
 | 클러스터 제어 | Go (Cluster Agent) |
+| 인증 | Spring Security + JWT |
 | 데이터베이스 | PostgreSQL (+ 임베딩 저장) |
 | 외부 연동 | Notion |
+| API 문서 | SpringDoc OpenAPI 3.0.3 |
 | 인프라 | k3s, Traefik, ArgoCD, Helm |
 | 접근 | Tailscale VPN |
 | 모니터링 | Prometheus, Grafana, Loki |
