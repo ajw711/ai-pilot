@@ -146,20 +146,20 @@ export const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="p-8 bg-[#F5F6F7] dark:bg-[#16171d] min-h-screen transition-colors duration-200">
+    <div className="p-4 sm:p-6 lg:p-8 bg-[#F5F6F7] dark:bg-[#16171d] min-h-full transition-colors duration-200">
       {/* 상단 헤더 영역 */}
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between border-b border-[#E4E8EB] dark:border-slate-800 pb-6 mb-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#E4E8EB] dark:border-slate-800 pb-6 mb-8">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#1E1E1E] dark:text-slate-100">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#1E1E1E] dark:text-slate-100">
             지식 대시보드
           </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
             지식 소스를 수집하고 AI 벡터 디비 상태를 모니터링합니다.
           </p>
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 rounded-lg bg-[#03C75A] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#02b350] transition-all active:scale-95 cursor-pointer"
+          className="flex items-center justify-center gap-2 rounded-lg bg-[#03C75A] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#02b350] transition-all active:scale-95 cursor-pointer w-full sm:w-auto"
         >
           <FiPlus className="h-5 w-5" />새 지식 등록
         </button>
@@ -269,7 +269,7 @@ export const DashboardPage: React.FC = () => {
             </div>
           ) : (
             <>
-              <table className="w-full text-left border-collapse">
+              <table className="w-full min-w-[550px] text-left border-collapse">
                 <thead>
                   <tr className="border-b border-[#E4E8EB] dark:border-slate-800 bg-[#F5F6F7] dark:bg-[#16171d] text-xs font-bold text-[#666666] dark:text-slate-400 uppercase tracking-wider">
                     <th className="py-4 px-6">지식 제목</th>

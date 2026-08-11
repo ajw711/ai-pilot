@@ -122,13 +122,13 @@ export const KnowledgeDetailModal: React.FC<KnowledgeDetailModalProps> = ({
 
   if (isSuccess) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-950/60 backdrop-blur-sm animate-fadeIn">
-        <div className="w-full max-w-md rounded-2xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-8 shadow-2xl flex flex-col items-center text-center animate-scaleUp">
-          <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-950/30 rounded-full flex items-center justify-center text-emerald-500 mb-4 animate-pulse">
-            <FiCheckCircle className="w-10 h-10" />
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/60 backdrop-blur-sm animate-fadeIn">
+        <div className="w-full max-w-md rounded-2xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-2xl flex flex-col items-center text-center animate-scaleUp">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 bg-emerald-50 dark:bg-emerald-950/30 rounded-full flex items-center justify-center text-emerald-500 mb-3 sm:mb-4 animate-pulse">
+            <FiCheckCircle className="w-8 h-8 sm:w-10 sm:h-10" />
           </div>
-          <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">최종 승인 완료</h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
+          <h3 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">최종 승인 완료</h3>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mb-5 sm:mb-6 leading-relaxed">
             노션 페이지 발행 및 AI 벡터 데이터베이스 저장이 시작되었습니다.<br />
             잠시 후 대시보드에서 완료 상태를 확인하실 수 있습니다.
           </p>
@@ -137,7 +137,7 @@ export const KnowledgeDetailModal: React.FC<KnowledgeDetailModalProps> = ({
               setIsSuccess(false);
               onClose();
             }}
-            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 font-bold text-white shadow-lg shadow-sky-500/20 hover:from-sky-400 hover:to-indigo-500 transition-all active:scale-95 cursor-pointer"
+            className="w-full py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 font-bold text-sm text-white shadow-lg shadow-sky-500/20 hover:from-sky-400 hover:to-indigo-500 transition-all active:scale-95 cursor-pointer"
           >
             확인
           </button>
@@ -147,22 +147,22 @@ export const KnowledgeDetailModal: React.FC<KnowledgeDetailModalProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-950/60 backdrop-blur-sm animate-fadeIn">
-      <div className="w-full max-w-6xl h-[85vh] rounded-2xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 shadow-2xl flex flex-col overflow-hidden transition-colors duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-slate-950/60 backdrop-blur-sm animate-fadeIn">
+      <div className="w-full max-w-6xl h-[92vh] sm:h-[85vh] rounded-2xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 shadow-2xl flex flex-col overflow-hidden transition-colors duration-200">
         
         {/* 모달 헤더 */}
-        <div className="bg-slate-50 dark:bg-slate-950/30 border-b border-slate-300 dark:border-slate-600 p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="bg-slate-50 dark:bg-slate-950/30 border-b border-slate-300 dark:border-slate-600 p-3.5 sm:p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4">
           {isLoading ? (
             <div className="h-10 w-48 bg-slate-200 dark:bg-slate-800 rounded animate-pulse" />
           ) : detail ? (
             <div>
-              <div className="flex items-center gap-3">
-                <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{detail.title}</h3>
-                <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${statusInfo.style}`}>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <h3 className="text-base sm:text-xl font-bold text-slate-800 dark:text-slate-100">{detail.title}</h3>
+                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 sm:px-3 sm:py-1 text-[11px] sm:text-xs font-semibold ring-1 ring-inset ${statusInfo.style}`}>
                   {statusInfo.label}
                 </span>
                 {detail.verificationScore !== null && (
-                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] sm:text-xs font-bold ${
                     detail.verificationScore >= 80 
                       ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 ring-emerald-600/10 dark:ring-emerald-500/20" 
                       : detail.verificationScore >= 50 
@@ -173,16 +173,16 @@ export const KnowledgeDetailModal: React.FC<KnowledgeDetailModalProps> = ({
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">ID: {detail.id} | 원본 지식 문서의 AI 분석 검수 리포트를 검토하고 승인하세요.</p>
+              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1">ID: {detail.id} | 원본 지식 문서의 AI 분석 검수 리포트를 검토하고 승인하세요.</p>
             </div>
           ) : (
-            <div className="text-slate-500 dark:text-slate-400">데이터가 없습니다.</div>
+            <div className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">데이터가 없습니다.</div>
           )}
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-end gap-2">
             <button
               onClick={onClose}
-              className="rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 px-4 py-2 text-sm font-semibold transition-all cursor-pointer"
+              className="rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 px-3.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer"
             >
               닫기
             </button>
@@ -193,26 +193,26 @@ export const KnowledgeDetailModal: React.FC<KnowledgeDetailModalProps> = ({
         {isLoading ? (
           <div className="flex-1 flex items-center justify-center text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-900">
             <div className="flex flex-col items-center gap-2">
-              <div className="w-10 h-10 border-4 border-sky-600 border-t-transparent rounded-full animate-spin" />
-              <p className="text-sm font-medium">지식 정보를 불러오는 중...</p>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 border-4 border-sky-600 border-t-transparent rounded-full animate-spin" />
+              <p className="text-xs sm:text-sm font-medium">지식 정보를 불러오는 중...</p>
             </div>
           </div>
         ) : error ? (
-          <div className="flex-1 flex items-center justify-center text-rose-600 dark:text-rose-400 font-semibold p-8 bg-white dark:bg-slate-900">
+          <div className="flex-1 flex items-center justify-center text-rose-600 dark:text-rose-400 font-semibold p-6 text-xs sm:text-sm bg-white dark:bg-slate-900">
             지식을 조회하는 도중 오류가 발생했습니다.
           </div>
         ) : detail ? (
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* 에러 메시지 배너 */}
             {errorMsg && (
-              <div className="mx-6 mt-4 p-4 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200 flex items-center justify-between text-sm shadow-sm animate-fadeIn">
+              <div className="mx-3.5 sm:mx-6 mt-3 sm:mt-4 p-3 sm:p-4 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200 flex items-center justify-between text-xs sm:text-sm shadow-sm animate-fadeIn">
                 <div className="flex items-center gap-2">
-                  <FiAlertTriangle className="h-5 w-5 text-rose-600 flex-shrink-0" />
+                  <FiAlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-rose-600 flex-shrink-0" />
                   <span>{errorMsg}</span>
                 </div>
                 <button 
                   onClick={() => setErrorMsg(null)}
-                  className="text-xs font-bold underline hover:text-rose-900 ml-4 flex-shrink-0"
+                  className="text-xs font-bold underline hover:text-rose-900 ml-3 flex-shrink-0"
                 >
                   닫기
                 </button>
@@ -220,58 +220,58 @@ export const KnowledgeDetailModal: React.FC<KnowledgeDetailModalProps> = ({
             )}
 
             {/* 탭 네비게이션 */}
-            <div className="flex border-b border-slate-300 dark:border-slate-600 px-6 bg-slate-50 dark:bg-slate-950/20">
+            <div className="flex border-b border-slate-300 dark:border-slate-600 px-3 sm:px-6 bg-slate-50 dark:bg-slate-950/20 overflow-x-auto whitespace-nowrap">
               <button
                 onClick={() => setActiveTab("compare")}
-                className={`py-3 px-4 text-sm font-semibold border-b-2 transition-all flex items-center gap-2 cursor-pointer ${
+                className={`py-2.5 px-3 sm:py-3 sm:px-4 text-xs sm:text-sm font-semibold border-b-2 transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer flex-shrink-0 ${
                   activeTab === "compare"
                     ? "border-sky-600 text-sky-600 dark:text-sky-400"
                     : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
                 }`}
               >
-                <FiFileText className="h-4.5 w-4.5" />
+                <FiFileText className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
                 원문 및 포맷팅 대조/수정
               </button>
               <button
                 onClick={() => setActiveTab("report")}
-                className={`py-3 px-4 text-sm font-semibold border-b-2 transition-all flex items-center gap-2 cursor-pointer ${
+                className={`py-2.5 px-3 sm:py-3 sm:px-4 text-xs sm:text-sm font-semibold border-b-2 transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer flex-shrink-0 ${
                   activeTab === "report"
                     ? "border-sky-600 text-sky-600 dark:text-sky-400"
                     : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
                 }`}
               >
-                <FiCpu className="h-4.5 w-4.5" />
+                <FiCpu className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
                 AI 팩트 검수 리포트 ({issues.length}건)
               </button>
             </div>
 
             {/* 탭 컨텐츠 */}
-            <div className="flex-1 overflow-hidden p-6 flex flex-col bg-white dark:bg-slate-900">
+            <div className="flex-1 overflow-hidden p-3.5 sm:p-6 flex flex-col bg-white dark:bg-slate-900">
               {activeTab === "compare" ? (
-                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 overflow-hidden">
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 overflow-y-auto md:overflow-hidden pr-0.5">
                   {/* Left: Raw Content */}
-                  <div className="flex flex-col border border-slate-300 dark:border-slate-600 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-950/20">
-                    <div className="bg-slate-100 dark:bg-slate-950/50 px-4 py-2.5 border-b border-slate-300 dark:border-slate-600 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                  <div className="flex flex-col border border-slate-300 dark:border-slate-600 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-950/20 min-h-[220px] md:min-h-0">
+                    <div className="bg-slate-100 dark:bg-slate-950/50 px-3.5 py-2 sm:px-4 sm:py-2.5 border-b border-slate-300 dark:border-slate-600 text-[11px] sm:text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                       원본 내용 (Raw Content)
                     </div>
-                    <div className="flex-1 p-4 overflow-y-auto text-sm text-slate-700 dark:text-slate-300 font-sans whitespace-pre-wrap leading-relaxed">
+                    <div className="flex-1 p-3.5 sm:p-4 overflow-y-auto text-xs sm:text-sm text-slate-700 dark:text-slate-300 font-sans whitespace-pre-wrap leading-relaxed">
                       {detail.rawContent}
                     </div>
                   </div>
 
                   {/* Right: Formatted Markdown (Editable & Preview) */}
-                  <div className="flex flex-col border border-slate-300 dark:border-slate-600 rounded-xl overflow-hidden bg-white dark:bg-slate-900 focus-within:border-sky-500 focus-within:ring-1 focus-within:ring-sky-500 transition-all">
-                    <div className="bg-slate-100 dark:bg-slate-950/50 px-4 py-2 flex items-center justify-between border-b border-slate-300 dark:border-slate-600 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-                      <span className="flex items-center gap-1.5">
-                        {previewMode === "edit" ? <FiEdit3 className="h-4 w-4" /> : <FiEye className="h-4 w-4" />}
-                        {previewMode === "edit" ? "최종 가공 본문 (Markdown - 편집 가능)" : "최종 가공 본문 (미리보기)"}
+                  <div className="flex flex-col border border-slate-300 dark:border-slate-600 rounded-xl overflow-hidden bg-white dark:bg-slate-900 focus-within:border-sky-500 focus-within:ring-1 focus-within:ring-sky-500 transition-all min-h-[260px] md:min-h-0">
+                    <div className="bg-slate-100 dark:bg-slate-950/50 px-3.5 py-2 sm:px-4 sm:py-2 flex items-center justify-between border-b border-slate-300 dark:border-slate-600 text-[11px] sm:text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                      <span className="flex items-center gap-1.5 truncate pr-2">
+                        {previewMode === "edit" ? <FiEdit3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" /> : <FiEye className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />}
+                        <span className="truncate">{previewMode === "edit" ? "최종 가공 본문 (Markdown - 편집 가능)" : "최종 가공 본문 (미리보기)"}</span>
                       </span>
                       
-                      <div className="flex items-center gap-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg p-0.5">
+                      <div className="flex items-center gap-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg p-0.5 flex-shrink-0">
                         <button
                           type="button"
                           onClick={() => setPreviewMode("edit")}
-                          className={`px-2 py-1 rounded-md text-[10px] font-extrabold transition-all cursor-pointer ${
+                          className={`px-2 py-0.5 sm:py-1 rounded-md text-[10px] font-extrabold transition-all cursor-pointer ${
                             previewMode === "edit"
                               ? "bg-slate-100 dark:bg-slate-750 text-slate-800 dark:text-slate-100 shadow-sm"
                               : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
@@ -282,7 +282,7 @@ export const KnowledgeDetailModal: React.FC<KnowledgeDetailModalProps> = ({
                         <button
                           type="button"
                           onClick={() => setPreviewMode("preview")}
-                          className={`px-2 py-1 rounded-md text-[10px] font-extrabold transition-all cursor-pointer ${
+                          className={`px-2 py-0.5 sm:py-1 rounded-md text-[10px] font-extrabold transition-all cursor-pointer ${
                             previewMode === "preview"
                               ? "bg-slate-100 dark:bg-slate-750 text-slate-800 dark:text-slate-100 shadow-sm"
                               : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
@@ -294,10 +294,10 @@ export const KnowledgeDetailModal: React.FC<KnowledgeDetailModalProps> = ({
                     </div>
                     
                     {detail.status === "VERIFYING" || detail.status === "FORMATTING" ? (
-                      <div className="flex-1 flex flex-col items-center justify-center p-6 text-slate-400 dark:text-slate-500 bg-slate-50/50 dark:bg-slate-950/10">
-                        <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-3" />
-                        <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">AI가 본문을 열심히 가공(포맷팅)하고 있습니다.</p>
-                        <p className="text-xs text-slate-400 mt-1">완료되면 가공된 마크다운을 이곳에서 편집하실 수 있습니다.</p>
+                      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 text-slate-400 dark:text-slate-500 bg-slate-50/50 dark:bg-slate-950/10">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-3" />
+                        <p className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 text-center">AI가 본문을 열심히 가공(포맷팅)하고 있습니다.</p>
+                        <p className="text-[11px] sm:text-xs text-slate-400 mt-1 text-center">완료되면 가공된 마크다운을 이곳에서 편집하실 수 있습니다.</p>
                       </div>
                     ) : previewMode === "edit" ? (
                       <textarea
@@ -305,10 +305,10 @@ export const KnowledgeDetailModal: React.FC<KnowledgeDetailModalProps> = ({
                         onChange={(e) => setEditedContent(e.target.value)}
                         disabled={detail.status !== "REVIEW_READY"}
                         placeholder="AI가 가공한 포맷팅 결과가 여기에 나타납니다. 직접 편집하여 올바른 마크다운으로 승인할 수도 있습니다."
-                        className="flex-1 p-4 overflow-y-auto text-sm text-slate-800 dark:text-slate-100 font-mono leading-relaxed outline-none resize-none bg-white dark:bg-slate-900 disabled:bg-slate-50 dark:disabled:bg-slate-950/40 disabled:text-slate-500 dark:disabled:text-slate-400"
+                        className="flex-1 p-3.5 sm:p-4 overflow-y-auto text-xs sm:text-sm text-slate-800 dark:text-slate-100 font-mono leading-relaxed outline-none resize-none bg-white dark:bg-slate-900 disabled:bg-slate-50 dark:disabled:bg-slate-950/40 disabled:text-slate-500 dark:disabled:text-slate-400"
                       />
                     ) : (
-                      <div className="flex-1 p-5 overflow-y-auto bg-slate-50/50 dark:bg-slate-950/10 min-h-0 select-text">
+                      <div className="flex-1 p-3.5 sm:p-5 overflow-y-auto bg-slate-50/50 dark:bg-slate-950/10 min-h-0 select-text text-xs sm:text-sm">
                         <MarkdownRenderer content={editedContent} />
                       </div>
                     )}
@@ -316,25 +316,25 @@ export const KnowledgeDetailModal: React.FC<KnowledgeDetailModalProps> = ({
                 </div>
               ) : (
                 /* Report Panel */
-                <div className="flex-1 overflow-y-auto border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-950/20 p-6 space-y-4">
-                  <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2 mb-2">
-                    <FiCpu className="h-5 w-5 text-indigo-600" />
+                <div className="flex-1 overflow-y-auto border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-950/20 p-4 sm:p-6 space-y-3 sm:space-y-4">
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2 mb-2">
+                    <FiCpu className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600" />
                     AI 기술 문서 팩트체킹 분석 결과
                   </h4>
                   {detail.status === "VERIFYING" || detail.status === "FORMATTING" ? (
-                    <div className="flex flex-col items-center justify-center py-16 text-slate-400 dark:text-slate-500">
-                      <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4" />
-                      <p className="font-semibold text-slate-700 dark:text-slate-300">AI 기술 문서 팩트체킹 분석을 진행하고 있습니다.</p>
-                      <p className="text-xs text-slate-400 mt-1">분석이 완료되면 검수 리포트 항목이 여기에 업데이트됩니다.</p>
+                    <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-slate-400 dark:text-slate-500">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-3 sm:mb-4" />
+                      <p className="font-semibold text-xs sm:text-sm text-slate-700 dark:text-slate-300 text-center">AI 기술 문서 팩트체킹 분석을 진행하고 있습니다.</p>
+                      <p className="text-[11px] sm:text-xs text-slate-400 mt-1 text-center">분석이 완료되면 검수 리포트 항목이 여기에 업데이트됩니다.</p>
                     </div>
                   ) : issues.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500">
-                      <FiCheckCircle className="h-12 w-12 text-emerald-500 mb-2" />
-                      <p className="font-semibold text-slate-700 dark:text-slate-300">팩트 및 개념적 오류가 발견되지 않았습니다.</p>
-                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">즉시 승인하여 발행하는 것을 권장합니다.</p>
+                    <div className="flex flex-col items-center justify-center py-10 sm:py-12 text-slate-400 dark:text-slate-500">
+                      <FiCheckCircle className="h-10 w-10 sm:h-12 sm:w-12 text-emerald-500 mb-2" />
+                      <p className="font-semibold text-xs sm:text-sm text-slate-700 dark:text-slate-300 text-center">팩트 및 개념적 오류가 발견되지 않았습니다.</p>
+                      <p className="text-[11px] sm:text-xs text-slate-400 dark:text-slate-500 mt-1 text-center">즉시 승인하여 발행하는 것을 권장합니다.</p>
                     </div>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-2.5 sm:space-y-3">
                       {issues.map((issue, idx) => {
                         const isCritical = issue.severity === "CRITICAL";
                         const isWarning = issue.severity === "WARNING";
@@ -342,7 +342,7 @@ export const KnowledgeDetailModal: React.FC<KnowledgeDetailModalProps> = ({
                         return (
                           <div 
                             key={idx} 
-                            className={`p-4 rounded-xl border flex gap-3.5 leading-relaxed ${
+                            className={`p-3 sm:p-4 rounded-xl border flex gap-3 leading-relaxed ${
                               isCritical 
                                 ? "bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-900/60 text-rose-900 dark:text-rose-200" 
                                 : isWarning 
@@ -352,14 +352,14 @@ export const KnowledgeDetailModal: React.FC<KnowledgeDetailModalProps> = ({
                           >
                             <div className="mt-0.5">
                               {isCritical || isWarning ? (
-                                <FiAlertTriangle className={`h-5 w-5 ${isCritical ? "text-rose-600" : "text-amber-600"}`} />
+                                <FiAlertTriangle className={`h-4 w-4 sm:h-5 sm:w-5 ${isCritical ? "text-rose-600" : "text-amber-600"}`} />
                               ) : (
-                                <FiInfo className="h-5 w-5 text-slate-500" />
+                                <FiInfo className="h-4 w-4 sm:h-5 sm:w-5 text-slate-500" />
                               )}
                             </div>
                             <div className="space-y-1">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                                <span className={`text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
                                   isCritical 
                                     ? "bg-rose-600 text-white" 
                                     : isWarning 
@@ -369,12 +369,12 @@ export const KnowledgeDetailModal: React.FC<KnowledgeDetailModalProps> = ({
                                   {issue.severity === "CRITICAL" ? "심각 오류" : issue.severity === "WARNING" ? "주의 경고" : "의견 추천"}
                                 </span>
                                 {issue.targetText && (
-                                  <code className="text-xs px-1.5 py-0.5 rounded bg-white/70 dark:bg-slate-800/80 border border-black/10 dark:border-white/10 font-mono whitespace-pre-wrap break-all">
+                                  <code className="text-[11px] sm:text-xs px-1.5 py-0.5 rounded bg-white/70 dark:bg-slate-800/80 border border-black/10 dark:border-white/10 font-mono whitespace-pre-wrap break-all">
                                     "{issue.targetText}"
                                   </code>
                                 )}
                               </div>
-                              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{issue.message}</p>
+                              <p className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200">{issue.message}</p>
                             </div>
                           </div>
                         );
@@ -386,23 +386,23 @@ export const KnowledgeDetailModal: React.FC<KnowledgeDetailModalProps> = ({
             </div>
 
             {/* 승인 작업 하단 바 */}
-            <div className="bg-slate-50 dark:bg-slate-950/30 border-t border-slate-300 dark:border-slate-600 p-6 flex items-center justify-between">
+            <div className="bg-slate-50 dark:bg-slate-950/30 border-t border-slate-300 dark:border-slate-600 p-3.5 sm:p-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               <div>
                 {(detail.status === "REVIEW_READY" || detail.status === "FAILED_AT_NOTION_PUBLISH" || detail.status === "FAILED_AT_VECTOR_INDEX") ? (
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                  <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
                     * 승인 버튼 클릭 시, <strong>Notion API</strong>와 <strong>벡터 임베딩 모델(Google Gemini)</strong>로 데이터가 실시간 전송됩니다.
                   </p>
                 ) : (
-                  <p className="text-xs text-rose-600 dark:text-rose-400 font-semibold">
+                  <p className="text-[11px] sm:text-xs text-rose-600 dark:text-rose-400 font-semibold">
                     * 이 지식은 현재 승인할 수 없는 상태입니다. (상태: {statusInfo.label})
                   </p>
                 )}
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-2.5">
                 <button
                   onClick={onClose}
-                  className="rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 px-5 py-3 text-sm font-semibold transition-all active:scale-95 cursor-pointer"
+                  className="w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 px-4 py-2.5 sm:px-5 sm:py-3 text-xs sm:text-sm font-semibold transition-all active:scale-95 cursor-pointer text-center"
                 >
                   취소
                 </button>
@@ -411,12 +411,12 @@ export const KnowledgeDetailModal: React.FC<KnowledgeDetailModalProps> = ({
                   <button
                     onClick={handleApprove}
                     disabled={approveMutation.isPending}
-                    className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-sky-500/20 hover:from-sky-400 hover:to-indigo-500 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 px-5 py-2.5 sm:px-6 sm:py-3 text-xs sm:text-sm font-bold text-white shadow-lg shadow-sky-500/20 hover:from-sky-400 hover:to-indigo-500 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
                   >
                     {approveMutation.isPending 
                       ? "처리 중..." 
                       : (detail.status === "REVIEW_READY" ? "최종 승인 및 발행" : "재발행 시도")}
-                    <FiChevronRight className="h-4.5 w-4.5" />
+                    <FiChevronRight className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
                   </button>
                 )}
               </div>

@@ -50,7 +50,11 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
       )}
 
       {/* 2. 반응형 사이드바 (가독성 높은 백그라운드 및 옅은 그레이 보더) */}
-      <aside className="fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-[#E4E8EB] dark:border-slate-800 bg-white dark:bg-slate-900 transition-transform duration-300 ease-in-out md:relative md:translate-x-0">
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-[#E4E8EB] dark:border-slate-800 bg-white dark:bg-slate-900 transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${
+          isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        }`}
+      >
         {/* 사이드바 헤더 */}
         <div className="flex h-16 items-center justify-between border-b border-[#E4E8EB] dark:border-slate-800 px-6 bg-white dark:bg-slate-900">
           <div

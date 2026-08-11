@@ -7,7 +7,7 @@ interface HomePageProps {
 
 export const HomePage: React.FC<HomePageProps> = ({ setActiveTab }) => {
   return (
-    <div className="p-8 bg-[#F5F6F7] dark:bg-[#16171d] min-h-screen transition-colors duration-200">
+    <div className="p-4 sm:p-6 lg:p-8 bg-[#F5F6F7] dark:bg-[#16171d] min-h-full transition-colors duration-200">
       {/* 1. 상단 타이틀 헤더 */}
       <div className="border-b border-[#E4E8EB] dark:border-slate-800 pb-6 mb-8">
         <h1 className="text-2xl font-bold tracking-tight text-[#1E1E1E] dark:text-slate-100">
