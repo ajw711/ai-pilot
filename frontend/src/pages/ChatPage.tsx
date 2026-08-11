@@ -226,7 +226,7 @@ export const ChatPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-1 flex-col h-screen overflow-hidden bg-[#F5F6F7] dark:bg-[#16171d] transition-colors duration-200">
+    <div className="flex flex-1 flex-col h-full overflow-hidden bg-[#F5F6F7] dark:bg-[#16171d] transition-colors duration-200">
       {/* 챗 상단 바  */}
       <div className="hidden md:flex h-16 items-center justify-between border-b border-[#E4E8EB] dark:border-[#2e303a] bg-white dark:bg-[#16171d] px-6">
         <div className="flex items-center gap-3">
@@ -242,7 +242,7 @@ export const ChatPage: React.FC = () => {
       </div>
 
       {/* 메시지 영역 */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-5">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-4 sm:space-y-5">
         {messages.map((msg) => {
           const isAi = msg.sender === "ai";
           return (
