@@ -37,9 +37,6 @@ public class LoginService implements LoginUseCase {
         }
 
         User user = userOpt.get();
-        log.info("[LoginService 디버그] 입력받은 비밀번호 평문: '{}'", command.password());
-        log.info("[LoginService 디버그] DB에서 꺼낸 비밀번호 해시: '{}'", user.getPassword());
-        log.info("[LoginService 디버그] 인코더 클래스 명세: '{}'", passwordEncoder.getClass().getName());
         if (!passwordEncoder.matches(command.password(), user.getPassword())) {
             log.warn("[LoginService] 패스워드가 일치하지 않습니다. Username: {}", command.username());
             throw new UserException(ErrorCode.UNAUTHORIZED_USER);
