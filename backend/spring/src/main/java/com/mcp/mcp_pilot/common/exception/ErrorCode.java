@@ -40,7 +40,8 @@ public enum ErrorCode {
     // User 관련
     UNAUTHORIZED_USER(HttpStatus.UNAUTHORIZED, "U001", "아이디 또는 비밀번호가 올바르지 않습니다."),
     INVALID_TICKET(HttpStatus.UNAUTHORIZED, "U002", "유효하지 않은 인증입니다."),
-    EXPIRED_TICKET(HttpStatus.UNAUTHORIZED, "U003", "만료된 인증입니다.");
+    EXPIRED_TICKET(HttpStatus.UNAUTHORIZED, "U003", "만료된 인증입니다."),
+    ACCESS_DENIED(HttpStatus.FORBIDDEN, "U004" ,"권한이 없습니다." );
 
     private final HttpStatus status; // HTTP 상태 코드
     private final String code; // 에러 코드
