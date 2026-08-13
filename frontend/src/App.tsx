@@ -1,32 +1,33 @@
-import { useState, useEffect } from 'react';
-import { SidebarLayout } from './components/layouts/SidebarLayout';
-import { api, setAccessToken } from './lib/api';
-import { DashboardPage } from './pages/DashboardPage';
-import { ChatPage } from './pages/ChatPage';
-import { HomePage } from './pages/HomePage';
-import { LoginPage } from './pages/LoginPage';
-import { NotFoundPage } from './pages/NotFoundPage';
+import { useState, useEffect } from "react";
+import { Toaster } from "react-hot-toast";
+import { SidebarLayout } from "./components/layouts/SidebarLayout";
+import { api, setAccessToken } from "./lib/api";
+import { DashboardPage } from "./pages/DashboardPage";
+import { ChatPage } from "./pages/ChatPage";
+import { HomePage } from "./pages/HomePage";
+import { LoginPage } from "./pages/LoginPage";
+import { NotFoundPage } from "./pages/NotFoundPage";
 
 function App() {
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
-    return localStorage.getItem('isLoggedIn') === 'true';
+    return localStorage.getItem("isLoggedIn") === "true";
   });
-  const [activeTab, setActiveTab] = useState<string>('home');
+  const [activeTab, setActiveTab] = useState<string>("home");
   const [darkMode, setDarkMode] = useState<boolean>(() => {
-    const saved = localStorage.getItem('theme');
-    if (saved) return saved === 'dark';
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const saved = localStorage.getItem("theme");
+    if (saved) return saved === "dark";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
   });
 
   // Apply dark mode class to html element
   useEffect(() => {
     if (darkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
     } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
     }
   }, [darkMode]);
 
@@ -35,7 +36,11 @@ function App() {
     const recoverSession = async () => {
       if (isLoggedIn) {
         try {
-          const res = await api.post("/auth/refresh", {}, { withCredentials: true });
+          const res = await api.post(
+            "/auth/refresh",
+            {},
+            { withCredentials: true },
+          );
           const { accessToken } = res.data.data;
           setAccessToken(accessToken);
         } catch (err) {
@@ -63,11 +68,11 @@ function App() {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'home':
+      case "home":
         return <HomePage setActiveTab={setActiveTab} />;
-      case 'dashboard':
+      case "dashboard":
         return <DashboardPage />;
-      case 'chat':
+      case "chat":
         return <ChatPage />;
       default:
         return <NotFoundPage setActiveTab={setActiveTab} />;
@@ -75,18 +80,27 @@ function App() {
   };
 
   if (!isLoggedIn) {
-    return <LoginPage onLoginSuccess={() => setIsLoggedIn(true)} />;
+    return (
+      <>
+        <Toaster position="top-right" reverseOrder={false} />
+        <LoginPage onLoginSuccess={() => setIsLoggedIn(true)} />
+      </>
+    );
   }
 
   return (
-    <SidebarLayout 
-      activeTab={activeTab} 
-      setActiveTab={setActiveTab}
-      darkMode={darkMode}
-      setDarkMode={setDarkMode}
-    >
-      {renderContent()}
-    </SidebarLayout>
+    <>
+      <Toaster position="top-right" reverseOrder={false} />
+
+      <SidebarLayout
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        darkMode={darkMode}
+        setDarkMode={setDarkMode}
+      >
+        {renderContent()}
+      </SidebarLayout>
+    </>
   );
 }
 

@@ -12,10 +12,12 @@ export interface LoginResponseData {
 export const loginApi = async (
   data: LoginRequestData,
 ): Promise<LoginResponseData> => {
-  const response = await api.post("/auth/login", data);
+  const response = await api.post("/auth/login", data, {
+    withCredentials: true,
+  });
   return response.data.data;
 };
 
 export const logoutApi = async (): Promise<void> => {
-  await api.post("/auth/logout");
+  await api.post("/auth/logout", {}, { withCredentials: true });
 };

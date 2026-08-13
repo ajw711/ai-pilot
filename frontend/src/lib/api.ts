@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "react-hot-toast";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 const API_VERSION_URL = `${API_BASE_URL}/api/v1`;
@@ -16,6 +17,7 @@ export const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
   timeout: 15000,
 });
 
@@ -51,10 +53,9 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     const status = error.response?.status;
-    const isAuthError = status === 401 || status === 403;
     const isRefreshEndpoint = originalRequest?.url?.includes("/auth/refresh");
 
-    if (isAuthError && !originalRequest._retry && !isRefreshEndpoint) {
+    if (status === 401 && !originalRequest._retry && !isRefreshEndpoint) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -70,7 +71,11 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const res = await axios.post(`${API_VERSION_URL}/auth/refresh`, {}, { withCredentials: true });
+        const res = await axios.post(
+          `${API_VERSION_URL}/auth/refresh`,
+          {},
+          { withCredentials: true },
+        );
         const { accessToken } = res.data.data;
 
         setAccessToken(accessToken);
@@ -91,6 +96,16 @@ api.interceptors.response.use(
         return Promise.reject(refreshError);
       }
     }
+
+    if (status === 403) {
+      console.warn("[403 Forbidden] 권한이 없는 요청입니다.");
+      toast.error("해당 기능에 대한 접근 권한이 없습니다.", {
+        id: "forbidden-403", // 중복 팝업 방지 ID
+        duration: 3500, // 3.5초 후 자동 소멸
+      });
+      return Promise.reject(error);
+    }
+
     return Promise.reject(error);
   },
 );
