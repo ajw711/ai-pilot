@@ -5,6 +5,7 @@ import com.mcp.mcp_pilot.user.domain.entitiy.User;
 import com.mcp.mcp_pilot.user.domain.vo.Role;
 import com.mcp.mcp_pilot.user.exception.UserException;
 import com.mcp.mcp_pilot.user.port.in.dto.LoginCommand;
+import com.mcp.mcp_pilot.user.port.out.RefreshTokenPort;
 import com.mcp.mcp_pilot.user.port.out.TokenPort;
 import com.mcp.mcp_pilot.user.port.out.UserPersistencePort;
 import com.mcp.mcp_pilot.user.port.out.dto.TokenResult;
@@ -16,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,6 +27,9 @@ import static org.mockito.Mockito.*;
 class LoginServiceTest {
     @Mock
     private UserPersistencePort userPersistencePort;
+
+    @Mock
+    private RefreshTokenPort refreshTokenPort;
 
     @Mock
     private TokenPort tokenPort;
@@ -62,6 +67,7 @@ class LoginServiceTest {
         verify(userPersistencePort).findByUsername("test-user");
         verify(passwordEncoder).matches("1234", "encoded-1234");
         verify(tokenPort).generateTokens(user);
+        verify(refreshTokenPort).save(eq(1L), eq("refresh-token-yyy"), any(LocalDateTime.class));
     }
 
     @Test
@@ -104,6 +110,6 @@ class LoginServiceTest {
         assertEquals(ErrorCode.UNAUTHORIZED_USER, exception.getErrorCode());
         verify(userPersistencePort).findByUsername("test-user");
         verify(passwordEncoder).matches("wrong-password", "encoded-1234");
-        verifyNoInteractions(tokenPort);
+        verifyNoInteractions(tokenPort, refreshTokenPort);
     }
 }
