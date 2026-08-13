@@ -11,7 +11,11 @@ import org.hibernate.annotations.SQLRestriction;
 import java.time.LocalDateTime;
 
 @SQLRestriction("deleted_at IS NULL")
-@Table(name = "refresh_token")
+@Table(name = "refresh_token",
+    indexes = {
+        @Index(name = "idx_token_hash_unique", columnList = "token_hash", unique = true)
+    }
+)
 @Entity
 @Getter
 @NoArgsConstructor
@@ -25,7 +29,7 @@ public class RefreshTokenJpaEntity extends BaseEntity {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "token_hash", nullable = false, length = 200)
+    @Column(name = "token_hash", nullable = false, unique = true, length = 200)
     private String tokenHash;
 
     @Column(name = "expired_at", nullable = false)

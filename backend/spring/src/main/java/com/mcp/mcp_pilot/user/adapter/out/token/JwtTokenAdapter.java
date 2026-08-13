@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 public class JwtTokenAdapter implements TokenPort {
 
     private final JwtProvider jwtProvider;
-    private final RefreshTokenPort refreshTokenPort;
 
     @Override
     public TokenResult generateTokens(User user) {
@@ -28,9 +27,6 @@ public class JwtTokenAdapter implements TokenPort {
         String refreshToken = jwtProvider.generateRefreshToken(
                 user.getId()
         );
-
-        // Refresh Token DB 기록 (만료일자 14일)
-        refreshTokenPort.save(user.getId(), refreshToken, LocalDateTime.now().plusDays(14));
 
         return new TokenResult(accessToken, refreshToken);
     }
