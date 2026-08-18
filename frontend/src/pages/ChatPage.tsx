@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { FiSend, FiCpu, FiUser } from "react-icons/fi";
 import { fetchPilotChatStream } from "../features/ops/api";
 import { MarkdownRenderer } from "../components/MarkdownRenderer";
+import { fetchKnowledgeChatStream } from "../features/knowledge/api";
 
 export interface ChatRequestDto {
   message: string;
@@ -32,6 +33,7 @@ export const ChatPage: React.FC = () => {
     },
   ]);
   const [input, setInput] = useState("");
+  const [mode, setMode] = useState<"ops" | "knowledge">("ops");
   const [isLoading, setIsLoading] = useState(false);
   const pendingResultsRef = useRef<
     Record<string, { status: string; message: string }>
@@ -112,7 +114,9 @@ export const ChatPage: React.FC = () => {
     let trackingIdExtracted = false;
 
     try {
-      await fetchPilotChatStream(userQuery, {
+      const streamFn =
+        mode === "ops" ? fetchPilotChatStream : fetchKnowledgeChatStream;
+      await streamFn(userQuery, {
         onMessage: (event: any) => {
           try {
             const eventData: ChatEventDto = JSON.parse(event.data);
@@ -237,6 +241,20 @@ export const ChatPage: React.FC = () => {
             <h2 className="text-sm font-bold text-[#1E1E1E] dark:text-[#f3f4f6]">
               Ops AI 어시스턴트
             </h2>
+            <div className="flex rounded-lg border border-[#E4E8EB] dark:border-[#2e303a] overflow-hidden text-xs font-bold">
+              <button
+                onClick={() => setMode("ops")}
+                className={`px-3 py-1.5 transition-all ${mode === "ops" ? "bg-[#03C75A] text-white" : "bg-white dark:bg-[#1f2028] text-slate-500 hover:bg-slate-50"}`}
+              >
+                Ops AI
+              </button>
+              <button
+                onClick={() => setMode("knowledge")}
+                className={`px-3 py-1.5 transition-all ${mode === "knowledge" ? "bg-[#03C75A] text-white" : "bg-white dark:bg-[#1f2028] text-slate-500 hover:bg-slate-50"}`}
+              >
+                지식 AI
+              </button>
+            </div>
           </div>
         </div>
       </div>

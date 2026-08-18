@@ -4,6 +4,7 @@ import { SidebarLayout } from "./components/layouts/SidebarLayout";
 import { api, setAccessToken } from "./lib/api";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ChatPage } from "./pages/ChatPage";
+import { KnowledgeChatPage } from "./pages/KnowledgeChatPage";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
@@ -74,6 +75,8 @@ function App() {
         return <DashboardPage />;
       case "chat":
         return <ChatPage />;
+      case "knowledge-chat":
+        return <KnowledgeChatPage />;
       default:
         return <NotFoundPage setActiveTab={setActiveTab} />;
     }

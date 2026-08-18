@@ -1,8 +1,7 @@
 package com.mcp.mcp_pilot.knowledge.port.in;
 
-import com.mcp.mcp_pilot.ai.dto.ChatRequest;
-import com.mcp.mcp_pilot.ai.dto.ChatResponse;
+import reactor.core.publisher.Flux;
 
 public interface KnowledgeChatUseCase {
-    ChatResponse chat(ChatRequest chatRequest, Long userId);
+    Flux<String> stream(String message, Long userId);
 }

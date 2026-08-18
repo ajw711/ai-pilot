@@ -29,7 +29,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       });
 
       setAccessToken(data.accessToken);
-      localStorage.setItem("access_token", data.accessToken);
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("userId", userId);
       onLoginSuccess();

@@ -36,6 +36,10 @@ public class KnowledgePublishService implements NotionUseCase {
 
         // Lag 측정
         Duration lag = Duration.between(event.publishedAt(), Instant.now());
+        if (lag.isNegative()) {
+            log.warn("[NotionService] Negative lag detected (possible clock skew): {}", lag);
+            lag = Duration.ZERO;
+        }
         meterRegistry.timer("knowledge_event_lag_seconds", "consumer", "notion").record(lag);
 
         // 멱등성 체크

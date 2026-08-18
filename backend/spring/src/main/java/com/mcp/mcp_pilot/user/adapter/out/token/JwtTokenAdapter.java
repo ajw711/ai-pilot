@@ -2,13 +2,10 @@ package com.mcp.mcp_pilot.user.adapter.out.token;
 
 import com.mcp.mcp_pilot.common.security.JwtProvider;
 import com.mcp.mcp_pilot.user.domain.entitiy.User;
-import com.mcp.mcp_pilot.user.port.out.dto.TokenResult;
 import com.mcp.mcp_pilot.user.port.out.TokenPort;
+import com.mcp.mcp_pilot.user.port.out.dto.TokenResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import com.mcp.mcp_pilot.user.port.out.RefreshTokenPort;
-import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor

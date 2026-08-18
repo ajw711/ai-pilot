@@ -23,7 +23,7 @@ public class LocalVectorSearchAdapter implements VectorSearchPort {
     private final VectorStoreRepository vectorStoreRepository;
     private final SimilarityCalculatorFactory calculatorFactory;
 
-    private static final double SCORE_THRESHOLD = 0.7;
+    private static final double SCORE_THRESHOLD = 0.55;
 
     @Override
     public List<Long> search(VectorTargetType targetType, String query, int topK,  SimilarityMetric metric) {
@@ -37,29 +37,17 @@ public class LocalVectorSearchAdapter implements VectorSearchPort {
                         metric
                 );
 
-        return vectorStoreRepository
-                .findByTargetType(targetType)
-                .stream()
+        List<com.mcp.mcp_pilot.ai.vector.entity.VectorStoreEntity> all =
+                vectorStoreRepository.findByTargetType(targetType);
+        log.info("[VectorSearch] DB에서 {}건 로드됨 (targetType={})", all.size(), targetType);
+
+        return all.stream()
                 .map(entity -> {
-
-                    double score =
-                            calculator.calculate(
-                                    queryVector,
-                                    entity.getEmbeddingVector()
-                            );
-
-                    return new SearchResult(
-                            entity.getTargetId(),
-                            score
-                    );
+                    double score = calculator.calculate(queryVector, entity.getEmbeddingVector());
+                    return new SearchResult(entity.getTargetId(), score);
                 })
                 .filter(result -> result.score() >= SCORE_THRESHOLD)
-                .sorted((a, b) ->
-                        Double.compare(
-                                b.score(),
-                                a.score()
-                        )
-                )
+                .sorted((a, b) -> Double.compare(b.score(), a.score()))
                 .limit(topK)
                 .map(SearchResult::id)
                 .toList();
