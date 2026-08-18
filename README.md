@@ -12,6 +12,8 @@ k3s 기반 홈랩 클러스터 위에서 동작하며, Tailscale VPN을 통해 P
    상태를 조회하고, AI가 이를 분석해 진단 결과를 스트리밍으로 제공합니다.
 2. **개인 지식 저장소 (Knowledge Guardian)**: 정리한 기술 노트를 AI가 사실관계 기준으로 1차
    검수하고, 최종 승인은 항상 사람이 하는 구조로 지식을 축적합니다.
+3. **RAG 기반 지식 검색**: 승인된 지식을 임베딩하여 벡터 DB에 저장하고, 질문 시 유사도 검색으로
+   관련 지식을 Context로 주입해 Gemini가 개인 지식 기반으로 답변합니다.
 
 ## Motivation
 
@@ -43,6 +45,7 @@ k3s 기반 홈랩 클러스터 위에서 동작하며, Tailscale VPN을 통해 P
 - **AI 기술 검수 (Knowledge Guardian)**: 정리한 지식을 저장하기 전에 AI가 사실관계를 검수하고
   심각도별로 이슈를 분류, 최종 승인은 항상 사람이 하도록 설계
 - **이원화된 지식 저장**: PostgreSQL(원본+요약+임베딩)과 Notion(열람/편집용 UI)에 독립적으로 저장
+- **RAG 기반 지식 챗봇**: 사용자 질문 → 벡터 유사도 검색(Cosine Similarity)으로 관련 지식 추출 → System Prompt에 Context 주입 → Gemini SSE 스트리밍 응답. 관련 지식이 없으면 일반 지식으로 폴백.
 - **GitOps 기반 배포**: ArgoCD를 통한 자동 배포 (자세한 내용은 [ai-pilot-infra](../ai-pilot-infra) 참고)
 
 ## Tech Stack
@@ -55,7 +58,7 @@ k3s 기반 홈랩 클러스터 위에서 동작하며, Tailscale VPN을 통해 P
 | 메시징 | NATS 2.25.3 (request-reply) |
 | 클러스터 제어 | Go (Cluster Agent) |
 | 인증 | Spring Security + JWT |
-| 데이터베이스 | PostgreSQL (+ 임베딩 저장) |
+| 데이터베이스 | PostgreSQL (원본 + 요약 + 벡터 임베딩 저장 / Cosine 유사도 검색) |
 | 외부 연동 | Notion |
 | API 문서 | SpringDoc OpenAPI 3.0.3 |
 | 인프라 | k3s, Traefik, ArgoCD, Helm |
@@ -79,8 +82,8 @@ k3s 기반 홈랩 클러스터 위에서 동작하며, Tailscale VPN을 통해 P
 이 저장소는 애플리케이션 코드만 관리하며, 배포/인프라 구성은
 [ai-pilot-infra](../ai-pilot-infra) 저장소에서 GitOps(ArgoCD) 기반으로 관리합니다.
 
-## Future Improvements
+## 구현 완료
 
-- **RAG 검색**: 현재 지식 저장 시 임베딩 값은 함께 저장되고 있으나, 이를 활용한 검색 기능은
-  아직 구현되지 않았습니다. 현재는 Notion에서 직접 열람하는 방식으로 사용 중이며, RAG 기반
-  검색 구축이 다음 목표입니다.
+- **RAG 기반 지식 검색**: 승인된 지식의 임베딩 벡터를 PostgreSQL에 저장하고, 질문 시 Cosine
+  유사도 검색으로 관련 지식을 추출해 AI 답변의 Context로 활용합니다. 관련 지식이 없는 경우
+  Gemini의 일반 지식으로 폴백합니다.

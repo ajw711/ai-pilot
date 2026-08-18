@@ -1,7 +1,10 @@
 import { api } from "../../lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getAccessToken } from "../../lib/api";
+import type { SseStreamOptions } from "../../lib/api";
 import type { KnowledgeStatus } from "../../types/knowledge";
 import type { ApiResponse } from "../../types/api";
+
 export interface KnowledgeSummaryDto {
   id: number;
   title: string;
@@ -98,4 +101,72 @@ export const useDeleteKnowledge = () => {
       queryClient.invalidateQueries({ queryKey: ["knowledgeList"] });
     },
   });
+};
+
+export const fetchKnowledgeChatStream = async (
+  message: string,
+  options: SseStreamOptions,
+): Promise<void> => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+  const token = getAccessToken();
+  const headers: Record<string, string> = {
+    Accept: "text/event-stream",
+  };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  // GET + query param (SSE는 GET만 지원)
+  const url = `${API_BASE_URL}/api/v1/knowledge/chat?message=${encodeURIComponent(message)}`;
+  const response = await fetch(url, { method: "GET", headers });
+  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+  // 이하 스트리밍 처리는 동일 — fetchSseStream 내부 로직 재사용 불가하므로 인라인
+  const reader = response.body?.getReader();
+  const decoder = new TextDecoder("utf-8");
+  if (!reader) throw new Error("ReadableStream reader를 사용할 수 없습니다.");
+  let lineBuffer = "";
+  let currentEventName = "";
+  let currentDataBuffer = "";
+  let currentId = "";
+  const dispatchEvent = () => {
+    if (currentDataBuffer) {
+      options.onMessage({
+        event: currentEventName || "message",
+        data: currentDataBuffer.trim(),
+        id: currentId,
+      });
+      currentDataBuffer = "";
+      currentEventName = "";
+    }
+  };
+  const processLine = (line: string) => {
+    if (line.startsWith(":") || line === "") {
+      if (line === "") dispatchEvent();
+      return;
+    }
+    const colonIndex = line.indexOf(":");
+    const field = colonIndex !== -1 ? line.substring(0, colonIndex) : line;
+    let value = colonIndex !== -1 ? line.substring(colonIndex + 1) : "";
+    if (value.startsWith(" ")) value = value.substring(1);
+    if (field === "data") currentDataBuffer += value + "\n";
+    else if (field === "event") currentEventName = value;
+    else if (field === "id") currentId = value;
+  };
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) {
+        dispatchEvent();
+        options.onComplete?.();
+        break;
+      }
+      lineBuffer += decoder.decode(value, { stream: true });
+      let idx: number;
+      while ((idx = lineBuffer.indexOf("\n")) !== -1) {
+        processLine(lineBuffer.substring(0, idx).replace(/\r$/, ""));
+        lineBuffer = lineBuffer.substring(idx + 1);
+      }
+    }
+  } catch (error) {
+    const err = error instanceof Error ? error : new Error(String(error));
+    options.onError?.(err);
+    throw err;
+  }
 };
