@@ -130,6 +130,16 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
           background-color: #1e293b;
           color: #fb7185; /* rose-400 */
         }
+
+        .markdown-preview-container strong,
+        .markdown-preview-container b {
+          font-weight: 800;
+          color: #111827;
+        }
+        .dark .markdown-preview-container strong,
+        .dark .markdown-preview-container b {
+          color: #f9fafb;
+        }
       `}</style>
       <div
         className="markdown-body font-sans text-sm text-inherit leading-relaxed"
