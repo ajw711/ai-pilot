@@ -1,6 +1,6 @@
 import { api } from "../../lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchSseStream, getAccessToken } from "../../lib/api";
+import { getAccessToken } from "../../lib/api";
 import type { SseStreamOptions } from "../../lib/api";
 import type { KnowledgeStatus } from "../../types/knowledge";
 import type { ApiResponse } from "../../types/api";
