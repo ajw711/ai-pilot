@@ -79,11 +79,13 @@ AI-Pilot 아키텍처는 **"안전성(Security)", "실시간성(Real-time)", "�
 - **SSE 방어 2-Tier 구조:** 컨트롤러 레벨(`onErrorResume`)과 글로벌 핸들러 레벨(`isSseRequest`)에서 이중으로 예외를 방어하여 불완전한 네트워크 단절로 인한 톰캣 스레드 릭과 서버 크래시를 원천 차단합니다.
 
 ![Ops AI Assistant - K8s 장애 진단](./docs/images/스크린샷2.png)
+<br>
 *(Ops AI Assistant: NodeNotReady, Probe 실패 등 실시간 K8s 이벤트를 분석하고 원인 및 조치 방법을 스트리밍으로 제공)*
 
 <br>
 
 ![Knowledge AI Assistant - RAG 답변](./docs/images/스크린샷3.png)
+<br>
 *(지식 AI 어시스턴트: 등록된 개인 지식을 RAG로 검색하여 구조화된 마크다운 형식으로 답변)*
 
 ### 2. 지식 등록 및 AI 검수 파이프라인 (Knowledge Pipeline)
@@ -95,22 +97,26 @@ AI-Pilot 아키텍처는 **"안전성(Security)", "실시간성(Real-time)", "�
 - **상태 집계:** `KnowledgeStatusAggregator`가 다수의 비동기 작업(Notion API 적재, Vector DB 임베딩)의 완료 상태를 추적하여 최종적으로 지식을 `PUBLISHED` 상태로 일관성 있게 전이시킵니다.
 
 ![Knowledge Dashboard](./docs/images/스크린샷5.png)
+<br>
 *(지식 대시보드: 전체 지식 소스 33개가 모두 벡터 DB에 동기화 완료된 상태 모니터링)*
 
 <br>
 
 ![AI 자동 포맷팅](./docs/images/스크린샷4.png)
+<br>
 *(AI 자동 포맷팅: 사용자가 입력한 원본 텍스트(좌)를 AI가 마크다운 기반 정형 문서(우)로 자동 변환)*
 
 <br>
 
 ![Knowledge Guardian - 팩트체크](./docs/images/스크린샷6.png)
+<br>
 *(Knowledge Guardian: AI가 기술적 사실관계를 검수하고 "주의 경고", "의견 추천" 등 심각도별로 리포팅)*
 
 <br>
 
 ![Notion 자동 동기화](./docs/images/스크린샷7.png)
-*(이원화 저장: 승인된 지식은 PostgreSQL뿐만 아니라 Notion WIKI에도 Transactional Outbox를 통해 유실 없이 자동 동기화)
+<br>
+*(이원화 저장: 승인된 지식은 PostgreSQL뿐만 아니라 Notion WIKI에도 Transactional Outbox를 통해 유실 없이 자동 동기화)*
 
 ## Design Decisions
 
