@@ -13,7 +13,11 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   const rawHtml = useMemo(() => {
     if (!content) return "";
 
-    const parsedHtml = marked.parse(content, { gfm: true, breaks: true }) as string;
+    // 한국어 조사(은/는/이/가 등)가 ** 뒤에 바로 붙어있을 때 
+    // 마크다운 파서가 이를 일반 텍스트로 오인하는 문제(CommonMark 스펙) 해결
+    const preprocessedContent = content.replace(/\*\*([\s\S]+?)\*\*/g, '<strong>$1</strong>');
+
+    const parsedHtml = marked.parse(preprocessedContent, { gfm: true, breaks: true }) as string;
     return DOMPurify.sanitize(parsedHtml);
   }, [content]);
 
