@@ -63,17 +63,20 @@ export const KnowledgeChatPage: React.FC = () => {
       await fetchKnowledgeChatStream(userQuery, {
         onMessage: (event: any) => {
           try {
-            if (event.event === "TOKEN" && event.data) {
-              accumulatedText += event.data;
-              setMessages((prev) =>
-                prev.map((msg) =>
-                  msg.id === aiMessageId
-                    ? { ...msg, text: accumulatedText }
-                    : msg,
-                ),
-              );
-            } else if (event.event === "COMPLETE") {
-              setIsLoading(false);
+            if (event.data) {
+              const eventData = JSON.parse(event.data);
+              if (eventData.type === "TOKEN" && eventData.message) {
+                accumulatedText += eventData.message;
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === aiMessageId
+                      ? { ...msg, text: accumulatedText }
+                      : msg,
+                  ),
+                );
+              } else if (eventData.type === "COMPLETE") {
+                setIsLoading(false);
+              }
             }
           } catch (e) {
             console.error("[KnowledgeChatPage] 파싱 에러:", e);
