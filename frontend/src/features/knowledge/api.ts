@@ -129,7 +129,7 @@ export const fetchKnowledgeChatStream = async (
     if (currentDataBuffer) {
       options.onMessage({
         event: currentEventName || "message",
-        data: currentDataBuffer.trim(),
+        data: currentDataBuffer.replace(/\n$/, ""),
         id: currentId,
       });
       currentDataBuffer = "";

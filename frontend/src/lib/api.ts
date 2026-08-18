@@ -166,7 +166,7 @@ export const fetchSseStream = async <Req>(
     if (currentDataBuffer) {
       options.onMessage({
         event: currentEventName || "message",
-        data: currentDataBuffer.trim(),
+        data: currentDataBuffer.replace(/\n$/, ""),
         id: currentId,
         retry: currentRetry,
       });
