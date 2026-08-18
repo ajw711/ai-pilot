@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { FiSend, FiCpu, FiUser } from "react-icons/fi";
 import { fetchPilotChatStream } from "../features/ops/api";
 import { MarkdownRenderer } from "../components/MarkdownRenderer";
-import { fetchKnowledgeChatStream } from "../features/knowledge/api";
 
 export interface ChatRequestDto {
   message: string;
@@ -28,12 +27,11 @@ export const ChatPage: React.FC = () => {
     {
       id: "1",
       sender: "ai",
-      text: "안녕하세요! 등록된 지식 정보를 기반으로 질문에 답변해 드립니다. 궁금한 점을 물어보세요.",
+      text: "안녕하세요! Kubernetes 클러스터의 상태 조회와 장애 진단을 도와드립니다. 명령어 또는 장애 현상을 입력해 주세요.",
       timestamp: "오후 2:30",
     },
   ]);
   const [input, setInput] = useState("");
-  const [mode, setMode] = useState<"ops" | "knowledge">("ops");
   const [isLoading, setIsLoading] = useState(false);
   const pendingResultsRef = useRef<
     Record<string, { status: string; message: string }>
@@ -114,9 +112,7 @@ export const ChatPage: React.FC = () => {
     let trackingIdExtracted = false;
 
     try {
-      const streamFn =
-        mode === "ops" ? fetchPilotChatStream : fetchKnowledgeChatStream;
-      await streamFn(userQuery, {
+      await fetchPilotChatStream(userQuery, {
         onMessage: (event: any) => {
           try {
             const eventData: ChatEventDto = JSON.parse(event.data);
@@ -241,20 +237,6 @@ export const ChatPage: React.FC = () => {
             <h2 className="text-sm font-bold text-[#1E1E1E] dark:text-[#f3f4f6]">
               Ops AI 어시스턴트
             </h2>
-            <div className="flex rounded-lg border border-[#E4E8EB] dark:border-[#2e303a] overflow-hidden text-xs font-bold">
-              <button
-                onClick={() => setMode("ops")}
-                className={`px-3 py-1.5 transition-all ${mode === "ops" ? "bg-[#03C75A] text-white" : "bg-white dark:bg-[#1f2028] text-slate-500 hover:bg-slate-50"}`}
-              >
-                Ops AI
-              </button>
-              <button
-                onClick={() => setMode("knowledge")}
-                className={`px-3 py-1.5 transition-all ${mode === "knowledge" ? "bg-[#03C75A] text-white" : "bg-white dark:bg-[#1f2028] text-slate-500 hover:bg-slate-50"}`}
-              >
-                지식 AI
-              </button>
-            </div>
           </div>
         </div>
       </div>
