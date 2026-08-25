@@ -1,9 +1,10 @@
 package com.mcp.mcp_pilot.knowledge.application.service;
 
 import com.mcp.mcp_pilot.ai.constant.VectorTargetType;
-import com.mcp.mcp_pilot.ai.vector.service.VectorMemoryService;
+import com.mcp.mcp_pilot.ai.vector.dto.RawChunk;
+import com.mcp.mcp_pilot.ai.vector.port.VectorIndexingUseCase;
+import com.mcp.mcp_pilot.knowledge.application.chunker.MarkdownChunker;
 import com.mcp.mcp_pilot.knowledge.application.event.KnowledgeProcessedEvent;
-import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeLog;
 import com.mcp.mcp_pilot.knowledge.domain.vo.KnowledgeStatus;
 import com.mcp.mcp_pilot.knowledge.exception.KnowledgeNotFoundException;
 import com.mcp.mcp_pilot.knowledge.port.in.VectorUseCase;
@@ -17,13 +18,15 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class KnowledgeVectorService implements VectorUseCase {
 
-    private final VectorMemoryService vectorMemoryService;
+    private final VectorIndexingUseCase vectorIndexingUseCase;
+    private final MarkdownChunker markdownChunker;
     private final KnowledgeEventPublishPort knowledgeEventPublishPort;
     private final KnowledgePersistencePort persistencePort;
     private final MeterRegistry meterRegistry;
@@ -37,30 +40,24 @@ public class KnowledgeVectorService implements VectorUseCase {
         Timer.Sample sample = Timer.start(meterRegistry);
         String status = "success";
 
-        // 멱등성 Check
-        if (vectorMemoryService.exists(VectorTargetType.KNOWLEDGE, event.knowledgeId())) {
-            log.info("[VectorService] 이미 벡터화된 데이터입니다. - ID: {}", event.knowledgeId());
-            return;
-        }
-
         log.info("[VectorService] 지식 벡터화 시작 - ID: {}", event.knowledgeId());
         persistencePort.updateStatus(event.knowledgeId(), KnowledgeStatus.VECTOR_INDEXING);
 
         try {
             persistencePort.findById(event.knowledgeId()).ifPresentOrElse(knowledge -> {
 
-                float[] vector = vectorMemoryService.generateVectorOnly(
-                        VectorTargetType.KNOWLEDGE,
-                        knowledge.getId(),
+                // 마크다운 본문을 헤딩/토큰 기준으로 청킹
+                List<RawChunk> chunks = markdownChunker.chunk(
+                        knowledge.getTitle(),
                         knowledge.getFormattedContent()
                 );
 
-                vectorMemoryService.saveEmbedding(
+                // 공통 인덱싱 엔진에 1:N 청크 일괄 색인 위임
+                vectorIndexingUseCase.indexChunks(
                         VectorTargetType.KNOWLEDGE,
                         knowledge.getId(),
-                        vector
+                        chunks
                 );
-
                 log.info("[VectorService] Vector 적재 완료 - Outbox 이벤트 발행 (ID: {})", event.knowledgeId());
                 knowledgeEventPublishPort.publish("knowledge.vector.indexed", event.knowledgeId());
 

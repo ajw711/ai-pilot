@@ -76,10 +76,12 @@ logging:
   level:
     org.springframework.ai: DEBUG
 
-ops:
-  defaults:
-    cpu-limit: 500m
-    memory-limit: 512Mi
-
 jwt:
   secret: ${JWT_SECRET}
+
+cloudflare:
+  r2:
+    account-id: ${R2_ACCOUNT_ID}
+    access-key: ${R2_ACCESS_KEY}
+    secret-key: ${R2_SECRET_KEY}
+    bucket-name: document

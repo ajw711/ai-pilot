@@ -2,6 +2,7 @@ package com.mcp.mcp_pilot.knowledge.application.service;
 
 import com.mcp.mcp_pilot.ai.constant.VectorTargetType;
 import com.mcp.mcp_pilot.ai.vector.constant.SimilarityMetric;
+import com.mcp.mcp_pilot.ai.vector.dto.VectorSearchResult;
 import com.mcp.mcp_pilot.ai.vector.port.VectorSearchPort;
 import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeLog;
 import com.mcp.mcp_pilot.knowledge.port.in.SearchKnowledgeUseCase;
@@ -58,9 +59,11 @@ public class KnowledgeSearchService implements SearchKnowledgeUseCase {
         }
 
         // 유사도 검색
-        List<Long> similarIds = vectorSearchPort.search(VectorTargetType.KNOWLEDGE, query, 3, SimilarityMetric.COSINE);
-        if (!similarIds.isEmpty()) {
-            List<KnowledgeLog> vectorResults = similarIds.stream()
+        List<VectorSearchResult> similarResults = vectorSearchPort.search(VectorTargetType.KNOWLEDGE, query, 3, SimilarityMetric.COSINE);
+        if (!similarResults.isEmpty()) {
+            List<KnowledgeLog> vectorResults = similarResults.stream()
+                    .map(VectorSearchResult::sourceId)
+                    .distinct()
                     .map(knowledgeSearchPort::findSummaryById)
                     .flatMap(Optional::stream)
                     .toList();

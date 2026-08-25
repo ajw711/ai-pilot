@@ -41,6 +41,12 @@ dependencies {
     // Stream
 	implementation 'io.nats:jnats:2.25.3'
 
+	// S3 OR R2
+	implementation 'software.amazon.awssdk:s3:2.54.2'
+
+	// 파일 형식에서 텍스트와 메타데이터를 자동으로 감지하고 추출할 수 있는 오픈소스 라이브러리
+	implementation 'org.springframework.ai:spring-ai-tika-document-reader'
+
 	implementation 'org.springframework.ai:spring-ai-starter-model-google-genai'
 	implementation 'org.springframework.ai:spring-ai-starter-model-google-genai-embedding'
 	implementation 'org.springframework.ai:spring-ai-starter-mcp-client'
