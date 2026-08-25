@@ -8,7 +8,8 @@ import lombok.RequiredArgsConstructor;
 public enum VectorTargetType {
     KNOWLEDGE("지식 데이터"),
     K8S_LOG("쿠버네티스 로그"),
-    CHAT_HISTORY("대화 이력");
+    CHAT_HISTORY("대화 이력"),
+    FILE_DOCUMENT("파일업로드");
 
     private final String description;
 }

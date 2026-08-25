@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.util.Map;
+
 /**
  *  텍스트를 의미 벡터(embedding vector)로 변환
  *
@@ -25,24 +27,54 @@ public class VectorStoreEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    private VectorTargetType targetType; // 예: "KNOWLEDGE", "K8S_LOG"
+    @Column(name = "vector_source_id", nullable = false)
+    private Long vectorSourceId;
 
-    @Column(nullable = false)
-    private Long targetId; // 도메인 pk
+    @Column(name = "chunk_index", nullable = false)
+    private Integer chunkIndex;
 
-    @Column(name = "embedding_vector", columnDefinition = "bytea", nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String content;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private Map<String, Object> metadata;
+
+    @Column(
+            name = "embedding_vector",
+            columnDefinition = "bytea",
+            nullable = false
+    )
     @JdbcTypeCode(SqlTypes.VARBINARY)
-    private float[] embeddingVector; // 768차원 벡터 좌표 배열
+    private float[] embeddingVector;
 
-    private VectorStoreEntity(VectorTargetType targetType, Long targetId, float[] embeddingVector) {
-        this.targetType = targetType;
-        this.targetId = targetId;
+    private VectorStoreEntity(
+            Long vectorSourceId,
+            Integer chunkIndex,
+            String content,
+            Map<String, Object> metadata,
+            float[] embeddingVector
+    ) {
+        this.vectorSourceId = vectorSourceId;
+        this.chunkIndex = chunkIndex;
+        this.content = content;
+        this.metadata = metadata;
         this.embeddingVector = embeddingVector;
     }
 
-    public static VectorStoreEntity createVectorStore(VectorTargetType targetType, Long targetId, float[] embeddingVector) {
-        return new VectorStoreEntity(targetType, targetId, embeddingVector);
+    public static VectorStoreEntity createChunk(
+            Long vectorSourceId,
+            int chunkIndex,
+            String content,
+            Map<String, Object> metadata,
+            float[] embeddingVector
+    ) {
+        return new VectorStoreEntity(
+                vectorSourceId,
+                chunkIndex,
+                content,
+                metadata,
+                embeddingVector
+        );
     }
-
 }

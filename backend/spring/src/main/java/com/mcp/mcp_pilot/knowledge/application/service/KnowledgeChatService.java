@@ -2,6 +2,7 @@ package com.mcp.mcp_pilot.knowledge.application.service;
 
 import com.mcp.mcp_pilot.ai.constant.VectorTargetType;
 import com.mcp.mcp_pilot.ai.vector.constant.SimilarityMetric;
+import com.mcp.mcp_pilot.ai.vector.dto.VectorSearchResult;
 import com.mcp.mcp_pilot.ai.vector.port.VectorSearchPort;
 import com.mcp.mcp_pilot.knowledge.port.in.KnowledgeChatUseCase;
 import com.mcp.mcp_pilot.knowledge.port.out.KnowledgeSearchPort;
@@ -30,13 +31,15 @@ public class KnowledgeChatService implements KnowledgeChatUseCase {
         log.info("[KnowledgeChatService] RAG 스트리밍 요청 - userId: {}", userId);
 
         // 쿼리 임베딩 → 유사 지식 ID 검색
-        List<Long> similarIds = vectorSearchPort.search(
+        List<VectorSearchResult> similarResults = vectorSearchPort.search(
                 VectorTargetType.KNOWLEDGE, message, 3, SimilarityMetric.COSINE
         );
-        log.info("[KnowledgeChatService] 유사 지식 {}건 검색됨: {}", similarIds.size(), similarIds);
+        log.info("[KnowledgeChatService] 유사 지식 {}건 검색됨: {}", similarResults.size(), similarResults);
 
         // 검색된 ID로 formattedContent 조회해서 Context 문자열 구성
-        String context = similarIds.stream()
+        String context = similarResults.stream()
+                .map(VectorSearchResult::sourceId)
+                .distinct()
                 .map(knowledgeSearchPort::findSummaryById)
                 .flatMap(Optional::stream)
                 .map(k -> "### " + k.getTitle() + "\n" + k.getFormattedContent())

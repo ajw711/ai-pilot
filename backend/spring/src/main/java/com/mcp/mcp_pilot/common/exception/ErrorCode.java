@@ -16,6 +16,7 @@ public enum ErrorCode {
      * Axxx = AI
      * Sxxx = Search
      * Oxxx = OPS
+     * Dxxx = Document
      */
 
     // 공통
@@ -41,7 +42,12 @@ public enum ErrorCode {
     UNAUTHORIZED_USER(HttpStatus.UNAUTHORIZED, "U001", "아이디 또는 비밀번호가 올바르지 않습니다."),
     INVALID_TICKET(HttpStatus.UNAUTHORIZED, "U002", "유효하지 않은 인증입니다."),
     EXPIRED_TICKET(HttpStatus.UNAUTHORIZED, "U003", "만료된 인증입니다."),
-    ACCESS_DENIED(HttpStatus.FORBIDDEN, "U004" ,"권한이 없습니다." );
+    ACCESS_DENIED(HttpStatus.FORBIDDEN, "U004" ,"권한이 없습니다." ),
+
+    // Document 관련
+    FILE_REQUEST(HttpStatus.BAD_REQUEST, "D001" ,"요청 파일이 없습니다."),
+    FILE_UPLOAD(HttpStatus.INTERNAL_SERVER_ERROR, "D002" ,"파일 업로드가 실패했습니다." ),
+    FILE_DOWNLOAD(HttpStatus.INTERNAL_SERVER_ERROR ,"D03", "파일 다운로드중 오류가 발생했습니다.");
 
     private final HttpStatus status; // HTTP 상태 코드
     private final String code; // 에러 코드

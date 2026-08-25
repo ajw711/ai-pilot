@@ -38,6 +38,7 @@ public class OutboxEventProcessor {
 
             JetStream js = connectionHolder.getJetStream();
 
+            // https://docs.nats.io/learn/jetstream/your-first-stream
             PublishOptions options = PublishOptions.builder()
                     .messageId(event.getEventId())
                     .build();

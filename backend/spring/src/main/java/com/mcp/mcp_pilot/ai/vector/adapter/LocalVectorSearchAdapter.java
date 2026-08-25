@@ -3,6 +3,8 @@ package com.mcp.mcp_pilot.ai.vector.adapter;
 import com.mcp.mcp_pilot.ai.constant.VectorTargetType;
 import com.mcp.mcp_pilot.ai.vector.constant.SimilarityMetric;
 import com.mcp.mcp_pilot.ai.vector.dto.SearchResult;
+import com.mcp.mcp_pilot.ai.vector.dto.VectorSearchResult;
+import com.mcp.mcp_pilot.ai.vector.dto.VectorSearchTarget;
 import com.mcp.mcp_pilot.ai.vector.factory.SimilarityCalculatorFactory;
 import com.mcp.mcp_pilot.ai.vector.repository.VectorStoreRepository;
 import com.mcp.mcp_pilot.ai.vector.port.VectorSearchPort;
@@ -26,7 +28,10 @@ public class LocalVectorSearchAdapter implements VectorSearchPort {
     private static final double SCORE_THRESHOLD = 0.55;
 
     @Override
-    public List<Long> search(VectorTargetType targetType, String query, int topK,  SimilarityMetric metric) {
+    public List<VectorSearchResult> search( VectorTargetType sourceType,
+                              String query,
+                              int topK,
+                              SimilarityMetric metric) {
         // 검색어 임베딩 생성
         float[] queryVector = embeddingModel.embed(query);
 
@@ -37,19 +42,23 @@ public class LocalVectorSearchAdapter implements VectorSearchPort {
                         metric
                 );
 
-        List<com.mcp.mcp_pilot.ai.vector.entity.VectorStoreEntity> all =
-                vectorStoreRepository.findByTargetType(targetType);
-        log.info("[VectorSearch] DB에서 {}건 로드됨 (targetType={})", all.size(), targetType);
+        List<VectorSearchTarget> targets = vectorStoreRepository.findSearchTargets(sourceType);
+        log.info("[VectorSearch] DB에서 {}건 로드됨 (targetType={})", targets.size(), sourceType);
 
-        return all.stream()
-                .map(entity -> {
-                    double score = calculator.calculate(queryVector, entity.getEmbeddingVector());
-                    return new SearchResult(entity.getTargetId(), score);
+        return targets.stream()
+                .map(target -> {
+                    double score = calculator.calculate(queryVector, target.embeddingVector());
+                    return new VectorSearchResult(
+                            target.sourceId(),
+                            target.chunkId(),
+                            target.content(),
+                            target.metadata(),
+                            score
+                    );
                 })
                 .filter(result -> result.score() >= SCORE_THRESHOLD)
                 .sorted((a, b) -> Double.compare(b.score(), a.score()))
                 .limit(topK)
-                .map(SearchResult::id)
                 .toList();
     }
 }
