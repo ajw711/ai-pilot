@@ -1,6 +1,7 @@
 package com.mcp.mcp_pilot.document.application.service;
 
 import com.mcp.mcp_pilot.common.exception.ErrorCode;
+import com.mcp.mcp_pilot.document.application.event.DocumentUploadedEvent;
 import com.mcp.mcp_pilot.document.domain.DocumentFile;
 import com.mcp.mcp_pilot.document.domain.vo.DocumentStatus;
 import com.mcp.mcp_pilot.document.exception.FileException;
@@ -16,6 +17,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
@@ -30,6 +32,9 @@ class DocumentUploadServiceTest {
 
     @Mock
     private FileStoragePort fileStoragePort;
+
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @Mock
     private DocumentFileRepositoryPort documentFileRepositoryPort;
@@ -59,6 +64,8 @@ class DocumentUploadServiceTest {
 
         when(fileStoragePort.upload(file1)).thenReturn("documents/uuid-1/k8s-guide.pdf");
         when(fileStoragePort.upload(file2)).thenReturn("documents/uuid-2/nginx-troubleshooting.md");
+        when(documentFileRepositoryPort.saveAll(anyList())).thenAnswer(invocation -> invocation.
+                getArgument(0));
 
         // when
         UploadDocumentResult result = documentUploadService.uploadDocument(command);
@@ -68,7 +75,7 @@ class DocumentUploadServiceTest {
 
         verify(fileStoragePort, times(1)).upload(file1);
         verify(fileStoragePort, times(1)).upload(file2);
-
+        verify(applicationEventPublisher, times(1)).publishEvent(any(DocumentUploadedEvent.class));
         @SuppressWarnings("unchecked")
         ArgumentCaptor<List<DocumentFile>> captor = ArgumentCaptor.forClass(List.class);
         verify(documentFileRepositoryPort, times(1)).saveAll(captor.capture());
