@@ -47,7 +47,9 @@ public enum ErrorCode {
     // Document 관련
     FILE_REQUEST(HttpStatus.BAD_REQUEST, "D001" ,"요청 파일이 없습니다."),
     FILE_UPLOAD(HttpStatus.INTERNAL_SERVER_ERROR, "D002" ,"파일 업로드가 실패했습니다." ),
-    FILE_DOWNLOAD(HttpStatus.INTERNAL_SERVER_ERROR ,"D03", "파일 다운로드중 오류가 발생했습니다.");
+    FILE_DOWNLOAD(HttpStatus.INTERNAL_SERVER_ERROR ,"D003", "파일 다운로드중 오류가 발생했습니다."),
+    FILE_DELETE(HttpStatus.INTERNAL_SERVER_ERROR, "D004" ,"파일 삭제중 오류가 발생했습니다." ),
+    FILE_NOT_FOUND(HttpStatus.NOT_FOUND, "D005" ,"파일을 찾지 못했습니다." );
 
     private final HttpStatus status; // HTTP 상태 코드
     private final String code; // 에러 코드

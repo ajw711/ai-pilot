@@ -2,12 +2,11 @@ package com.mcp.mcp_pilot.ai.vector.adapter;
 
 import com.mcp.mcp_pilot.ai.constant.VectorTargetType;
 import com.mcp.mcp_pilot.ai.vector.constant.SimilarityMetric;
-import com.mcp.mcp_pilot.ai.vector.dto.SearchResult;
 import com.mcp.mcp_pilot.ai.vector.dto.VectorSearchResult;
 import com.mcp.mcp_pilot.ai.vector.dto.VectorSearchTarget;
 import com.mcp.mcp_pilot.ai.vector.factory.SimilarityCalculatorFactory;
-import com.mcp.mcp_pilot.ai.vector.repository.VectorStoreRepository;
 import com.mcp.mcp_pilot.ai.vector.port.VectorSearchPort;
+import com.mcp.mcp_pilot.ai.vector.repository.VectorStoreRepository;
 import com.mcp.mcp_pilot.ai.vector.strategy.SimilarityCalculator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

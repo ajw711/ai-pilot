@@ -10,6 +10,7 @@ import com.mcp.mcp_pilot.document.port.in.dto.UploadDocumentResult;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,7 +29,7 @@ public class DocumentUploadController {
 
     private final UploadDocumentUseCase uploadDocumentUseCase;
 
-    @PostMapping(path = "/upload", version = "v1")
+    @PostMapping(path = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, version = "v1")
     public ApiResponse<UploadDocumentResponse> upload(@RequestPart("files") List<MultipartFile> files, @AuthenticationPrincipal CustomUserPrincipal principal) {
         log.info("파일 업로드 요청 수신 (Web Adapter): {}", files.size());
         // 외부 데이터를 내부 command로 변환

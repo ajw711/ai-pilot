@@ -11,10 +11,12 @@ import org.springframework.stereotype.Component;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
@@ -37,13 +39,11 @@ public class R2StorageAdapter implements FileStoragePort {
                 .contentLength(file.fileSize())
                 .build();
 
-        try {
+        try (InputStream inputStream = file.inputStream()){
+            byte[] bytes = inputStream.readAllBytes();
             s3Client.putObject(
                     request,
-                    RequestBody.fromInputStream(
-                            file.inputStream(),
-                            file.fileSize()
-                    )
+                    RequestBody.fromBytes(bytes)
             );
 
             log.info(
@@ -59,6 +59,9 @@ public class R2StorageAdapter implements FileStoragePort {
                     key,
                     e
             );
+            throw new FileException(ErrorCode.FILE_UPLOAD);
+        } catch (IOException e) {
+            log.error("[R2StorageAdapter] 파일 스트림 읽기 실패. fileName={}", file.fileName(), e);
             throw new FileException(ErrorCode.FILE_UPLOAD);
         }
     }
@@ -83,6 +86,22 @@ public class R2StorageAdapter implements FileStoragePort {
             );
 
             throw new FileException(ErrorCode.FILE_DOWNLOAD);
+        }
+    }
+
+    @Override
+    public void delete(String r2Key) {
+        DeleteObjectRequest request = DeleteObjectRequest.builder()
+                .bucket(s3Config.bucketName())
+                .key(r2Key)
+                .build();
+
+        try {
+            s3Client.deleteObject(request);
+            log.info("[R2StorageAdapter] R2 파일 삭제 완료. key={}", r2Key);
+        } catch (S3Exception e) {
+            log.error("[R2StorageAdapter] R2 파일 삭제 실패. key={}", r2Key, e);
+            throw new FileException(ErrorCode.FILE_DELETE);
         }
     }
 

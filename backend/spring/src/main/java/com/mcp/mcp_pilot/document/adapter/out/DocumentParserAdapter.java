@@ -24,6 +24,7 @@ public class DocumentParserAdapter implements DocumentParserPort {
 
     /**
      *     Spring AI 2.0.0+ 표준 빌더 방식
+     *     DocumentTransformer 구현체
      *     private final TokenTextSplitter textSplitter = TokenTextSplitter.builder()
      *             .withChunkSize(500)               // 목표 청크 크기 (토큰 수)
      *             .withMinChunkSizeChars(50)        // 청크 최소 문자 수

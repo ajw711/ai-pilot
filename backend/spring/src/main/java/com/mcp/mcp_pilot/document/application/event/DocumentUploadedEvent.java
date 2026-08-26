@@ -12,7 +12,7 @@ public record DocumentUploadedEvent(
         return new DocumentUploadedEvent(
                 documents.stream()
                         .map(document ->
-                                new UploadedDocument(document.getId(), document.getR2Key(), document.getFileName()
+                                new UploadedDocument(document.getId(), document.getFileName(), document.getR2Key()
                                 ))
                         .toList()
         );

@@ -8,4 +8,6 @@ public interface FileStoragePort {
     String upload(UploadFileCommand file);
 
     InputStream download(String r2Key);
+
+    void delete(String r2Key);
 }
