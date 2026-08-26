@@ -11,6 +11,7 @@ import com.mcp.mcp_pilot.document.port.out.FileStoragePort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
 import java.util.List;
@@ -35,6 +36,7 @@ public class DocumentParsingService implements DocumentParsingUseCase {
 
 
     @Override
+    @Transactional
     public void execute(DocumentUploadedEvent event) {
         log.info("[DocumentParsingService] 문서 청크 수: {}", event.documents().size());
         for (UploadedDocument document : event.documents()) {

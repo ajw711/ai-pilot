@@ -1,6 +1,8 @@
 package com.mcp.mcp_pilot.document.adapter.in.web.mapper;
 
 import com.mcp.mcp_pilot.common.exception.ErrorCode;
+import com.mcp.mcp_pilot.document.adapter.in.web.dto.DocumentResponse;
+import com.mcp.mcp_pilot.document.domain.DocumentFile;
 import com.mcp.mcp_pilot.document.exception.FileException;
 import com.mcp.mcp_pilot.document.port.in.dto.UploadDocumentCommand;
 import com.mcp.mcp_pilot.document.port.in.dto.UploadFileCommand;
@@ -38,4 +40,17 @@ public class DocumentWebMapper {
             throw new FileException(ErrorCode.FILE_REQUEST);
         }
     }
+
+    // Domain DocumentFile -> Web Response DTO 변환
+    public static DocumentResponse toResponse(DocumentFile document) {
+        return new DocumentResponse(
+                document.getId(),
+                document.getFileName(),
+                document.getContentType(),
+                document.getFileSize(),
+                document.getDocumentStatus(),
+                document.getCreateDate()
+        );
+    }
+
 }

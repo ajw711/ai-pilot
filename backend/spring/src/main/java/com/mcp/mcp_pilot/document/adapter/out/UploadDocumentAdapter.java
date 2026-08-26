@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -29,4 +30,29 @@ public class UploadDocumentAdapter implements DocumentFileRepositoryPort {
                 .map(DocumentFilePersistenceMapper::toDomain)
                 .toList();
     }
+
+    @Override
+    public List<DocumentFile> findAll() {
+        return documentFileJpaRepository.findAll().stream()
+                .map(DocumentFilePersistenceMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public Optional<DocumentFile> findById(Long id) {
+        return documentFileJpaRepository.findById(id)
+                .map(DocumentFilePersistenceMapper::toDomain);
+    }
+
+    @Override
+    public List<DocumentFile> findAllById(List<Long> ids) {
+        return documentFileJpaRepository.findAllById(ids).stream()
+                .map(DocumentFilePersistenceMapper::toDomain).toList();
+    }
+
+    @Override
+    public void deleteAllById(List<Long> ids) {
+        documentFileJpaRepository.deleteAllById(ids);
+    }
+
 }
