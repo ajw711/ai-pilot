@@ -10,6 +10,7 @@ import {
   FiHome,
   FiLogOut,
   FiBookOpen,
+  FiFileText,
 } from "react-icons/fi";
 
 interface SidebarLayoutProps {
@@ -32,6 +33,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
   const menuItems = [
     { id: "home", label: "홈", icon: FiHome },
     { id: "dashboard", label: "지식 대시보드", icon: FiGrid },
+    { id: "document", label: "문서 관리", icon: FiFileText },
     { id: "chat", label: "Ops AI 챗봇", icon: FiMessageSquare },
     { id: "knowledge-chat", label: "지식 AI 챗봇", icon: FiBookOpen },
   ];

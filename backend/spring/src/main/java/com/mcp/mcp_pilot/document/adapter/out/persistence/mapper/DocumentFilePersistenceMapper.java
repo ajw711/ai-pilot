@@ -33,23 +33,6 @@ public class DocumentFilePersistenceMapper {
         return entity;
     }
 
-    public static KnowledgeLog toDomain(KnowledgeLogJpaEntity entity) {
-        if (entity == null) return null;
-        return new KnowledgeLog(
-                entity.getId(),
-                entity.getTitle(),
-                entity.getRawContent(),
-                entity.getFormattedContent(),
-                entity.getCreateDate(),
-                entity.getUpdateDate(),
-                entity.getVerificationScore(),
-                entity.getVerificationReport(),
-                entity.getStatus(),
-                entity.getVerificationVersion(),
-                entity.getDeletedAt()
-        );
-    }
-
     public static DocumentFile toDomain(DocumentFileJpaEntity entity) {
         if (entity == null) {
             return null;

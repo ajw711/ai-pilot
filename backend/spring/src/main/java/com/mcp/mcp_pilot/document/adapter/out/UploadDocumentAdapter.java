@@ -50,9 +50,4 @@ public class UploadDocumentAdapter implements DocumentFileRepositoryPort {
                 .map(DocumentFilePersistenceMapper::toDomain).toList();
     }
 
-    @Override
-    public void deleteAllById(List<Long> ids) {
-        documentFileJpaRepository.deleteAllById(ids);
-    }
-
 }

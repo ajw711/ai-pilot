@@ -40,3 +40,6 @@ KNOWLEDGE_SYSTEM_PLAN.md
 backend/spring/project_analysis.md
 *.md
 !**/README.md
+!docs/**/*.md
+*.pdf
+portfolio_text.txt
