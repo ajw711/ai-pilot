@@ -10,5 +10,4 @@ public interface DocumentFileRepositoryPort {
     List<DocumentFile> findAll();
     Optional<DocumentFile> findById(Long id);
     List<DocumentFile> findAllById(List<Long> ids);
-    void deleteAllById(List<Long> ids);
 }

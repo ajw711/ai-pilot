@@ -5,6 +5,7 @@ import { api, setAccessToken } from "./lib/api";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ChatPage } from "./pages/ChatPage";
 import { KnowledgeChatPage } from "./pages/KnowledgeChatPage";
+import { DocumentPage } from "./pages/DocumentPage";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
@@ -73,6 +74,8 @@ function App() {
         return <HomePage setActiveTab={setActiveTab} />;
       case "dashboard":
         return <DashboardPage />;
+      case "document":
+        return <DocumentPage />;
       case "chat":
         return <ChatPage />;
       case "knowledge-chat":
