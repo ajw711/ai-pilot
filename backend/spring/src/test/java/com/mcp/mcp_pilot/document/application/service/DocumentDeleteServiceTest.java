@@ -40,6 +40,7 @@ class DocumentDeleteServiceTest {
         DocumentFile doc1 = new DocumentFile(1L, "k8s.pdf", "application/pdf", 100L, "documents/uuid-1/k8s.pdf", DocumentStatus.UPLOADED, LocalDateTime.now(), null, 1L, null);
         DocumentFile doc2 = new DocumentFile(2L, "nginx.md", "text/markdown", 200L, "documents/uuid-2/nginx.md", DocumentStatus.UPLOADED, LocalDateTime.now(), null, 1L, null);
 
+        List<DocumentFile> documents = List.of(doc1, doc2);
         List<Long> ids = List.of(1L, 2L);
         when(documentFileRepositoryPort.findAllById(ids)).thenReturn(List.of(doc1, doc2));
 
@@ -56,7 +57,7 @@ class DocumentDeleteServiceTest {
         verify(vectorIndexingUseCase, times(1)).deleteIndex(VectorTargetType.FILE_DOCUMENT, 2L);
 
         // PostgreSQL DB 레코드 일괄 삭제 검증
-        verify(documentFileRepositoryPort, times(1)).deleteAllById(ids);
+        verify(documentFileRepositoryPort, times(1)).saveAll(documents);
     }
 
     @Test
@@ -86,6 +87,6 @@ class DocumentDeleteServiceTest {
         verify(documentFileRepositoryPort, times(1)).findAllById(ids);
         verifyNoInteractions(fileStoragePort);
         verifyNoInteractions(vectorIndexingUseCase);
-        verify(documentFileRepositoryPort, never()).deleteAllById(any());
+        verify(documentFileRepositoryPort, never()).saveAll(any());
     }
 }
