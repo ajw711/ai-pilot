@@ -120,11 +120,26 @@ AI-Pilot 아키텍처는 **"안전성(Security)", "실시간성(Real-time)", "�
 
 ## Design Decisions
 
-기술 선택 이유와 트레이드오프는 [docs/decisions](./docs/decisions)에 ADR 형태로 기록합니다.
+기술 선택 이유와 트레이드오프를 ADR 형태로 기록합니다.
+
+- [001. AI 기반 기술 검수(Knowledge Guardian) 및 점수화 시스템 도입](./docs/decisions/001-ai-knowledge-review.md)
+- [002. 비동기 메시징 솔루션을 어떻게 선택할 것인가 (NATS)](./docs/decisions/002-messaging-choice.md)
+- [003. 실시간 스트리밍 방식으로 SSE를 선택한 이유](./docs/decisions/003-sse-choice.md)
 
 ## Troubleshooting
 
-실제로 겪은 문제와 해결 과정은 [docs/troubleshooting](./docs/troubleshooting)에 기록합니다.
+애플리케이션/코드 레벨에서 실제로 겪은 문제와 해결 과정을 기록합니다.
+(인프라/클러스터 레벨 이슈는 [ai-pilot-infra의 troubleshooting](../ai-pilot-infra/docs/troubleshooting) 참고)
+
+각 문서는 다음 구조를 따릅니다.
+- **상황**: 무엇이 문제였는가 (에러 로그, 증상)
+- **원인**: 왜 발생했는가
+- **해결**: 어떻게 고쳤는가
+- **교훈**: 다음에 비슷한 문제를 피하려면 무엇을 알아야 하는가
+
+### 목록
+- [002. SSE 스트리밍 중 예외 발생 시 프론트 파서가 깨지는 문제](./docs/troubleshooting/002-sse-exception-handling.md)
+- [003. SSE 인증 시 JWT 노출 문제와 티켓(Ticket) 패턴 도입](./docs/troubleshooting/003-sse-ticket-auth-pattern.md)
 
 ## Deployment
 
