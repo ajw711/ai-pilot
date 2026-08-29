@@ -14,3 +14,4 @@
 
 - [002. SSE 스트리밍 중 예외 발생 시 프론트 파서가 깨지는 문제](./002-sse-exception-handling.md)
 - [003. SSE 인증 시 JWT 노출 문제와 티켓(Ticket) 패턴 도입](./003-sse-ticket-auth-pattern.md)
+- [004. 대용량 문서 벡터 색인 중 429 Rate Limit 및 CoreDNS DNS Timeout 장애 분석](./004-vector-batch-embedding-dns-retry.md)
