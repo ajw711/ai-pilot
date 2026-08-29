@@ -27,6 +27,8 @@ public class VectorIndexingService implements VectorIndexingUseCase {
     private static final int BATCH_SIZE = 40;
     // 배치 호출 간 딜레이(ms) - 분당 요청/토큰(RPM/TPM) 제한 방지
     private static final long BATCH_DELAY_MS = 300L;
+    // 배치당 최대 재시도 횟수
+    private static final int MAX_EMBED_ATTEMPTS = 3;
 
     /**
      * 임베딩 생성 후 저장
@@ -58,7 +60,7 @@ public class VectorIndexingService implements VectorIndexingUseCase {
 
             try {
                 // Spring AI 배치 임베딩 호출 (단 1번의 HTTP 요청으로 배치 처리)
-                List<float[]> vectors = embeddingModel.embed(contents);
+                List<float[]> vectors = embedBatchWithRetry(contents, i, toIndex-1);
 
                 if (vectors.size() !=batch.size()) {
                     throw new IllegalStateException(
@@ -98,10 +100,36 @@ public class VectorIndexingService implements VectorIndexingUseCase {
         vectorStorePersistencePort.deleteIndex(sourceType, sourceId);
     }
 
+    private List<float[]> embedBatchWithRetry(List<String> contents, int fromIndex, int toIndex) {
+        for (int attempt = 1; attempt <= MAX_EMBED_ATTEMPTS; attempt++) {
+            try {
+                return embeddingModel.embed(contents);
+            } catch (Exception e) {
+                log.warn("[VectorIndexingService] 임베딩 API 일시 실패 (시도 {}/{}). batchRange=[{}..{}] 사유: {}",
+                        attempt, MAX_EMBED_ATTEMPTS, fromIndex, toIndex, e.getMessage());
+                // 마지막 시도까지 실패하면 그때 최종 예외 발생
+                if (attempt == MAX_EMBED_ATTEMPTS) {
+                    log.error("[VectorIndexingService] 임베딩 API 최종 실패. batchRange=[{}..{}]", fromIndex, toIndex, e);
+                    throw new AiException(ErrorCode.AI_EMBEDDING_FAILURE, e);
+                }
+
+                try {
+                    // 일시적 DNS/네트워크 흔들림 복구를 위해 2초 대기 후 해당 배치만 재시도
+                    TimeUnit.SECONDS.sleep(2);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new AiException(ErrorCode.AI_EMBEDDING_FAILURE, ie);
+                }
+
+            }
+        }
+        throw new AiException(ErrorCode.AI_EMBEDDING_FAILURE);
+    }
+
     private void applyDelay(int currentIndex, int totalSize) {
         if (currentIndex < totalSize) {
             try {
-                TimeUnit.MICROSECONDS.sleep(BATCH_DELAY_MS);
+                TimeUnit.MILLISECONDS.sleep(BATCH_DELAY_MS);
             } catch (InterruptedException ie) {
                 Thread.currentThread().interrupt();
                 log.error("[VectorIndexingService] 임베딩 지연 대기 중 인터럽트 발생", ie);
