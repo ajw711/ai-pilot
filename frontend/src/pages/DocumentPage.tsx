@@ -50,8 +50,20 @@ export const DocumentPage: React.FC = () => {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-    } catch {
-      toast.error("파일 업로드 중 오류가 발생했습니다.");
+    } catch (error: any) {
+      if (error?.code === "ECONNABORTED" || error?.message?.includes("timeout")) {
+        toast.error("업로드 요청 시간이 초과되었습니다. 대용량 파일은 백그라운드에서 계속 처리될 수 있으니 잠시 후 목록을 새로고침해 주세요.", {
+          duration: 5000,
+        });
+      } else if (error?.response?.status === 413) {
+        toast.error("업로드 파일 크기가 서버 제한(50MB)을 초과했습니다.");
+      } else if (error?.response?.data?.error?.message) {
+        toast.error(error.response.data.error.message);
+      } else if (error?.code === "ERR_NETWORK") {
+        toast.error("서버와 통신할 수 없습니다. 네트워크 상태를 확인해 주세요.");
+      } else {
+        toast.error("파일 업로드 중 오류가 발생했습니다.");
+      }
     }
   };
 
