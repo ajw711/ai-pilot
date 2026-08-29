@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -75,13 +76,10 @@ public class VectorIndexingService implements VectorIndexingUseCase {
                 log.info("[VectorIndexingService] 배치 임베딩 진행 중... ({}/{})", toIndex, chunks.size());
 
                 // Rate Limit 방지를 위한 배치 간 지연 (마지막 배치가 아닐 때만)
-                if (toIndex < chunks.size()) {
-                    Thread.sleep(BATCH_DELAY_MS);
-                }
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
-                log.error("[VectorIndexingService] 임베딩 처리 중 인터럽트 발생", ie);
-                throw new AiException(ErrorCode.AI_EMBEDDING_FAILURE, ie);
+                applyDelay(toIndex, chunks.size());
+
+            } catch (AiException aie) {
+                throw aie;
             } catch (Exception e) {
                 log.error("[VectorIndexingService] 배치 임베딩 실패. batchRange=[{}..{}]", i, toIndex - 1, e);
                 throw new AiException(ErrorCode.AI_EMBEDDING_FAILURE, e);
@@ -100,18 +98,15 @@ public class VectorIndexingService implements VectorIndexingUseCase {
         vectorStorePersistencePort.deleteIndex(sourceType, sourceId);
     }
 
-    private EmbeddedChunk embed(RawChunk chunk) {
-        try {
-            float[] vector = embeddingModel.embed(chunk.content());
-            return new EmbeddedChunk(
-                    chunk.chunkIndex(),
-                    chunk.content(),
-                    chunk.metadata(),
-                    vector
-            );
-        } catch (Exception e) {
-            log.error("[VectorIndexingService] 임베딩 생성 실패. chunkIndex={}", chunk.chunkIndex(), e);
-            throw new AiException(ErrorCode.AI_EMBEDDING_FAILURE, e);
+    private void applyDelay(int currentIndex, int totalSize) {
+        if (currentIndex < totalSize) {
+            try {
+                TimeUnit.MICROSECONDS.sleep(BATCH_DELAY_MS);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                log.error("[VectorIndexingService] 임베딩 지연 대기 중 인터럽트 발생", ie);
+                throw new AiException(ErrorCode.AI_EMBEDDING_FAILURE, ie);
+            }
         }
     }
 }
