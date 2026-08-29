@@ -26,8 +26,9 @@ export const useUploadDocuments = () => {
       const { data: apiResponse } = await api.post<
         ApiResponse<UploadDocumentResponse>
       >("/document/upload", formData, {
+        timeout: 120000,
         headers: {
-          "Content-Type": "multipart/form-data",
+          "Content-Type": undefined,
         },
       });
       return apiResponse.data;

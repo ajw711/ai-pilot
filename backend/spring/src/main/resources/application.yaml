@@ -14,7 +14,11 @@ spring:
 
   ai:
     retry:
-      max-attempts: 1
+      max-attempts: 5
+      backoff:
+        initial-interval: 2000ms
+        multiplier: 2  # 실패 시 2배씩 대기시간 증가 (2초 -> 4초 -> 8초)
+        max-interval:  10000ms     # 최대 대기시간 10초
     google:
       genai:
         api-key: ${GEMINI_API_KEY}
