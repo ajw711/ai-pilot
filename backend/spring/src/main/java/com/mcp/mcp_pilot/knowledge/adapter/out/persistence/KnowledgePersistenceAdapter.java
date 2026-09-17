@@ -33,7 +33,19 @@ public class KnowledgePersistenceAdapter implements KnowledgePersistencePort {
 
     @Override
     public KnowledgeLog save(KnowledgeLog knowledgeLog) {
-        KnowledgeLogJpaEntity entity = KnowledgePersistenceMapper.toEntity(knowledgeLog);
+        KnowledgeLogJpaEntity entity;
+
+        if (knowledgeLog.getId() == null) {
+            // 신규생성
+            entity = KnowledgePersistenceMapper.toEntity(knowledgeLog);
+        } else {
+            // 기존 엔티티를 조회해 Notion 발행 정보 보존
+            entity = logRepository.findById(knowledgeLog.getId())
+                    .orElseThrow(() ->
+                            new KnowledgeNotFoundException(knowledgeLog.getId()));
+            KnowledgePersistenceMapper.applyToEntity(knowledgeLog, entity);
+        }
+
         KnowledgeLogJpaEntity savedEntity = logRepository.save(entity);
         return KnowledgePersistenceMapper.toDomain(savedEntity);
     }
