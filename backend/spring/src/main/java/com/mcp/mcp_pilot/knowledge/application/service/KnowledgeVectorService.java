@@ -10,6 +10,7 @@ import com.mcp.mcp_pilot.knowledge.exception.KnowledgeNotFoundException;
 import com.mcp.mcp_pilot.knowledge.port.in.VectorUseCase;
 import com.mcp.mcp_pilot.knowledge.port.out.KnowledgeEventPublishPort;
 import com.mcp.mcp_pilot.knowledge.port.out.KnowledgePersistencePort;
+import com.mcp.mcp_pilot.knowledge.port.out.KnowledgeVectorPort;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import lombok.RequiredArgsConstructor;
@@ -29,10 +30,25 @@ public class KnowledgeVectorService implements VectorUseCase {
     private final MarkdownChunker markdownChunker;
     private final KnowledgeEventPublishPort knowledgeEventPublishPort;
     private final KnowledgePersistencePort persistencePort;
+    private final KnowledgeVectorPort knowledgeVectorPort;
     private final MeterRegistry meterRegistry;
 
     @Override
     public void execute(KnowledgeProcessedEvent event) {
+        if (knowledgeVectorPort.isVectorStored(event.knowledgeId())) {
+            log.info("[VectorService] 이미 저장된 벡터입니다. 건너뜁니다. - ID: {}",
+                    event.knowledgeId());
+
+            // 저장은 생략하고 기존 집계가 완료 여부를 다시 확인하도록 전달
+            knowledgeEventPublishPort.publish(
+                    "knowledge.vector.indexed",
+                    event.knowledgeId()
+            );
+            return;
+        }
+
+
+
         // Lag 측정
         Duration lag = Duration.between(event.publishedAt(), Instant.now());
         meterRegistry.timer("knowledge_event_lag_seconds", "consumer", "vector").record(Duration.between(event.publishedAt(), Instant.now()));

@@ -2,6 +2,7 @@ package com.mcp.mcp_pilot.knowledge.application.service;
 
 import com.mcp.mcp_pilot.knowledge.application.event.KnowledgeProcessedEvent;
 import com.mcp.mcp_pilot.knowledge.domain.entity.KnowledgeLog;
+import com.mcp.mcp_pilot.knowledge.domain.vo.KnowledgeStatus;
 import com.mcp.mcp_pilot.knowledge.exception.KnowledgeNotFoundException;
 import com.mcp.mcp_pilot.knowledge.port.in.dto.ApproveKnowledgeCommand;
 import com.mcp.mcp_pilot.knowledge.port.in.dto.ApproveKnowledgeResult;
@@ -25,14 +26,17 @@ public class KnowledgeApproveService implements ApproveKnowledgeUseCase {
     @Transactional
     public ApproveKnowledgeResult approve(ApproveKnowledgeCommand command) {
         Long knowledgeId = command.knowledgeId();
-        log.info("[ApproveService] 지식 승인 프로세스 시작 - ID: {}", command.knowledgeId());
+        log.info("[ApproveService] 지식 승인 프로세스 시작 - ID: {}", knowledgeId);
 
-        KnowledgeLog knowledge = persistencePort.findById(command.knowledgeId())
-                .orElseThrow(() -> new KnowledgeNotFoundException(command.knowledgeId()));
+        KnowledgeLog knowledge = persistencePort.findById(knowledgeId)
+                .orElseThrow(() -> new KnowledgeNotFoundException(knowledgeId));
 
-        knowledge.approve(command.finalFormattedContent());
-
-        persistencePort.save(knowledge);
+        if (knowledge.isReviewReady()) {
+            knowledge.approve(command.finalFormattedContent());
+            persistencePort.save(knowledge);
+        } else {
+            knowledge.validateRetry(command.finalFormattedContent());
+        }
 
         // 외부 채널(Notion/Vector Store) 발행을 시작하는 이벤트 발행
         applicationEventPublisher.publishEvent(KnowledgeProcessedEvent.of(knowledgeId));

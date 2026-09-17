@@ -14,6 +14,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.ArgumentCaptor;
 
 import java.util.Optional;
 
@@ -32,6 +35,50 @@ public class KnowledgeApproveServiceTest {
 
     @InjectMocks
     private KnowledgeApproveService knowledgeApproveService;
+
+
+    @ParameterizedTest
+    @EnumSource(
+            value = KnowledgeStatus.class,
+            names = {
+                    "FAILED_AT_NOTION_PUBLISH",
+                    "FAILED_AT_VECTOR_INDEX"
+            }
+    )
+    void retry_preservesContentAndStatus_andPublishesEvent(
+            KnowledgeStatus failedStatus
+    ) {
+        Long id = 1L;
+        KnowledgeLog target = new KnowledgeLog(
+                id, "제목", "원문", "저장된 본문",
+                null, null, 80, "{}",
+                failedStatus, 0, null
+        );
+
+        when(persistencePort.findById(id))
+                .thenReturn(Optional.of(target));
+
+        var result = knowledgeApproveService.approve(
+                new ApproveKnowledgeCommand(id, null)
+        );
+
+        // 재시도 요청만 접수했으므로 완료 상태로 바꾸지 않음
+        assertEquals(failedStatus, target.getStatus());
+        assertEquals(failedStatus, result.status());
+        assertEquals("저장된 본문", target.getFormattedContent());
+
+        verify(persistencePort, never()).save(any());
+        verify(persistencePort, never()).updateStatus(any(), any());
+
+        var eventCaptor =
+                ArgumentCaptor.forClass(KnowledgeProcessedEvent.class);
+
+        verify(applicationEventPublisher)
+                .publishEvent(eventCaptor.capture());
+
+        assertEquals(id, eventCaptor.getValue().knowledgeId());
+    }
+
 
     @Test
     @DisplayName("REVIEW_READY 상태의 지식을 승인하면 status가 APPROVED로 변경되고 save가 호출되며 발행 이벤트가 발송된다")

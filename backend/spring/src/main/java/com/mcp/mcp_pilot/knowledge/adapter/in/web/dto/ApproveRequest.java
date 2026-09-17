@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 public record ApproveRequest(
         @NotNull
         Long knowledgeId,
-        @NotEmpty
         String finalFormattedContent
 ) {
 }

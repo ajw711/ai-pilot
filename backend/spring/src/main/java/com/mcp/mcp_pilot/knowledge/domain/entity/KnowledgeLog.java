@@ -2,10 +2,12 @@ package com.mcp.mcp_pilot.knowledge.domain.entity;
 
 import com.mcp.mcp_pilot.knowledge.domain.vo.KnowledgeStatus;
 import com.mcp.mcp_pilot.knowledge.exception.InvalidKnowledgeStatusException;
+import com.mcp.mcp_pilot.knowledge.exception.KnowledgeRetryContentChangeException;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
+
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * 지식 원문 및 요약 (Domain Entity)
@@ -30,18 +32,12 @@ public class KnowledgeLog {
         return new KnowledgeLog(null, title, rawContent, formattedContent, null, null, null, null, KnowledgeStatus.DRAFT, 0, null);
     }
 
-    public void updateVerificationResult(String formattedContent, int score, String reportJson, KnowledgeStatus status) {
-        this.formattedContent = formattedContent;
-        this.verificationScore = score;
-        this.verificationReport = reportJson;
-        this.status = status;
-        this.verificationVersion = (this.verificationVersion == null ? 0 : this.verificationVersion) + 1;
+    public boolean isReviewReady() {
+        return this.status == KnowledgeStatus.REVIEW_READY;
     }
 
     public void approve(String finalFormattedContent) {
-        if (this.status != KnowledgeStatus.REVIEW_READY
-                        && this.status != KnowledgeStatus.FAILED_AT_NOTION_PUBLISH
-                        && this.status != KnowledgeStatus.FAILED_AT_VECTOR_INDEX) {
+        if (!isReviewReady()) {
             throw new InvalidKnowledgeStatusException();
         }
 
@@ -49,6 +45,18 @@ public class KnowledgeLog {
             this.formattedContent = finalFormattedContent;
         }
         this.status = KnowledgeStatus.REVIEW_APPROVED;
+    }
+
+    // 재시도에서는 상태와 본문을 변경하지 않음
+    public void validateRetry(String requestedContent) {
+        if (this.status != KnowledgeStatus.FAILED_AT_NOTION_PUBLISH &&
+        this.status != KnowledgeStatus.FAILED_AT_VECTOR_INDEX) {
+            throw  new InvalidKnowledgeStatusException();
+        }
+        // 재시도 요청에서 변경된 본문을 조용히 무시하지 않도록 검증
+        if (requestedContent != null && !requestedContent.isBlank() && !Objects.equals(requestedContent, this.formattedContent)) {
+            throw new KnowledgeRetryContentChangeException();
+        }
     }
 
     public void delete(LocalDateTime deleteAt) {

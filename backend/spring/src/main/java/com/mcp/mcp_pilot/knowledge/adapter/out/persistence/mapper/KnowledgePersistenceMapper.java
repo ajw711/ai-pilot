@@ -122,4 +122,21 @@ public class KnowledgePersistenceMapper {
                 .map(KnowledgePersistenceMapper::toDomain)
                 .collect(Collectors.toList());
     }
+
+    public static void applyToEntity(
+            KnowledgeLog domain,
+            KnowledgeLogJpaEntity entity
+    ) {
+        entity.setTitle(domain.getTitle());
+        entity.setRawContent(domain.getRawContent());
+        entity.setFormattedContent(domain.getFormattedContent());
+        entity.setVerificationScore(domain.getVerificationScore());
+        entity.setVerificationReport(domain.getVerificationReport());
+        entity.setVerificationVersion(domain.getVerificationVersion());
+        entity.setStatus(domain.getStatus());
+        entity.setDeletedAt(domain.getDeleteAt());
+
+        // notionPageId, notionPageUrl 유지
+    }
+
 }
