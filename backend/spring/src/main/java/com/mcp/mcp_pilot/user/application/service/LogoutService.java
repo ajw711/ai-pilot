@@ -23,6 +23,6 @@ public class LogoutService implements LogoutUseCase {
             return;
         }
 
-        refreshTokenPort.   revoke(command.refreshToken());
+        refreshTokenPort.revoke(command.refreshToken());
     }
 }
