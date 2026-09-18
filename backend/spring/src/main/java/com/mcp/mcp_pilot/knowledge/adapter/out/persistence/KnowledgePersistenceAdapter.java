@@ -104,4 +104,11 @@ public class KnowledgePersistenceAdapter implements KnowledgePersistencePort {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional
+    public void updateApproval(Long knowledgeId, KnowledgeStatus status, String formattedContent) {
+        KnowledgeLogJpaEntity entity = logRepository.findById(knowledgeId).orElseThrow(() -> new KnowledgeNotFoundException(knowledgeId));
+        entity.updateApproval(status, formattedContent);
+    }
+
 }

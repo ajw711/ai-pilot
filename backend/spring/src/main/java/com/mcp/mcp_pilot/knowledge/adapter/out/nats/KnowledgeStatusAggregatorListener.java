@@ -52,7 +52,7 @@ public class KnowledgeStatusAggregatorListener {
             );
             log.info("[KnowledgeStatusAggregatorListener] JetStream 구독 완료: knowledge.>");
         } catch (Exception e) {
-            log.warn("[KnowledgeStatusAggregatorListener] JetStream 구독 대기 (NATS 연결 대기 중)");
+            log.error("[KnowledgeStatusAggregatorListener] JetStream 구독 실패", e);
         }
     }
 

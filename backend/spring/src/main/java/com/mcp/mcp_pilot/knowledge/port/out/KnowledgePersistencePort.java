@@ -20,4 +20,6 @@ public interface KnowledgePersistencePort {
     void updatePublicationResult(Long knowledgeId, String notionPageId, String notionPageUrl);
     boolean isPublished(Long knowledgeId);
     List<String> findTagsByKnowledgeId(Long knowledgeId);
+
+    void updateApproval(Long knowledgeId, KnowledgeStatus status, String formattedContent);
 }

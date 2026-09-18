@@ -98,4 +98,9 @@ public class KnowledgeLogJpaEntity extends BaseEntity {
         this.notionPageId = notionPageId;
         this.notionPageUrl = notionPageUrl;
     }
+
+    public void updateApproval(KnowledgeStatus status, String formattedContent) {
+        this.formattedContent = formattedContent;
+        this.status = status;
+    }
 }

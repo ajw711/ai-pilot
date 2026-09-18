@@ -31,8 +31,7 @@ public class KnowledgeApproveService implements ApproveKnowledgeUseCase {
                 .orElseThrow(() -> new KnowledgeNotFoundException(command.knowledgeId()));
 
         knowledge.approve(command.finalFormattedContent());
-
-        persistencePort.save(knowledge);
+        persistencePort.updateApproval(knowledge.getId(), knowledge.getStatus(), knowledge.getFormattedContent());
 
         // 외부 채널(Notion/Vector Store) 발행을 시작하는 이벤트 발행
         applicationEventPublisher.publishEvent(KnowledgeProcessedEvent.of(knowledgeId));

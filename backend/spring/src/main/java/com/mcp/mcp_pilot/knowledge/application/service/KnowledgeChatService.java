@@ -34,7 +34,7 @@ public class KnowledgeChatService implements KnowledgeChatUseCase {
         List<VectorSearchResult> similarResults = vectorSearchPort.search(
                 VectorTargetType.KNOWLEDGE, message, 3, SimilarityMetric.COSINE
         );
-        log.info("[KnowledgeChatService] 유사 지식 {}건 검색됨: {}", similarResults.size(), similarResults);
+        log.info("[KnowledgeChatService] 유사 지식 {}건 검색됨", similarResults.size());
 
         // 검색된 ID로 formattedContent 조회해서 Context 문자열 구성
         String context = similarResults.stream()
