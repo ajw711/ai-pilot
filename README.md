@@ -144,5 +144,5 @@ AI-Pilot 아키텍처는 **"안전성(Security)", "실시간성(Real-time)", "�
 ## Deployment
 
 이 저장소는 애플리케이션 코드만 관리하며, 배포/인프라 구성은
-[ai-pilot-infra](../ai-pilot-infra) 저장소에서 GitOps(ArgoCD) 기반으로 관리합니다.
+[ai-pilot-infra](https://github.com/ajw711/ai-pilot/ai-pilot-infra) 저장소에서 GitOps(ArgoCD) 기반으로 관리합니다.
 
