@@ -6,7 +6,7 @@ Kubernetes 환경에서 AI를 활용해 장애를 진단하고 운영 작업을 
 ## Overview
 
 k3s 기반 홈랩 클러스터 위에서 동작하며, Tailscale VPN을 통해 PC, 개인 노트북, 모바일 등
-어디서든 접근할 수 있습니다. 크게 두 가지 축으로 구성되어 있습니다.
+어디서든 접근할 수 있습니다. 크게 세 가지 축으로 구성되어 있습니다.
 
 1. **AI 기반 Kubernetes 진단**: 채팅으로 장애 상황을 물어보면 Go Cluster Agent가 실제 클러스터
    상태를 조회하고, AI가 이를 분석해 진단 결과를 스트리밍으로 제공합니다.
@@ -75,7 +75,7 @@ AI-Pilot 아키텍처는 **"안전성(Security)", "실시간성(Real-time)", "�
 사용자가 실시간으로 K8s 상태를 진단하거나 지식 검색(RAG)을 요청할 때 사용하는 SSE 기반 스트리밍 파이프라인입니다.
 
 - **보안 (1회용 티켓 인증):** JWT를 브라우저의 EventSource에 직접 노출하지 않기 위해, 서버 측에서 SecureRandom 256-bit 난수로 1회용 티켓을 발급합니다. 클라이언트는 이 티켓으로 SSE 연결을 맺으며, 연결 즉시 서버 메모리에서 티켓이 파기되어 재사용을 원천 차단합니다.
-- **동적 툴 호출 (Dynamic Tool Calling):** Spring AI ChatClient와 ToolRegistry를 활용하여 질문 의도에 따라 `K8sDiagnosticTool`(Go Agent 연동) 또는 `KnowledgeTool`(PgVector RAG)을 동적으로 선택합니다.
+- **동적 툴 호출 (Dynamic Tool Calling):** `@AiTool` 어노테이션이 붙은 빈을 ToolRegistry가 ToolType별로 캐싱하고, 요청마다 필요한 툴만 Spring AI ChatClient에 장착합니다. Gemini가 질문 의도에 따라 `K8sDiagnosticTool`(Go Agent 연동)을 호출하며, 지식 검색 툴(`KnowledgeTool`)은 운영 채팅 연동 예정입니다. (현재 RAG는 별도 지식 챗봇 경로에서 제공)
 - **SSE 방어 2-Tier 구조:** 컨트롤러 레벨(`onErrorResume`)과 글로벌 핸들러 레벨(`isSseRequest`)에서 이중으로 예외를 방어하여 불완전한 네트워크 단절로 인한 톰캣 스레드 릭과 서버 크래시를 원천 차단합니다.
 
 ![Ops AI Assistant - K8s 장애 진단](./docs/images/스크린샷2.png)
@@ -89,10 +89,10 @@ AI-Pilot 아키텍처는 **"안전성(Security)", "실시간성(Real-time)", "�
 *(지식 AI 어시스턴트: 등록된 개인 지식을 RAG로 검색하여 구조화된 마크다운 형식으로 답변)*
 
 ### 2. 지식 등록 및 AI 검수 파이프라인 (Knowledge Pipeline)
-지식을 등록하고 외부 시스템(Notion, PgVector)에 동기화할 때 데이터 유실을 0%로 보장하기 위한 이벤트 기반 파이프라인입니다.
+지식을 등록하고 외부 시스템(Notion, Vector 저장소)에 적재할 때, 장애 상황에서도 처리 상태의 정합성을 유지하기 위한 이벤트 기반 파이프라인입니다.
 
 - **비동기 AI 가공:** 지식 저장 요청 시, I/O 블로킹을 최소화하기 위해 가상 스레드(Virtual Thread)를 사용하여 Gemini AI가 지식을 비동기적으로 검수하고 포맷팅합니다.
-- **데이터 무결성 (Transactional Outbox):** 외부 서비스(Notion/PgVector) 호출 정보와 Outbox 테이블 기록을 동일한 DB 트랜잭션으로 묶어, 서버 크래시 등 시스템 장애 시에도 이벤트 데이터 유실을 완벽히 방지합니다.
+- **이벤트 유실 방지 (Outbox 패턴):** Notion 발행·벡터 적재의 완료/실패 이벤트를 먼저 Outbox 테이블에 기록하고, 스케줄러가 이를 NATS JetStream으로 발행합니다. 브로커 장애 시에도 이벤트가 DB에 남아 재시도되며, messageId 기반 중복 제거와 최대 5회 재시도 후 실패 처리를 적용했습니다.
 - **NATS JetStream 연동:** 커밋된 이벤트를 NATS 분산 메시징 큐로 전달하며, `FOR UPDATE SKIP LOCKED` 쿼리를 사용해 다중 서버 환경에서도 데드락 없이 안전하게 이벤트를 병렬 처리합니다.
 - **상태 집계:** `KnowledgeStatusAggregator`가 다수의 비동기 작업(Notion API 적재, Vector DB 임베딩)의 완료 상태를 추적하여 최종적으로 지식을 `PUBLISHED` 상태로 일관성 있게 전이시킵니다.
 
@@ -116,7 +116,7 @@ AI-Pilot 아키텍처는 **"안전성(Security)", "실시간성(Real-time)", "�
 
 ![Notion 자동 동기화](./docs/images/스크린샷7.png)
 <br>
-*(이원화 저장: 승인된 지식은 PostgreSQL뿐만 아니라 Notion WIKI에도 Transactional Outbox를 통해 유실 없이 자동 동기화)*
+*(이원화 저장: 승인된 지식은 PostgreSQL뿐만 아니라 Notion WIKI에도 자동 적재)*
 
 ## Design Decisions
 
@@ -140,6 +140,7 @@ AI-Pilot 아키텍처는 **"안전성(Security)", "실시간성(Real-time)", "�
 ### 목록
 - [002. SSE 스트리밍 중 예외 발생 시 프론트 파서가 깨지는 문제](./docs/troubleshooting/002-sse-exception-handling.md)
 - [003. SSE 인증 시 JWT 노출 문제와 티켓(Ticket) 패턴 도입](./docs/troubleshooting/003-sse-ticket-auth-pattern.md)
+- [004. 벡터 배치 임베딩 중 DNS 오류와 재시도 처리](./docs/troubleshooting/004-vector-batch-embedding-dns-retry.md)
 
 ## Deployment
 
